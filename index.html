@@ -1,0 +1,2496 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Frecuencia de Fondo · Estación Erial-7</title>
+<style>
+:root{
+  --bg:#060a08;--panel:#0c1410;--card:#111d17;--border:#243d2b;
+  --fg:#c8f2d0;--mut:#789c82;--accent:#4ade80;--warn:#eab308;--bad:#ef4444;--blue:#38bdf8;
+  box-sizing:border-box;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font:14px/1.45 ui-monospace,"Cascadia Code","Fira Code",Consolas,monospace;
+  padding:env(safe-area-inset-top,8px) 8px env(safe-area-inset-bottom,12px);
+}
+main{max-width:860px;margin:0 auto}
+.terminal{
+  background:var(--panel);border:2px solid var(--border);border-radius:10px;
+  overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.78);position:relative;
+}
+.terminal::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0px,rgba(0,0,0,.13) 1px,transparent 1px,transparent 3px);
+}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:8px 12px;background:#080e0b;border-bottom:1px solid var(--border);font-size:12px;
+}
+.topbar b{color:var(--accent);letter-spacing:1px}
+.stats{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pill{background:#122019;border:1px solid var(--border);padding:2px 7px;border-radius:4px}
+.pill.night{border-color:#991b1b;color:#fca5a5;background:#1f0d0d}
+.pill.lowtime{border-color:#ca8a04;color:#fde047}
+.pill.slowrech{border-color:#a16207;color:#fef08a;background:#1c1705}
+.pill.norech{border-color:#b45309;color:#fdba74;background:#231307}
+.pill.sandbox{border-color:#0284c7;color:#7dd3fc;background:#081c29}
+#tabs{display:flex;overflow-x:auto;background:#080e0b;border-bottom:1px solid var(--border)}
+.tab{
+  flex:none;background:transparent;color:var(--mut);border:0;border-right:1px solid var(--border);
+  padding:10px 13px;font:inherit;font-size:13px;cursor:pointer;transition:.15s;
+}
+.tab:hover{background:#111e17;color:var(--fg)}
+.tab.on{background:#172b20;color:var(--fg);box-shadow:inset 0 -3px var(--accent)}
+.bd{background:var(--warn);color:#000;border-radius:3px;padding:0 5px;font-weight:700;font-size:11px;margin-left:4px}
+#win{padding:14px;min-height:460px}
+button{
+  font:inherit;font-size:13px;background:#1f5c38;color:#ecfdf5;
+  border:1px solid #348a57;border-radius:5px;padding:8px 12px;cursor:pointer;
+}
+button:hover:not(:disabled){background:#277346}
+button.alt{background:#101b15;color:var(--fg);border:1px solid var(--border)}
+button.alt:hover:not(:disabled){background:#182920}
+button.bad{background:#7f1d1d;border-color:#b91c1c;color:#fef2f2}
+button.warn{background:#78350f;border-color:#d97706;color:#fef3c7}
+button.shadow{background:#231438;border-color:#7e22ce;color:#f3e8ff}
+button.shadow:hover:not(:disabled){background:#321c52}
+button.sandbox-btn{background:#0c4a6e;border-color:#0284c7;color:#e0f2fe}
+button.sandbox-btn:hover:not(:disabled){background:#075985}
+button:disabled{opacity:.35;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin:8px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px;margin:8px 0}
+.card.warnbox{border-color:#d97706;background:#1f1609}
+.card.dangerbox{border-color:#b91c1c;background:#220b0b}
+.card.shadowbox{border-color:#7e22ce;background:#160d24}
+.card.sandboxbox{border-color:#0284c7;background:#0a1924}
+.mut{color:var(--mut)}
+.mail-layout{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:660px){.mail-layout{grid-template-columns:265px 1fr}}
+.mail-list{border:1px solid var(--border);border-radius:6px;background:#09100c;max-height:340px;overflow-y:auto}
+.mi{padding:9px 10px;border-bottom:1px solid #18291e;cursor:pointer;font-size:12px}
+.mi:hover{background:#121f18}
+.mi.un{font-weight:700;border-left:3px solid var(--accent);background:#101c16}
+.mi.sel{background:#192e23}
+.mi.anom-mail{border-left-color:#a855f7}
+.mail-body{white-space:pre-line;font-size:13px;line-height:1.55}
+#cv{width:100%;height:310px;border:1px solid var(--border);border-radius:6px;background:#03060a;display:block;touch-action:none;cursor:grab}
+#cv:active{cursor:grabbing}
+.srv-banner{
+  background:#2a0909;border:2px solid #ef4444;border-radius:6px;padding:10px 12px;
+  margin-bottom:8px;color:#fecaca;animation:srvPulse 1.4s infinite alternate;
+}
+@keyframes srvPulse{from{border-color:#991b1b;background:#220808}to{border-color:#ef4444;background:#350c0c}}
+.crt-wrap{
+  background:#040404;border:2px solid #2b382e;border-radius:6px;padding:8px;
+  display:flex;flex-direction:column;align-items:center;position:relative;
+}
+#crt{width:100%;max-width:420px;height:240px;image-rendering:pixelated;background:#0a0a0a;border:1px solid #222;display:block}
+.crt-offline{
+  width:100%;max-width:420px;height:240px;background:#080505;border:1px solid #7f1d1d;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:16px;color:#fca5a5;
+}
+#spec{width:100%;height:190px;background:#040806;border:1px solid var(--border);border-radius:6px;display:block}
+.databox{
+  background:#070c09;border:1px solid var(--border);border-radius:5px;padding:9px;
+  font-size:12px;color:#a7f3d0;white-space:pre-wrap;word-break:break-all;margin-top:8px;
+}
+.databox.anom{border-color:#991b1b;color:#fca5a5;background:#140808}
+input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer}
+input[type=text], select{
+  width:100%;background:#070d0a;color:var(--fg);
+  border:1px solid #348a57;border-radius:5px;padding:9px 12px;font:14px inherit;
+  outline:none;
+}
+input[type=text]:focus, select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(74,222,128,.2)}
+textarea{
+  width:100%;min-height:85px;background:#070d0a;color:var(--fg);
+  border:1px solid var(--border);border-radius:5px;padding:8px;font:12px inherit;
+}
+.prox-wrap{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:11px}
+.prox-bar{flex:1;height:7px;background:#070d0a;border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.prox-fill{height:100%;transition:width .08s,background .12s}
+.atlas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:10px}
+.atlas-card{
+  background:#0c1611;border:1px solid var(--border);border-radius:6px;padding:9px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.atlas-card.locked{opacity:.48;background:#080e0b}
+.atlas-cv{width:100%;height:110px;image-rendering:pixelated;background:#050806;border:1px solid #1f3326;border-radius:4px;display:block}
+.paper-sheet{
+  background:linear-gradient(180deg,#e9dec4 0%,#dfd0b0 100%);
+  color:#2b2116;border:2px solid #8c734b;border-radius:6px;padding:14px;
+  margin-top:16px;box-shadow:inset 0 0 24px rgba(92,68,36,.28),0 4px 14px rgba(0,0,0,.45);
+  font-family:"Courier New",Courier,monospace;
+}
+.paper-sheet h3{
+  margin:0 0 10px;color:#3d2814;border-bottom:1px dashed #7c623c;padding-bottom:6px;
+  font-size:15px;letter-spacing:.5px;
+}
+.paper-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.paper-entry{
+  background:rgba(255,250,238,.65);border:1px solid #9c8259;border-radius:4px;padding:9px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.paper-cv{
+  width:100%;height:110px;image-rendering:pixelated;background:#1e1912;
+  border:1px solid #6e5634;border-radius:3px;display:block;
+}
+.paper-bin{
+  background:#f5eedc;border:1px solid #a89068;padding:6px;border-radius:3px;
+  font-size:11px;color:#24190e;word-break:break-all;white-space:pre-wrap;
+}
+.paper-btn{
+  background:#5c4424;color:#fbf6ea;border:1px solid #3d2b14;font-size:12px;padding:6px 10px;
+}
+.paper-btn:hover{background:#473319}
+#toast{
+  margin-top:8px;padding:8px 12px;border-radius:6px;background:#15291e;
+  border:1px solid var(--border);color:var(--fg);text-align:center;font-size:12px;min-height:34px;
+}
+#toast.ok{border-color:#22c55e;background:#0f291a}
+#toast.bad{border-color:#ef4444;background:#2b1111;color:#fecaca}
+</style>
+</head>
+<body>
+<main>
+<div class="terminal">
+  <div class="topbar">
+    <b>ERIAL-7 // TERMINAL DE ESCUCHA</b>
+    <div class="stats" id="st"></div>
+  </div>
+  <div id="tabs"></div>
+  <div id="win"></div>
+</div>
+<div id="toast" style="visibility:hidden"></div>
+</main>
+
+<script>
+// ============================================================================
+// TELEMETRÍA SILENCIOSA EN SEGUNDO PLANO (Firebase Realtime Database)
+// ============================================================================
+const CLOUD_DB_URL = "https://signal-finder-5e191-default-rtdb.firebaseio.com";
+
+const $ = s => document.querySelector(s);
+const CLASSES = ["Estrella", "Planeta", "Asteroide", "Satelite", "Pulsar"];
+const TOTAL_NIGHTS = 15;
+const SHIFT_DURATION = 600; // 10 minutos por noche
+const W = 1400, H = 900;
+const stars = Array.from({length: 340}, () => [Math.random()*W, Math.random()*H, Math.random()*1.5 + 0.4]);
+
+// Catálogo completo adaptado a los sprites de la carpeta Signals/
+const MODELS = [
+  // 0: Estrella
+  {id:"est_enana", cat:0, name:"Enana Amarilla", img:"Signals/yellow_dwarf.png", freq:210, wave:"sine", desc:"Secuencia principal estable de espectro solar."},
+  {id:"est_enana_roja", cat:0, name:"Enana Roja", img:"Signals/red_dwarf.png", freq:190, wave:"sine", desc:"Emision tenue de baja temperatura y larga vida."},
+  {id:"est_gigante", cat:0, name:"Gigante Roja", img:"Signals/red_giant.png", freq:175, wave:"sine", desc:"3 bandas anchas de baja frecuencia y corona extensa."},
+  {id:"est_binaria", cat:0, name:"Estrella Binaria", img:"Signals/binary_star.png", freq:255, wave:"triangle", desc:"Doble pico orbital con modulacion en 3 bandas."},
+  {id:"est_trinaria", cat:0, name:"Sistema Trinario", img:"Signals/trinary_star.png", freq:295, wave:"triangle", desc:"Tres focos gravitacionales sincronizados."},
+  // 1: Planeta / Luna / Enano
+  {id:"pla_venus", cat:1, name:"Venus", img:"Signals/venus.png", freq:104, wave:"sine", desc:"Atmosfera densa de alta reflectividad termica."},
+  {id:"pla_marte", cat:1, name:"Marte", img:"Signals/mars.png", freq:110, wave:"sine", desc:"Planeta rocoso con casquetes polares y oxido."},
+  {id:"pla_jupiter", cat:1, name:"Jupiter", img:"Signals/jupiter.png", freq:132, wave:"sine", desc:"Gigante gaseoso con franjas atmosfericas densas."},
+  {id:"pla_saturno", cat:1, name:"Saturno", img:"Signals/saturn.png", freq:148, wave:"triangle", desc:"Sistema de anillos de alta densidad orbital."},
+  {id:"pla_urano", cat:1, name:"Urano", img:"Signals/uranus.png", freq:138, wave:"sine", desc:"Gigante helado de inclinacion axial extrema."},
+  {id:"pla_neptuno", cat:1, name:"Neptuno", img:"Signals/neptune.png", freq:142, wave:"sine", desc:"Vientos supersonicos en atmosfera profunda."},
+  {id:"pla_exoplaneta", cat:1, name:"Exoplaneta", img:"Signals/exoplanet.png", freq:124, wave:"sine", desc:"Mundo extrasolar detectado en transito."},
+  {id:"pla_luna", cat:1, name:"Luna", img:"Signals/moon.png", freq:92, wave:"sine", desc:"Satelite natural rocoso de baja gravedad."},
+  {id:"pla_io", cat:1, name:"Io", img:"Signals/io.png", freq:98, wave:"triangle", desc:"Satelite volcanico con flujo magnetico intenso."},
+  {id:"pla_europa", cat:1, name:"Europa", img:"Signals/europa.png", freq:101, wave:"sine", desc:"Corteza helada con oceano subsuperficial."},
+  {id:"pla_ceres", cat:1, name:"Ceres", img:"Signals/ceres.png", freq:88, wave:"sine", desc:"Planeta enano del cinturon principal."},
+  {id:"pla_pluton", cat:1, name:"Pluton", img:"Signals/pluto.png", freq:84, wave:"sine", desc:"Cuerpo transneptuniano helado."},
+  {id:"pla_makemake", cat:1, name:"Makemake", img:"Signals/makemake.png", freq:86, wave:"sine", desc:"Planeta enano del cinturon de Kuiper."},
+  // 2: Asteroide / Cometa
+  {id:"ast_metalico", cat:2, name:"Asteroide Metalico", img:"Signals/metallic_asteroid.png", freq:320, wave:"triangle", desc:"Trazas diagonales definidas de alta reflectividad."},
+  {id:"ast_condrita", cat:2, name:"Condrita Carbonacea", img:"Signals/chondrite_asteroid.png", freq:285, wave:"sine", desc:"Trazas diagonales suaves con deriva constante."},
+  {id:"ast_cometa", cat:2, name:"Cometa de Nucleo Activo", img:"Signals/comet.png", freq:355, wave:"sawtooth", desc:"Trazas diagonales alargadas por estela volatil."},
+  // 3: Satelite
+  {id:"sat_com", cat:3, name:"Satelite de Comunicaciones", img:"Signals/comms_satellite.png", freq:760, wave:"sawtooth", desc:"Columnas de bloques digitales + subportadora TLM."},
+  {id:"sat_sonda", cat:3, name:"Sonda Orbital", img:"Signals/space_probe.png", freq:810, wave:"sawtooth", desc:"Paquetes telemetricos espaciados + subportadora."},
+  {id:"sat_telescopio", cat:3, name:"Telescopio Espacial", img:"Signals/space_telescope.png", freq:720, wave:"square", desc:"Bloques regulares de observacion profunda."},
+  {id:"sat_estacion", cat:3, name:"Estacion Modular", img:"Signals/station.png", freq:850, wave:"sawtooth", desc:"Tramas continuas de alta densidad telemetrica."},
+  // 4: Pulsar (aparece a partir de Noche 3 -> shift >= 2)
+  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", freq:480, wave:"square", desc:"Columnas verticales periodicas de cadencia rapida."},
+  {id:"pul_magnetar", cat:4, name:"Magnetar", img:"Signals/magnetar.png", freq:430, wave:"square", desc:"Pulsos verticales de altisima intensidad magnetica."},
+  {id:"pul_binario", cat:4, name:"Pulsar Binario", img:"Signals/binary_pulsar.png", freq:515, wave:"square", desc:"Doble tren de pulsos verticales con deriva de fase."}
+];
+
+// Catálogo completo de las 12 anomalías de Signals/ (aparecen desde Noche 10 -> shift >= 9)
+const ANOMALY_DEFS = [
+  {
+    anomType: "dyson",
+    title: "Esfera de Dyson",
+    img: "Signals/dyson_anomaly.png",
+    cat: 0,
+    freq: 68,
+    wave: "sawtooth",
+    textData: "MEGAESTRUCTURA // OCLUSION SOLAR 99.4% // EMISION INFRARROJA ARTIFICIAL"
+  },
+  {
+    anomType: "failed_planet",
+    title: "Planeta Fallido",
+    img: "Signals/earth_anomaly.png",
+    cat: 1,
+    freq: 56,
+    wave: "sawtooth",
+    textData: "NUCLEO FRACTURADO // ORBITA COLAPSADA // RESTOS DE BIOSFERA"
+  },
+  {
+    anomType: "dark_eyes",
+    title: "???",
+    img: "Signals/noimage_anomaly.png",
+    cat: 4,
+    freq: 44,
+    wave: "square",
+    textData: "01001110 01001111 01010011 00100000 01010110 01000101 // LECTURA BIOMETRICA EN VACIO"
+  },
+  {
+    anomType: "astronaut",
+    title: "Cosmonauta a la Deriva",
+    img: "Signals/astronaut_anomaly.png",
+    cat: 3,
+    freq: 142,
+    wave: "triangle",
+    textData: "TRAJE PRESURIZADO // PULSO CARDIACO 0 BPM // TRANSMISION DE VOZ EN BUCLE"
+  },
+  {
+    anomType: "cyst",
+    title: "Quiste Orbital",
+    img: "Signals/cyst_anomaly.png",
+    cat: 2,
+    freq: 62,
+    wave: "sawtooth",
+    textData: "MASA ORGANICA DENSA // MEMBRANA PULSANTE // TEMPERATURA 37.2 C"
+  },
+  {
+    anomType: "flock",
+    title: "Enjambre Silencioso",
+    img: "Signals/flock_anomaly.png",
+    cat: 2,
+    freq: 195,
+    wave: "triangle",
+    textData: "MULTIPLES VECTORES SINCRONIZADOS // SIN FIRMA TERMICA"
+  },
+  {
+    anomType: "iris",
+    title: "Iris Estelar",
+    img: "Signals/iris_anomaly.png",
+    cat: 0,
+    freq: 74,
+    wave: "sine",
+    textData: "APERTURA OPTICA EN CORONA // ENFOQUE DIRECTO HACIA ERIAL-7"
+  },
+  {
+    anomType: "macula",
+    title: "Macula Negra",
+    img: "Signals/macula_anomaly.png",
+    cat: 0,
+    freq: 52,
+    wave: "sawtooth",
+    textData: "MANCHA FOTOSPHERICA ANOMALA // ABSORCION TOTAL DE LUZ"
+  },
+  {
+    anomType: "moon_anom",
+    title: "Satelite Hueco",
+    img: "Signals/moon_anomaly.png",
+    cat: 1,
+    freq: 82,
+    wave: "square",
+    textData: "RESONANCIA METALICA INTERNA // GEOMETRIA SUBTERRANEA"
+  },
+  {
+    anomType: "spaceship",
+    title: "Navio Derelict",
+    img: "Signals/spaceship_anomaly.png",
+    cat: 3,
+    freq: 118,
+    wave: "sawtooth",
+    textData: "CASCO NO CATALOGADO // REACTOR INACTIVO // BALIZA DE AUXILIO"
+  },
+  {
+    anomType: "virgo_dragon",
+    title: "Filamento de Virgo",
+    img: "Signals/virgo_dragon_anomaly.png",
+    cat: 4,
+    freq: 94,
+    wave: "triangle",
+    textData: "ESTELA GRAVITACIONAL SERPENTEANTE // DESPLAZAMIENTO SUPRALUMINICO"
+  },
+  {
+    anomType: "vitreous",
+    title: "Cuerpo Vitreo",
+    img: "Signals/vitreous_anomaly.png",
+    cat: 1,
+    freq: 108,
+    wave: "sine",
+    textData: "REFRACCION CRISTALINA // DISTORSION OPTICA DE FONDO"
+  }
+];
+
+// Caché y precarga de todos los sprites de Signals/
+const IMG_CACHE = {};
+const offCv = document.createElement("canvas");
+const offCx = offCv.getContext("2d");
+
+function preloadAllSprites() {
+  const paths = new Set();
+  MODELS.forEach(m => { if (m.img) paths.add(m.img); });
+  ANOMALY_DEFS.forEach(a => { if (a.img) paths.add(a.img); });
+  paths.forEach(src => {
+    const im = new Image();
+    im.src = src;
+    IMG_CACHE[src] = im;
+  });
+}
+
+function getSprite(src) {
+  if (!src) return null;
+  if (!IMG_CACHE[src]) {
+    const im = new Image();
+    im.src = src;
+    IMG_CACHE[src] = im;
+  }
+  const im = IMG_CACHE[src];
+  return (im.complete && im.naturalWidth > 0) ? im : null;
+}
+
+preloadAllSprites();
+
+// Resolución CRT progresiva según mejora de Filtro (NV 0/5 a NV 5/5)
+const CRT_RES = [
+  [40, 24],
+  [64, 38],
+  [92, 55],
+  [124, 74],
+  [152, 91],
+  [184, 110]
+];
+
+const SCIENTISTS = [
+  {name: "Dra. Elena Alreyd", inst: "Observatorio Astrofisico Sur"},
+  {name: "Dr. Julian Charles", inst: "Instituto de Dinamica Orbital"},
+  {name: "Dra. Claire Powell", inst: "Consorcio Espectral Nordico"},
+  {name: "Dr. Tiago Branco", inst: "Red de Radioastronomia Austral"},
+  {name: "Dra. Valeria Rojas", inst: "Laboratorio de Cuerpos Menores"},
+  {name: "Dr. Nikos Koustoulas", inst: "Centro de Radiofrecuencia Egea"},
+  {name: "Dr. Arthur Hammond", inst: "Division de Telemetria Profunda"}
+];
+
+const LIVE_STORAGE_KEY = "erial7_live_sessions_v1";
+const bc = ("BroadcastChannel" in window) ? new BroadcastChannel("erial7_telemetry") : null;
+
+function normalizeDbUrl(raw) {
+  const clean = String(raw || "").trim().replace(/\/+$/, "");
+  if (!clean) return "";
+  return /^https?:\/\//i.test(clean) ? clean : `https://${clean}`;
+}
+
+const activeDbUrl = normalizeDbUrl(CLOUD_DB_URL);
+let cloudInFlight = false;
+let cloudQueuedSnap = null;
+
+let V = "intro", G = null, S = null;
+let playerNameInput = "";
+let selectedStartNight = 0;
+let sandboxMode = false;
+let sessionStartPerf = 0;
+let liveSyncTimer = 0;
+let cloudSyncTimer = 0;
+
+let sigs = [], cam = {x: 380, y: 300};
+let en = 100, cap = 100, rd = 0;
+let mail = [], selMail = null, notes = "";
+let shift = 0; // 0 = Noche 1 ... 14 = Noche 15
+let shiftLeft = SHIFT_DURATION;
+let srv = null, crashes = 0;
+let cur = null, knobF = 50, knobP = 50, choiceCat = null, choiceMod = null;
+let outbox = [];
+let selPkgId = null;
+let pendingOverrideSig = null;
+let savedSatLog = null, satReportsSent = 0;
+let discoveredModels = new Set();
+let discoveredAnomalies = [];
+let firstAnomalyFound = false;
+let shadowBuyerUnlocked = false;
+let gameOverReason = ""; // "ARREST" | "COMPLETED"
+let R = null, sid = 0, last = performance.now();
+let flash = "", flashOk = 1, flashT = 0;
+let drag = null, moved = 0, uiTick = 0;
+let au = null, muted = false, activeVoice = null;
+let pendingEvals = [];
+
+const uid = () => Math.random().toString(36).slice(2, 8).toUpperCase();
+const shiftLabel = idx => `NOCHE ${idx + 1}`;
+const isSubcatEnabled = () => sandboxMode || shift >= 9; // Noche 10+ o Modo Libre
+const isPulsarEnabled = () => sandboxMode || shift >= 2; // Noche 3+ o Modo Libre
+const isAnomEnabled = () => sandboxMode || shift >= 9;   // Noche 10+ o Modo Libre
+const isCrtBroken = () => !sandboxMode && shift === 8;   // Noche 9 (0-based == 8): fallo óptico de imagen
+const getEnergyMode = () => {
+  if (sandboxMode) return "fast";
+  if (shift <= 4) return "fast";   // Noches 1 a 5: recuperación más o menos rápida
+  if (shift <= 9) return "slow";   // Noches 6 a 10: recuperación más lenta
+  return "none";                   // Noches 11 a 15: recuperación nula
+};
+const activeAssigns = () => mail.filter(m => m.kind === "as" && !m.done && !m.failed);
+const allNightAssignsClosed = () => {
+  const list = mail.filter(m => m.kind === "as" && m.night === shift);
+  return list.length > 0 && list.every(m => m.done || m.failed);
+};
+
+function formatLocalDateTime(d) {
+  const pad = n => String(n).padStart(2, "0");
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function buildSessionSnapshot(finalized = false) {
+  if (!S) return null;
+  const elapsedTotal = sessionStartPerf ? +((performance.now() - sessionStartPerf) / 1000).toFixed(1) : (S.totalPlayTime || 0);
+  S.totalPlayTime = elapsedTotal;
+  S.notesLength = notes.trim().length;
+  S.satReportsTotal = satReportsSent;
+  S.status = finalized ? (gameOverReason === "ARREST" ? "CLAUSURADA_ONU" : "FINALIZADA") : "EN_CURSO";
+  S.lastUpdated = new Date().toISOString();
+
+  const shiftsList = [...S.shifts];
+  if (!finalized && R && V !== "end") {
+    shiftsList.push({
+      ...R,
+      time: +((performance.now() - R.t0) / 1000).toFixed(1),
+      energy: Math.round(en),
+      money: G ? G.money : 75
+    });
+  }
+
+  return {
+    id: S.id,
+    playerName: S.playerName,
+    sandbox: sandboxMode,
+    date: S.date,
+    dateISO: S.dateISO,
+    totalPlayTime: S.totalPlayTime,
+    status: S.status,
+    lastUpdated: S.lastUpdated,
+    shifts: shiftsList,
+    survey: null,
+    notesLength: S.notesLength,
+    satReportsTotal: S.satReportsTotal
+  };
+}
+
+async function pushSnapshotToCloud(snap) {
+  if (!activeDbUrl || !snap) return;
+  if (cloudInFlight) {
+    cloudQueuedSnap = snap;
+    return;
+  }
+  cloudInFlight = true;
+  try {
+    await fetch(`${activeDbUrl}/sessions/${encodeURIComponent(snap.id)}.json`, {
+      method: "PUT",
+      body: JSON.stringify(snap)
+    });
+  } catch (_) {
+  } finally {
+    cloudInFlight = false;
+    if (cloudQueuedSnap) {
+      const next = cloudQueuedSnap;
+      cloudQueuedSnap = null;
+      pushSnapshotToCloud(next);
+    }
+  }
+}
+
+function syncLiveTelemetry(finalized = false, pushCloudNow = true) {
+  const snap = buildSessionSnapshot(finalized);
+  if (!snap) return;
+  try {
+    const raw = localStorage.getItem(LIVE_STORAGE_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    const idx = list.findIndex(item => item.id === snap.id);
+    if (idx >= 0) list[idx] = snap;
+    else list.push(snap);
+    localStorage.setItem(LIVE_STORAGE_KEY, JSON.stringify(list));
+  } catch (_) {}
+
+  if (bc) {
+    try { bc.postMessage({type: "SESSION_UPDATE", session: snap}); } catch (_) {}
+  }
+
+  if (pushCloudNow && activeDbUrl) {
+    pushSnapshotToCloud(snap);
+  }
+}
+
+function fmtClock(sec) {
+  const s = Math.max(0, Math.ceil(sec));
+  const mm = String(Math.floor(s / 60)).padStart(2, "0");
+  const ss = String(s % 60).padStart(2, "0");
+  return `${mm}:${ss}`;
+}
+
+function msg(t, ok = 1) {
+  flash = t; flashOk = ok; flashT = 3.4; updTop();
+}
+
+function beep(freq, dur = 0.08, type = "sine", vol = 0.06) {
+  if (muted) return;
+  try {
+    au = au || new (window.AudioContext || window.webkitAudioContext)();
+    if (au.state === "suspended") au.resume();
+    const o = au.createOscillator(), g = au.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, au.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, au.currentTime + dur);
+    o.connect(g); g.connect(au.destination);
+    o.start(); o.stop(au.currentTime + dur);
+  } catch (_) {}
+}
+
+function stopVoice() {
+  if (!activeVoice) return;
+  try { activeVoice.o.stop(); } catch (_) {}
+  activeVoice = null;
+}
+
+function playSignalAudio(sigObj) {
+  stopVoice();
+  if (muted) return;
+  try {
+    au = au || new (window.AudioContext || window.webkitAudioContext)();
+    if (au.state === "suspended") au.resume();
+    const o = au.createOscillator(), g = au.createGain();
+    if (sigObj.anom) {
+      const aDef = ANOMALY_DEFS.find(a => a.anomType === sigObj.anomType) || ANOMALY_DEFS[0];
+      o.type = aDef.wave;
+      o.frequency.value = aDef.freq;
+    } else {
+      const mod = MODELS.find(m => m.id === sigObj.modelId) || MODELS[0];
+      o.type = mod.wave;
+      o.frequency.value = mod.freq;
+    }
+    g.gain.value = 0.07;
+    o.connect(g); g.connect(au.destination);
+    o.start();
+    activeVoice = {o, g, sig: sigObj, t: 0, max: 3.4};
+  } catch (_) {}
+}
+
+function addMail(subj, body, extra = {}) {
+  const id = uid();
+  mail.unshift({id, subj, body, read: 0, ...extra});
+  if (!selMail) selMail = id;
+  return id;
+}
+
+function makeSignal(cat, forcedAnom = null, forcedAnomType = null) {
+  let x, y, tries = 0;
+  do {
+    x = 110 + Math.random() * (W - 220);
+    y = 110 + Math.random() * (H - 220);
+  } while (tries++ < 60 && sigs.some(s => s.st !== "gone" && Math.hypot(s.x - x, s.y - y) < 195));
+
+  const allowAnom = isAnomEnabled();
+  const anom = allowAnom ? (forcedAnom !== null ? forcedAnom : (Math.random() < 0.24)) : false;
+
+  let actualCat = cat;
+  let anomType = "";
+  let anomTitle = "";
+  let imgPath = "";
+  let textData = "[Sin subportadora]";
+
+  if (anom) {
+    const chosenAnom = forcedAnomType
+      ? (ANOMALY_DEFS.find(a => a.anomType === forcedAnomType) || ANOMALY_DEFS[0])
+      : ANOMALY_DEFS[Math.floor(Math.random() * ANOMALY_DEFS.length)];
+    anomType = chosenAnom.anomType;
+    anomTitle = chosenAnom.title;
+    actualCat = chosenAnom.cat;
+    imgPath = chosenAnom.img;
+    textData = chosenAnom.textData;
+  }
+
+  const catModels = MODELS.filter(m => m.cat === actualCat);
+  const chosenModel = catModels[Math.floor(Math.random() * catModels.length)];
+  if (!anom) {
+    imgPath = chosenModel.img;
+  }
+
+  const corruptProb = !sandboxMode && shift >= 4 ? Math.min(0.42, 0.16 + (shift - 4) * 0.03) : (sandboxMode ? 0 : 0.04);
+  const isCorruptSignal = !anom && (Math.random() < corruptProb);
+
+  const moving = (actualCat === 2 || actualCat === 3);
+  const ang = Math.random() * Math.PI * 2;
+  const spd = moving ? (2.1 + Math.random() * 1.4) : 0;
+
+  if (!anom) {
+    if (actualCat === 3) {
+      const satNum = 100 + Math.floor(Math.random() * 899);
+      const alt = 420 + Math.floor(Math.random() * 380);
+      const hex = uid();
+      textData = `TLM-SAT-${satNum} // ${chosenModel.name.toUpperCase()} // ALT:${alt}KM // PWR:88% // HASH:${hex}`;
+    } else {
+      textData = `ESPECTRO-${chosenModel.id.toUpperCase()} // INTENSIDAD:${62 + Math.floor(Math.random()*35)}%`;
+    }
+  }
+
+  return {
+    id: ++sid, x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+    cat: actualCat, modelId: chosenModel.id, img: imgPath, anom, anomType, anomTitle,
+    isCorruptSignal, st: "echo", align: 0, prog: 0,
+    tot: 0, bad: 0, acc: 0, seed: Math.random() * 100,
+    tgF: 14 + Math.floor(Math.random() * 72),
+    tgP: 14 + Math.floor(Math.random() * 72),
+    fixed: false, textData
+  };
+}
+
+function ensureSectorDiversity() {
+  const inSector = sigs.filter(s => s.st === "echo" || s.st === "align" || s.st === "dl");
+  const allowedCats = isPulsarEnabled() ? [0, 1, 2, 3, 4] : [0, 1, 2, 3];
+
+  if (!isPulsarEnabled()) {
+    sigs.forEach(s => { if (s.cat === 4 && s.st === "echo") s.st = "gone"; });
+  }
+  if (!isAnomEnabled()) {
+    sigs.forEach(s => { if (s.anom && s.st === "echo") s.st = "gone"; });
+  }
+
+  for (const c of allowedCats) {
+    if (!inSector.some(s => s.cat === c && !s.anom)) {
+      sigs.push(makeSignal(c, false, null));
+    }
+  }
+
+  // En Noche 10+ o Modo Libre, garantizar variedad de anomalías en el sector
+  if (isAnomEnabled()) {
+    const activeAnoms = inSector.filter(s => s.anom);
+    const targetAnomCount = sandboxMode ? 3 : 2;
+    while (activeAnoms.length < targetAnomCount) {
+      const unfound = ANOMALY_DEFS.filter(d => !discoveredAnomalies.some(a => a.anomType === d.anomType));
+      const pool = unfound.length ? unfound : ANOMALY_DEFS;
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      const newAnomSig = makeSignal(pick.cat, true, pick.anomType);
+      sigs.push(newAnomSig);
+      activeAnoms.push(newAnomSig);
+    }
+  }
+}
+
+function initShift() {
+  shiftLeft = SHIFT_DURATION;
+  pendingOverrideSig = null;
+
+  R = {
+    shift: shiftLabel(shift), status: "EN_CURSO", ok: 0,
+    t0: performance.now(), tFirst: null,
+    slewTime: 0, retunes: 0, invalid: 0,
+    repeats: 0, corrupt: 0, silentErrors: 0,
+    satReports: 0, specUses: 0, anomSent: 0, crash: 0, fix: 0
+  };
+
+  // Generar 3 encargos científicos diarios
+  const allowedCats = isPulsarEnabled() ? [0, 1, 2, 3, 4] : [0, 1, 2, 3];
+  const usedSci = new Set();
+
+  for (let i = 0; i < 3; i++) {
+    let sci;
+    do {
+      sci = SCIENTISTS[Math.floor(Math.random() * SCIENTISTS.length)];
+    } while (usedSci.has(sci.name) && usedSci.size < SCIENTISTS.length);
+    usedSci.add(sci.name);
+
+    const cat = allowedCats[(shift + i) % allowedCats.length];
+    const catModels = MODELS.filter(m => m.cat === cat);
+    const mod = catModels[Math.floor(Math.random() * catModels.length)];
+    const reward = 45 + Math.floor(Math.random() * 21);
+    const requireModel = isSubcatEnabled();
+
+    const targetDesc = requireModel
+      ? `${CLASSES[cat]} (${mod.name})`
+      : `${CLASSES[cat]}`;
+
+    addMail(
+      `ENCARGO ${i + 1}/3 // ${sci.name.toUpperCase()}`,
+      `Remitente: ${sci.name} (${sci.inst})
+` +
+      `Solicitud para ${shiftLabel(shift)}: Registro espectral verificado de ${targetDesc}.
+` +
+      `Honorarios autorizados: $${reward} CR.`,
+      {
+        kind: "as",
+        night: shift,
+        sciName: sci.name,
+        cat,
+        modelId: requireModel ? mod.id : null,
+        reward,
+        done: false,
+        failed: false
+      }
+    );
+  }
+
+  // Avisos específicos por noche
+  if (shift === 2) {
+    addMail(
+      "BOLETIN TECNICO // NOCHE 3",
+      "Se han detectado emisiones de Pulsares en el cuadrante profundo."
+    );
+  } else if (shift === 4) {
+    addMail(
+      "AVISO DE INTERFERENCIA SOLAR // NOCHE 5",
+      "Tormentas magneticas estan corrompiendo paquetes en transito."
+    );
+  } else if (shift === 5) {
+    addMail(
+      "AVISO DE SUMINISTRO // NOCHE 6",
+      "Degradacion en los paneles colectores: a partir de esta guardia la recuperacion de energia sera mas lenta."
+    );
+  } else if (shift === 8) {
+    addMail(
+      "FALLO DE INSTRUMENTACION // NOCHE 9",
+      "ALERTA DE HARDWARE: Una sobrecarga ha danado el tubo de rayos catodicos y los sensores opticos de visualizacion.
+
+" +
+      "Durante esta guardia no podras ver la imagen de ningun objeto en el Procesador. Identifica las senales guiandote por el audio, la proximidad y el espectrograma."
+    );
+  } else if (shift === 9) {
+    addMail(
+      "ACTUALIZACION DE PROTOCOLO // NOCHE 10",
+      "Los investigadores ahora requieren especificar la subcategoria exacta de cada cuerpo celeste."
+    );
+  } else if (shift === 10) {
+    addMail(
+      "CORTE DE GENERADOR AUXILIAR // NOCHE 11",
+      "El generador de respaldo ha quedado fuera de servicio: la recuperacion automatica de energia es nula hasta el final de la campana."
+    );
+  }
+
+  ensureSectorDiversity();
+  syncLiveTelemetry(false, true);
+}
+
+function start(operatorName, startNightIdx = 0, isSandbox = false) {
+  const cleanName = (operatorName || "").trim();
+  if (!cleanName) {
+    msg("[ERR] Ingresa tu nombre antes de iniciar la guardia", 0);
+    return;
+  }
+  const nowDate = new Date();
+  sessionStartPerf = performance.now();
+  sandboxMode = !!isSandbox;
+  shift = Math.max(0, Math.min(TOTAL_NIGHTS - 1, Number(startNightIdx) || 0));
+
+  S = {
+    id: uid(),
+    playerName: cleanName,
+    sandbox: sandboxMode,
+    date: formatLocalDateTime(nowDate),
+    dateISO: nowDate.toISOString(),
+    totalPlayTime: 0,
+    status: "EN_CURSO",
+    shifts: [],
+    survey: null
+  };
+
+  if (sandboxMode) {
+    G = {money: 9999, a: 5, f: 5, b: 5, spec: 5};
+    cap = 200;
+    en = 200;
+    discoveredModels = new Set(MODELS.map(m => m.id));
+    discoveredAnomalies = ANOMALY_DEFS.map((a, idx) => ({
+      anomType: a.anomType,
+      anomTitle: a.title,
+      modelId: MODELS[0].id,
+      img: a.img,
+      seed: 1.5 + idx,
+      anom: true,
+      textData: a.textData
+    }));
+    firstAnomalyFound = true;
+    shadowBuyerUnlocked = true;
+  } else {
+    G = {money: 75, a: 0, f: 0, b: 0, spec: 0};
+    cap = 100;
+    en = 100;
+    discoveredModels = new Set();
+    discoveredAnomalies = [];
+    firstAnomalyFound = false;
+    shadowBuyerUnlocked = false;
+  }
+
+  sigs = []; mail = []; selMail = null; notes = "";
+  shiftLeft = SHIFT_DURATION; srv = null; crashes = 0; cur = null; rd = 0;
+  knobF = 50; knobP = 50; choiceCat = null; choiceMod = null;
+  outbox = []; selPkgId = null; pendingOverrideSig = null;
+  savedSatLog = null; satReportsSent = 0;
+  gameOverReason = "";
+  pendingEvals = [];
+
+  const introId = addMail(
+    `PROTOCOLO DE OPERACIONES // OP. ${cleanName.toUpperCase()}`,
+    `Estacion de Escucha Erial-7.
+
+` +
+    "Obtencion de senales:
+" +
+    "1. Mapa Estelar: Selecciona un eco activo para alinear las antenas y descargar su trama.
+" +
+    "2. Procesador: Ajusta Frecuencia y Polaridad hasta estabilizar la senal, fija la captura y clasifica el objeto.
+" +
+    "3. Plataforma: Despacha el paquete clasificado a su destinatario correspondiente."
+  );
+  selMail = introId;
+
+  if (sandboxMode) {
+    addMail(
+      "MODO LIBRE ACTIVADO // ACCESO TOTAL",
+      "Todas las mejoras del Taller (NV 5/5), el Atlas completo (28 cuerpos celestes y 12 anomalias), energia ilimitada y el Canal Cifrado estan desbloqueados para pruebas."
+    );
+  }
+
+  initShift();
+  V = "mail";
+  render();
+  updTop();
+}
+
+function markFirst() {
+  if (R && R.tFirst === null) {
+    R.tFirst = +((performance.now() - R.t0) / 1000).toFixed(2);
+    syncLiveTelemetry(false, true);
+  }
+}
+
+function offF(s) { return Math.min(1, Math.abs(knobF - s.tgF) / 45); }
+function offP(s) { return Math.min(1, Math.abs(knobP - s.tgP) / 45); }
+function proxPct(val, target) { return Math.max(0, Math.round(100 - Math.min(100, Math.abs(val - target) * 2.2))); }
+function isTuned(s) { return Math.abs(knobF - s.tgF) <= 6 && Math.abs(knobP - s.tgP) <= 6; }
+
+function updBadges() {
+  const bMail = $("#bd-mail");
+  const bProc = $("#bd-proc");
+  const bPlat = $("#bd-plat");
+  const bSrv = $("#bd-srv");
+  if (bMail) {
+    const un = mail.filter(m => !m.read).length;
+    bMail.textContent = un ? un : "";
+    bMail.style.display = un ? "inline-block" : "none";
+  }
+  if (bProc) {
+    const rc = sigs.filter(s => s.st === "raw").length;
+    bProc.textContent = rc ? rc : "";
+    bProc.style.display = rc ? "inline-block" : "none";
+  }
+  if (bPlat) {
+    bPlat.textContent = outbox.length ? outbox.length : "";
+    bPlat.style.display = outbox.length ? "inline-block" : "none";
+  }
+  if (bSrv) {
+    bSrv.textContent = srv ? "!" : "";
+    bSrv.style.display = srv ? "inline-block" : "none";
+  }
+}
+
+function updTop() {
+  const st = $("#st");
+  if (!G || V === "intro" || V === "end") {
+    st.innerHTML = `<span class="pill">SECTOR ERIAL-7</span>`;
+    const t = $("#toast");
+    t.textContent = flash;
+    t.className = flash ? (flashOk ? "ok" : "bad") : "";
+    t.style.visibility = flash ? "visible" : "hidden";
+    return;
+  }
+  const remAssigns = activeAssigns().length;
+  const lowTime = shiftLeft <= 120;
+  const eMode = getEnergyMode();
+  const pwrClass = sandboxMode ? "sandbox" : (eMode === "none" ? "norech" : (eMode === "slow" ? "slowrech" : ""));
+  const pwrTag = sandboxMode ? " [LIBRE]" : (eMode === "none" ? " [SIN RECARGA]" : (eMode === "slow" ? " [RECARGA LENTA]" : ""));
+  st.innerHTML = `
+    <span class="pill">OP: ${S.playerName}</span>
+    ${sandboxMode ? `<span class="pill sandbox">MODO LIBRE</span>` : ""}
+    <span class="pill ${shift >= 8 ? "night" : ""}">${shiftLabel(shift)}/${TOTAL_NIGHTS}</span>
+    <span class="pill ${lowTime ? "lowtime" : ""}">T-${fmtClock(shiftLeft)}</span>
+    <span class="pill ${pwrClass}">PWR ${Math.round(en)}/${cap}${pwrTag}</span>
+    <span class="pill">CR $${G.money}</span>
+    <span class="pill">ENCARGOS: ${3 - remAssigns}/3</span>
+    <button class="alt" id="muteBtn" style="padding:2px 7px;font-size:11px">${muted ? "🔇" : "🔊"}</button>
+  `;
+  const mb = $("#muteBtn");
+  if (mb) mb.onclick = () => { muted = !muted; if (muted) stopVoice(); updTop(); };
+
+  const t = $("#toast");
+  t.textContent = flash;
+  t.className = flash ? (flashOk ? "ok" : "bad") : "";
+  t.style.visibility = flash ? "visible" : "hidden";
+  updBadges();
+}
+
+function makeServerChallenge() {
+  const count = Math.min(7, 3 + Math.floor(shift / 3));
+  const seq = Array.from({length: count}, (_, i) => i);
+  if (shift >= 2) {
+    for (let i = seq.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [seq[i], seq[j]] = [seq[j], seq[i]];
+    }
+  }
+  return {
+    count,
+    seq,
+    step: 0,
+    latched: Array(count).fill(false),
+    t: performance.now()
+  };
+}
+
+function triggerCrash() {
+  crashes++;
+  if (R) R.crash++;
+  srv = makeServerChallenge();
+  beep(140, 0.32, "sawtooth", 0.08);
+  msg("[ALERTA] Fallo de servidor // Revisa Mapa Estelar o Servidor", 0);
+  syncLiveTelemetry(false, true);
+  if (V === "srv" || V === "map") render();
+  else updBadges();
+}
+
+function onFirstAnomalyDiscovered() {
+  if (firstAnomalyFound) return;
+  firstAnomalyFound = true;
+
+  addMail(
+    "DIVISION DEL ESPACIO DE NACIONES UNIDAS // PROTOCOLO DE INCIDENCIAS",
+    "Comunicado oficial de la Oficina de Asuntos del Espacio Ultraterrestre (Division del Espacio de Naciones Unidas):
+
+" +
+    "Nuestros monitores orbitales han registrado una fluctuacion no catalogada en el cuadrante de la Estacion Erial-7.
+
+" +
+    "Le invitamos a reportar de inmediato cualquier incidencia, senal anomala o lectura fuera de parametro a traves de los canales oficiales de Central para su analisis institucional.",
+    {kind: "un_notice"}
+  );
+
+  addMail(
+    "[REMITENTE OCULTO] // NO LA ENVIES POR LA RED",
+    "Detectamos que acabas de fijar una lectura anomala en tu terminal.
+
+" +
+    "ADVERTENCIA: No transmitas esa senal a los cientificos ni al Archivo Central. Si la subes a la red oficial, activaras los protocolos de seguridad de la Division del Espacio de Naciones Unidas: clausuraran la estacion y te arrestaran para interrogatorio.
+
+" +
+    "Guardala en tus apuntes personales. Alguien mas se pondra en contacto contigo pronto.",
+    {kind: "anon_warn"}
+  );
+
+  setTimeout(() => {
+    if (V === "end") return;
+    shadowBuyerUnlocked = true;
+    addMail(
+      "INTERMEDIARIO SOMBRA // OFERTA PRIVADA ($240 CR)",
+      "Sabemos lo que tienes en el buffer de Erial-7. Nos interesan las lecturas anomalas que las agencias oficiales intentan ocultar.
+
+" +
+      "Hemos habilitado un Canal Cifrado en tu Plataforma de Envio. Transmite alli cualquier senal anomala y te transferiremos $240 CR sin dejar rastro en los servidores de Naciones Unidas.",
+      {kind: "buyer"}
+    );
+    beep(610, 0.14, "triangle", 0.07);
+    msg("[CORREO CIFRADO] Nuevo mensaje en bandeja", 1);
+    if (V === "mail" || V === "plat") render();
+    else updBadges();
+  }, 4200);
+}
+
+function triggerGovernmentArrestEnding() {
+  gameOverReason = "ARREST";
+  stopVoice();
+  if (R) {
+    R.ok = 0;
+    R.status = "CLAUSURADA_ONU";
+    R.time = +((performance.now() - R.t0) / 1000).toFixed(1);
+    R.energy = Math.round(en);
+    R.money = G.money;
+    S.shifts.push({...R});
+  }
+  beep(110, 0.5, "sawtooth", 0.1);
+  V = "end";
+  syncLiveTelemetry(true, true);
+  updTop();
+  render();
+}
+
+function evaluatePlatformDispatch(ev) {
+  const {pkg, targetType, assignId} = ev;
+
+  if (pkg.anom && targetType !== "shadow") {
+    if (R) R.anomSent++;
+    triggerGovernmentArrestEnding();
+    return;
+  }
+
+  if (targetType === "shadow") {
+    if (!pkg.anom) {
+      addMail(
+        "INTERMEDIARIO SOMBRA // PAQUETE RECHAZADO",
+        "Esto es telemetria convencional. Solo pagamos por anomalias reales fuera de catalogo. Pago: $0 CR."
+      );
+    } else {
+      if (R) R.anomSent++;
+      G.money += 240;
+      addMail(
+        "INTERMEDIARIO SOMBRA // TRANSFERENCIA COMPLETADA",
+        `Paquete anomalo (${pkg.anomTitle}) recibido en el nodo cifrado. Fondos acreditados: +$240 CR.`
+      );
+      msg("[OK] Venta cifrada completada (+$240 CR)", 1);
+    }
+    syncLiveTelemetry(false, true);
+    updTop();
+    if (V === "mail" || V === "shop") render();
+    return;
+  }
+
+  const modObj = MODELS.find(m => m.id === pkg.modelId);
+
+  if (targetType === "assign") {
+    const asg = mail.find(m => m.id === assignId);
+    if (!asg || asg.done || asg.failed) {
+      addMail(
+        `RE: ENVIO #${pkg.sigId} [ASIGNACION CERRADA]`,
+        "El encargo seleccionado ya no se encuentra vigente. Abono acreditado: $0 CR."
+      );
+      return;
+    }
+
+    const catMatches = pkg.chosenCat === pkg.trueCat && pkg.chosenCat === asg.cat;
+    const modMatches = !asg.modelId || (pkg.chosenMod === pkg.trueMod && pkg.chosenMod === asg.modelId);
+
+    if (!catMatches || !modMatches) {
+      if (R) R.silentErrors++;
+      addMail(
+        `RE: ${asg.sciName.toUpperCase()} [ARCHIVO ERRONEO]`,
+        `El paquete enviado (#${pkg.sigId}) no coincide con los parametros solicitados o contiene una clasificacion erronea.
+
+` +
+        `Lectura real verificada: ${CLASSES[pkg.trueCat]}${modObj ? ` (${modObj.name})` : ""}.
+` +
+        `Pago emitido: $0 CR.`
+      );
+      syncLiveTelemetry(false, true);
+      if (V === "mail") render();
+      else updBadges();
+      return;
+    }
+
+    asg.done = true;
+    discoveredModels.add(pkg.trueMod);
+    G.money += asg.reward;
+    addMail(
+      `RE: ${asg.sciName.toUpperCase()} [ENCARGO VALIDADO]`,
+      `Excelente trabajo, Operador. Los datos de ${CLASSES[pkg.trueCat]} (${modObj ? modObj.name : ""}) han sido incorporados a nuestra investigacion.
+
+` +
+      `Honorarios transferidos: +$${asg.reward} CR.`
+    );
+    msg(`[OK] Encargo validado (+$${asg.reward} CR)`, 1);
+    syncLiveTelemetry(false, true);
+    updTop();
+    if (V === "mail" || V === "shop" || V === "atlas") render();
+    return;
+  }
+
+  if (targetType === "central") {
+    const catOk = pkg.chosenCat === pkg.trueCat;
+    const modOk = !isSubcatEnabled() || (pkg.chosenMod === pkg.trueMod);
+
+    if (!catOk || !modOk) {
+      if (R) R.silentErrors++;
+      addMail(
+        `CENTRAL // PAQUETE #${pkg.sigId} [ARCHIVO ERRONEO]`,
+        `La verificacion automatica detecto discrepancias en tu etiqueta (${CLASSES[pkg.chosenCat]}).
+` +
+        `Cuerpo real: ${CLASSES[pkg.trueCat]}${modObj ? ` (${modObj.name})` : ""}. Abono: $0 CR.`
+      );
+      syncLiveTelemetry(false, true);
+      if (V === "mail") render();
+      else updBadges();
+      return;
+    }
+
+    discoveredModels.add(pkg.trueMod);
+    const isSat = pkg.trueCat === 3;
+    const baseExtraPay = 48;
+    const pay = isSat ? 60 : Math.round(baseExtraPay * 0.75);
+    G.money += pay;
+
+    addMail(
+      `CENTRAL // REGISTRO EXTRA #${pkg.sigId} [ACEPTADO]`,
+      isSat
+        ? `Telemetria satelital (${modObj ? modObj.name : "Satelite"}) archivada al 100% de tarifa orbital: +$${pay} CR.`
+        : `Registro adicional de ${CLASSES[pkg.trueCat]} archivado (tarifa extra -25%): +$${pay} CR.`
+    );
+    msg(`[OK] Registro extra acreditado (+$${pay} CR)`, 1);
+    syncLiveTelemetry(false, true);
+    updTop();
+    if (V === "mail" || V === "shop" || V === "atlas") render();
+  }
+}
+
+function advanceNight(timedOut) {
+  const pendingList = mail.filter(m => m.kind === "as" && m.night === shift && !m.done && !m.failed);
+  const completed = pendingList.length === 0;
+
+  if (timedOut && pendingList.length > 0) {
+    pendingList.forEach(a => { a.failed = true; });
+    addMail(
+      `CIERRE DE GUARDIA ${shiftLabel(shift)} // ENCARGOS EXPIRADOS`,
+      `Se agotaron los 10:00 minutos de la noche con ${pendingList.length} encargo(s) sin entregar.`
+    );
+  }
+
+  if (R) {
+    R.ok = completed ? 1 : 0;
+    R.status = completed ? "COMPLETADA" : "INCOMPLETA_TIEMPO";
+    R.time = +((performance.now() - R.t0) / 1000).toFixed(1);
+    R.energy = Math.round(en);
+    R.money = G.money;
+    S.shifts.push({...R});
+  }
+
+  if (shift < TOTAL_NIGHTS - 1) {
+    shift++;
+    initShift();
+    msg(timedOut ? `[CAMBIO DE GUARDIA] ${shiftLabel(shift)}` : `[NUEVA GUARDIA] ${shiftLabel(shift)}`, timedOut ? 0 : 1);
+    updTop();
+    render();
+  } else {
+    gameOverReason = "COMPLETED";
+    V = "end";
+    syncLiveTelemetry(true, true);
+    updTop();
+    render();
+  }
+}
+
+function tick(dt) {
+  if (!G || V === "intro" || V === "end") return;
+
+  shiftLeft -= dt;
+  if (shiftLeft <= 0) {
+    shiftLeft = 0;
+    advanceNight(true);
+    return;
+  }
+
+  // Recuperación de energía escalonada:
+  // Noches 1 a 5 (shift 0..4): rápida
+  // Noches 6 a 10 (shift 5..9): lenta
+  // Noches 11 a 15 (shift 10..14): nula
+  const eMode = getEnergyMode();
+  if (eMode === "fast") {
+    en = Math.min(cap, en + dt * (en < 25 ? 1.45 : 0.90));
+  } else if (eMode === "slow") {
+    en = Math.min(cap, en + dt * (en < 25 ? 0.42 : 0.22));
+  }
+
+  if (rd > 0) rd = Math.max(0, rd - dt);
+
+  const alignDur = Math.max(1.1, 4.4 - G.a * 0.65);
+  const dlDur = Math.max(3.8, 12.0 - G.a * 1.6);
+  const noiseProb = sandboxMode ? 0 : Math.max(0.02, 0.24 - G.f * 0.04);
+  let activeDl = false;
+
+  sigs.forEach(s => {
+    if ((s.st === "echo" || s.st === "align" || s.st === "dl") && (s.vx || s.vy)) {
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      if (s.x < 90 || s.x > W - 90) { s.vx *= -1; s.x = Math.max(90, Math.min(W - 90, s.x)); }
+      if (s.y < 90 || s.y > H - 90) { s.vy *= -1; s.y = Math.max(90, Math.min(H - 90, s.y)); }
+    }
+
+    if (srv) return;
+
+    if (s.st === "align") {
+      if (R) R.slewTime += dt;
+      s.align += dt / alignDur;
+      if (s.align >= 1) {
+        s.align = 1;
+        s.st = "dl";
+        beep(520, 0.08, "triangle", 0.05);
+        msg("[OK] Antenas alineadas // Descargando trama", 1);
+      }
+    } else if (s.st === "dl") {
+      activeDl = true;
+      s.prog += dt / dlDur;
+      s.acc += dt;
+      while (s.acc >= 0.5) {
+        s.acc -= 0.5;
+        s.tot++;
+        if (Math.random() < noiseProb) {
+          s.bad++;
+          if (R) R.corrupt++;
+        }
+      }
+      if (s.prog >= 1) {
+        s.prog = 1;
+        s.st = "raw";
+        beep(680, 0.12, "sine", 0.07);
+        msg(`[OK] Trama #${s.id} lista en Procesador`, 1);
+        ensureSectorDiversity();
+        syncLiveTelemetry(false, true);
+        if (V === "map" || V === "mail") render();
+        else updBadges();
+      }
+    }
+  });
+
+  if (activeDl && !srv && Math.random() < dt / 46) triggerCrash();
+
+  if (activeVoice) {
+    activeVoice.t += dt;
+    const s = activeVoice.sig;
+    const clarity = s.fixed ? 1 : (s.tgF !== undefined ? Math.max(0.18, 1 - (offF(s) + offP(s)) * 0.6) : 1);
+    const pulse = s.cat === 4 ? ((activeVoice.t * 7 % 1) < 0.22 ? 1 : 0.05)
+                : s.cat === 3 ? ((activeVoice.t * 2.5 % 1) < 0.45 ? 0.9 : 0.1)
+                : (0.65 + 0.35 * Math.sin(activeVoice.t * 3));
+    activeVoice.g.gain.value = 0.07 * clarity * pulse;
+    if (activeVoice.t >= activeVoice.max) stopVoice();
+  }
+
+  for (let i = pendingEvals.length - 1; i >= 0; i--) {
+    if (performance.now() >= pendingEvals[i].at) {
+      const ev = pendingEvals.splice(i, 1)[0];
+      evaluatePlatformDispatch(ev);
+    }
+  }
+
+  if (flashT > 0) {
+    flashT -= dt;
+    if (flashT <= 0) { flash = ""; updTop(); }
+  }
+
+  uiTick += dt;
+  if (uiTick >= 0.45) { uiTick = 0; updTop(); }
+
+  liveSyncTimer += dt;
+  if (liveSyncTimer >= 2.0) {
+    liveSyncTimer = 0;
+    syncLiveTelemetry(false, false);
+  }
+
+  cloudSyncTimer += dt;
+  if (cloudSyncTimer >= 5.0) {
+    cloudSyncTimer = 0;
+    if (activeDbUrl) {
+      pushSnapshotToCloud(buildSessionSnapshot(false));
+    }
+  }
+}
+
+// Renderizador híbrido: usa el sprite PNG de Signals/ con filtro CRT y respaldo procedural
+function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMode = false) {
+  if (!cv) return;
+  const cx = cv.getContext("2d");
+  const w = cv.width, h = cv.height;
+  const img = cx.createImageData(w, h);
+  const d = img.data;
+
+  const baseFloor = [0.60, 0.44, 0.30, 0.18, 0.09, 0.02][Math.min(5, Math.max(0, filterLv))];
+  const staticAmt = sepiaMode ? 0.05 : Math.min(0.98, baseFloor + tuneErr * (1 - baseFloor));
+
+  // Intentar cargar sprite personalizado desde Signals/
+  const modObj = MODELS.find(m => m.id === spec.modelId);
+  const anomObj = spec.anomType ? ANOMALY_DEFS.find(a => a.anomType === spec.anomType) : null;
+  const spriteSrc = spec.img || (anomObj && anomObj.img) || (modObj && modObj.img);
+  const sprite = getSprite(spriteSrc);
+
+  if (sprite) {
+    try {
+      offCv.width = w;
+      offCv.height = h;
+      offCx.imageSmoothingEnabled = false;
+      offCx.fillStyle = "#000000";
+      offCx.fillRect(0, 0, w, h);
+
+      // Mantener relación de aspecto centrada dentro del CRT
+      const sw = sprite.naturalWidth || w;
+      const sh = sprite.naturalHeight || h;
+      const scaleFit = Math.min((w * 0.92) / sw, (h * 0.92) / sh);
+      const dw = Math.max(1, Math.round(sw * scaleFit));
+      const dh = Math.max(1, Math.round(sh * scaleFit));
+      const dx0 = Math.floor((w - dw) / 2);
+      const dy0 = Math.floor((h - dh) / 2);
+      offCx.drawImage(sprite, dx0, dy0, dw, dh);
+
+      const srcPixels = offCx.getImageData(0, 0, w, h).data;
+      for (let i = 0; i < d.length; i += 4) {
+        const y = Math.floor((i / 4) / w);
+        const scanline = (y % 2 === 0) ? 0.90 : 1.0;
+        const alpha = srcPixels[i + 3] / 255;
+        const rawLum = (srcPixels[i] * 0.299 + srcPixels[i + 1] * 0.587 + srcPixels[i + 2] * 0.114) * alpha;
+        const lum = Math.max(10, rawLum);
+        const snow = Math.random() * 255;
+        const finalVal = Math.max(0, Math.min(255, (lum * (1 - staticAmt) + snow * staticAmt) * scanline));
+
+        if (sepiaMode) {
+          d[i]     = Math.min(255, finalVal * 1.05);
+          d[i + 1] = Math.min(255, finalVal * 0.92);
+          d[i + 2] = Math.min(255, finalVal * 0.72);
+        } else {
+          d[i]     = finalVal;
+          d[i + 1] = finalVal;
+          d[i + 2] = finalVal;
+        }
+        d[i + 3] = 255;
+      }
+      cx.putImageData(img, 0, 0);
+      return;
+    } catch (_) {
+      // Si se abre en file:// sin servidor local y CORS bloquea getImageData, pasa al respaldo procedural
+    }
+  }
+
+  // Respaldo procedural si la imagen aún está cargando o sin servidor HTTP
+  const cx0 = w / 2, cy0 = h / 2;
+  const scale = Math.min(w, h) / 96;
+  const mid = spec.modelId || "est_enana";
+  const seed = spec.seed || 1.5;
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const dx = (x - cx0) / scale;
+      const dy = (y - cy0) / scale;
+      const dist = Math.hypot(dx, dy);
+      let lum = 10;
+
+      if (spec.anom) {
+        if (spec.anomType === "dyson") {
+          const ring1 = Math.abs(dist - 24) < 2.2 && Math.abs(dx) > 5;
+          const ring2 = Math.abs(Math.hypot(dx * 0.65, dy * 1.35) - 22) < 2.0;
+          if (dist < 11) lum = 245 - dist * 4;
+          else if (ring1 || ring2) lum = 215;
+        } else if (spec.anomType === "failed_planet") {
+          const split = (dx - dy * 0.45);
+          const offX = split > 1.5 ? 4.5 : (split < -1.5 ? -4.5 : 0);
+          const offY = split > 1.5 ? -2.5 : (split < -1.5 ? 2.5 : 0);
+          const dFrag = Math.hypot(dx - offX, dy - offY);
+          if (Math.abs(split) >= 1.8 && dFrag < 21) {
+            lum = 175 + Math.sin(dx * 0.6 + dy * 0.4) * 35;
+          } else if (Math.abs(split) < 1.8 && dist < 17) {
+            lum = 230 + Math.sin(t * 8 + dist) * 20;
+          }
+        } else if (spec.anomType === "dark_eyes") {
+          const headDist = Math.hypot(dx * 1.18, dy * 0.88);
+          const leftEye = Math.hypot(dx + 7.5, dy + 3.5);
+          const rightEye = Math.hypot(dx - 7.5, dy + 3.5);
+          if (headDist < 22) {
+            lum = 195 - headDist * 2.2;
+            if (leftEye < 4.3 || rightEye < 4.3) lum = 6;
+          }
+        } else {
+          if (dist < 18) lum = 180 + Math.sin(t * 10 + dist) * 40;
+        }
+      } else if (mid.startsWith("est_")) {
+        if (dist < 22) lum = 235 - dist * 2;
+        else if (dist < 42) lum = Math.max(14, 155 - (dist - 22) * 6);
+      } else if (mid.startsWith("pla_")) {
+        if (dist < 24) lum = 175 + Math.sin(dy * 0.75) * 40 - dx * 0.8;
+      } else if (mid.startsWith("ast_")) {
+        const ang = Math.atan2(dy, dx);
+        const rad = 22 + Math.sin(ang * 3 + seed) * 7;
+        if (dist < rad) lum = 185 + Math.sin(dx * 0.4) * 35;
+      } else if (mid.startsWith("sat_")) {
+        if ((Math.abs(dx) < 8 && Math.abs(dy) < 9) || (Math.abs(dx) <= 40 && Math.abs(dy) < 5)) lum = 215;
+      } else if (mid.startsWith("pul_")) {
+        const beam = Math.abs(dy - dx * Math.tan(t * 9)) < 2.4 && dist < 46;
+        if (dist < 12) lum = 245;
+        else if (beam) lum = 220;
+      }
+
+      const snow = Math.random() * 255;
+      const scanline = (y % 2 === 0) ? 0.90 : 1.0;
+      const finalVal = Math.max(0, Math.min(255, (lum * (1 - staticAmt) + snow * staticAmt) * scanline));
+
+      const idx = (y * w + x) * 4;
+      if (sepiaMode) {
+        d[idx] = Math.min(255, finalVal * 1.05);
+        d[idx + 1] = Math.min(255, finalVal * 0.92);
+        d[idx + 2] = Math.min(255, finalVal * 0.72);
+      } else {
+        d[idx] = finalVal;
+        d[idx + 1] = finalVal;
+        d[idx + 2] = finalVal;
+      }
+      d[idx + 3] = 255;
+    }
+  }
+  cx.putImageData(img, 0, 0);
+}
+
+function drawMap(t) {
+  const cv = $("#cv");
+  if (!cv) return;
+  const cx = cv.getContext("2d");
+  cx.fillStyle = "#03070d";
+  cx.fillRect(0, 0, 640, 310);
+
+  cx.strokeStyle = "rgba(52, 95, 68, 0.2)";
+  cx.lineWidth = 1;
+  const gx0 = -(cam.x % 80), gy0 = -(cam.y % 80);
+  for (let x = gx0; x < 640; x += 80) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, 310); cx.stroke(); }
+  for (let y = gy0; y < 310; y += 80) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(640, y); cx.stroke(); }
+
+  cx.fillStyle = "#d1fae5";
+  stars.forEach(([x, y, r]) => {
+    const sx = x - cam.x, sy = y - cam.y;
+    if (sx < 0 || sx > 640 || sy < 0 || sy > 310) return;
+    cx.globalAlpha = 0.3 + 0.35 * Math.sin(t * 1.4 + x);
+    cx.fillRect(sx, sy, r, r);
+  });
+  cx.globalAlpha = 1;
+
+  cx.save();
+  cx.translate(-cam.x, -cam.y);
+  sigs.forEach(s => {
+    if (s.st === "gone" || s.st === "raw") return;
+    const col = s.st === "echo" ? "96, 195, 255" : s.st === "align" ? "234, 179, 8" : "74, 222, 128";
+    const pulse = (t * 0.45 + s.seed) % 1;
+    cx.strokeStyle = `rgba(${col}, ${(1 - pulse) * 0.65})`;
+    cx.beginPath(); cx.arc(s.x, s.y, 7 + pulse * 26, 0, Math.PI * 2); cx.stroke();
+
+    cx.fillStyle = `rgb(${col})`;
+    cx.beginPath(); cx.arc(s.x, s.y, 4.5, 0, Math.PI * 2); cx.fill();
+
+    if (s.st === "align") {
+      cx.strokeStyle = "#eab308";
+      cx.lineWidth = 2.5;
+      cx.beginPath(); cx.arc(s.x, s.y, 16, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.align); cx.stroke();
+      cx.lineWidth = 1;
+    } else if (s.st === "dl") {
+      cx.strokeStyle = srv ? "#ef4444" : "#4ade80";
+      cx.lineWidth = 2.5;
+      cx.beginPath(); cx.arc(s.x, s.y, 16, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.prog); cx.stroke();
+      cx.lineWidth = 1;
+    }
+  });
+  cx.restore();
+
+  if (rd > 0) {
+    cx.globalAlpha = Math.min(1, rd / 2);
+    sigs.forEach(s => {
+      if (s.st !== "echo") return;
+      const sx = s.x - cam.x, sy = s.y - cam.y;
+      if (sx > 10 && sx < 630 && sy > 10 && sy < 300) return;
+      const a = Math.atan2(sy - 155, sx - 320);
+      const k = Math.min(295 / Math.abs(Math.cos(a) || 1e-5), 136 / Math.abs(Math.sin(a) || 1e-5));
+      cx.save();
+      cx.translate(320 + Math.cos(a)*k, 155 + Math.sin(a)*k);
+      cx.rotate(a);
+      cx.fillStyle = "#4ade80";
+      cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(-14, -6); cx.lineTo(-14, 6); cx.fill();
+      cx.restore();
+    });
+    cx.globalAlpha = 1;
+  }
+
+  const aligning = sigs.find(s => s.st === "align");
+  const targetAng = aligning ? Math.atan2(aligning.y - H/2, aligning.x - W/2) : -Math.PI/2;
+  cx.fillStyle = "rgba(8, 14, 11, 0.78)";
+  cx.fillRect(8, 268, 112, 34);
+  cx.strokeStyle = "#243d2b";
+  cx.strokeRect(8, 268, 112, 34);
+  for (let i = 0; i < 3; i++) {
+    const ax = 26 + i * 36, ay = 285;
+    cx.strokeStyle = "#4ade80";
+    cx.beginPath(); cx.arc(ax, ay, 8, 0, Math.PI * 2); cx.stroke();
+    const curA = aligning ? (targetAng - (1 - aligning.align) * 2.2) : targetAng;
+    cx.beginPath(); cx.moveTo(ax, ay); cx.lineTo(ax + Math.cos(curA)*10, ay + Math.sin(curA)*10); cx.stroke();
+  }
+}
+
+function drawCRT(t) {
+  if (isCrtBroken()) return;
+  const cv = $("#crt");
+  if (!cv || !cur) return;
+  const [rw, rh] = CRT_RES[Math.min(5, G.f)];
+  if (cv.width !== rw || cv.height !== rh) {
+    cv.width = rw;
+    cv.height = rh;
+  }
+  const tuneErr = cur.fixed ? 0 : Math.min(1, (offF(cur) + offP(cur)) * 0.75);
+  renderCelestialToCanvas(cv, cur, t, G.f, tuneErr, false);
+}
+
+function drawAtlasCanvases(t) {
+  document.querySelectorAll("[data-atlas-mid]").forEach(cv => {
+    const mid = cv.dataset.atlasMid;
+    const mod = MODELS.find(m => m.id === mid);
+    if (mod) {
+      renderCelestialToCanvas(cv, {modelId: mod.id, img: mod.img, seed: 2.1, anom: false}, t, 5, 0, false);
+    }
+  });
+  document.querySelectorAll("[data-anom-idx]").forEach(cv => {
+    const idx = +cv.dataset.anomIdx;
+    const item = discoveredAnomalies[idx];
+    if (item) {
+      renderCelestialToCanvas(cv, item, t, 5, 0, true);
+    }
+  });
+}
+
+function drawSpectrogram(t) {
+  const cv = $("#spec");
+  if (!cv || !cur) return;
+  const cx = cv.getContext("2d");
+  const w = cv.width, h = cv.height;
+  cx.fillStyle = "#030805";
+  cx.fillRect(0, 0, w, h);
+
+  cx.strokeStyle = "rgba(52, 95, 68, 0.25)";
+  for (let x = 0; x < w; x += 40) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, h); cx.stroke(); }
+  for (let y = 0; y < h; y += 30) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(w, y); cx.stroke(); }
+
+  const cat = cur.cat;
+  for (let x = 0; x < w; x += 3) {
+    const phase = x * 0.04 + t * 2.2;
+    if (cur.anom) {
+      for (let b = 0; b < 4; b++) {
+        const bend = Math.exp(-Math.pow((x - w/2)/65, 2)) * 38;
+        const y = 30 + b * 28 + bend + Math.sin(phase * 1.4 + b) * 4;
+        cx.fillStyle = "rgba(248, 113, 113, 0.88)";
+        cx.fillRect(x, y, 2, 5);
+      }
+    } else if (cat === 0) {
+      for (let b = 0; b < 3; b++) {
+        const y = 38 + b * 42 + Math.sin(phase * 0.7 + b) * 4;
+        cx.fillStyle = "rgba(74, 222, 128, 0.55)";
+        cx.fillRect(x, y - 6, 3, 12);
+      }
+    } else if (cat === 1) {
+      for (let b = 0; b < 4; b++) {
+        const y = 32 + b * 28 + Math.sin(phase + b) * 2;
+        cx.fillStyle = "rgba(74, 222, 128, 0.82)";
+        cx.fillRect(x, y, 3, 4);
+      }
+    } else if (cat === 4) {
+      if (((x + Math.floor(t * 45)) % 36) < 4) {
+        cx.fillStyle = "rgba(74, 222, 128, 0.9)";
+        cx.fillRect(x, 18, 3, h - 36);
+      }
+    } else if (cat === 3) {
+      const slot = Math.floor((x + t * 35) / 18);
+      if ((slot * 7 + Math.floor(cur.seed)) % 3 === 0) {
+        const top = 26 + (slot % 3) * 32;
+        cx.fillStyle = "rgba(74, 222, 128, 0.85)";
+        cx.fillRect(x, top, 3, 28);
+      }
+    } else if (cat === 2) {
+      const y = ((x * 0.6 + t * 40) % (h - 30)) + 15;
+      cx.fillStyle = "rgba(134, 239, 172, 0.65)";
+      cx.fillRect(x, y, 2, 9);
+    }
+  }
+}
+
+function loop(now) {
+  const dt = Math.min(0.1, (now - last) / 1000);
+  last = now;
+  tick(dt);
+  const t = now / 1000;
+  if (V === "map") drawMap(t);
+  if (V === "proc") drawCRT(t);
+  if (V === "spec") drawSpectrogram(t);
+  if (V === "atlas") drawAtlasCanvases(t);
+  requestAnimationFrame(loop);
+}
+
+function render() {
+  const w = $("#win"), tb = $("#tabs");
+  if (V === "intro" || V === "end") {
+    tb.innerHTML = "";
+  } else {
+    const un = mail.filter(m => !m.read).length;
+    const rawCount = sigs.filter(s => s.st === "raw").length;
+    const pkgCount = outbox.length;
+    const tabList = [
+      ["mail", `✉ Correo<span class="bd" id="bd-mail" style="display:${un ? "inline-block" : "none"}">${un || ""}</span>`],
+      ["map", "📡 Mapa Estelar"],
+      ["proc", `🎛 Procesador<span class="bd" id="bd-proc" style="display:${rawCount ? "inline-block" : "none"}">${rawCount || ""}</span>`],
+      ["plat", `📤 Plataforma<span class="bd" id="bd-plat" style="display:${pkgCount ? "inline-block" : "none"}">${pkgCount || ""}</span>`],
+      ["atlas", "📖 Atlas"]
+    ];
+    if (G.spec) tabList.push(["spec", "📊 Espectrograma"]);
+    tabList.push(["srv", `🖧 Servidor<span class="bd" id="bd-srv" style="display:${srv ? "inline-block" : "none"}">!</span>`]);
+    tabList.push(["shop", "🛠 Taller"]);
+
+    tb.innerHTML = tabList.map(([k, label]) =>
+      `<button class="tab ${V === k ? "on" : ""}" data-t="${k}">${label}</button>`
+    ).join("");
+    tb.querySelectorAll("[data-t]").forEach(b => b.onclick = () => {
+      beep(420, 0.05);
+      V = b.dataset.t;
+      if (V === "spec" && R) R.specUses++;
+      syncLiveTelemetry(false, true);
+      render();
+    });
+  }
+
+  let h = "";
+  if (V === "intro") {
+    h = `
+      <div class="card" style="padding:24px;text-align:center;margin-top:16px">
+        <div class="mut" style="font-size:12px;letter-spacing:2px">RED DE RADIOASTRONOMIA // SECTOR ERIAL-7</div>
+        <h1 style="margin:10px 0 6px;font-size:24px;color:var(--accent)">FRECUENCIA DE FONDO</h1>
+        <p class="mut" style="max-width:480px;margin:0 auto 18px">
+          Terminal de escucha profunda, catalogacion cientifica y vigilancia orbital · Campana de 15 Noches.
+        </p>
+        <div style="max-width:360px;margin:0 auto 12px;text-align:left">
+          <label for="playerName" style="display:block;font-size:12px;color:var(--accent);margin-bottom:5px">
+            NOMBRE DE OPERADOR:
+          </label>
+          <input type="text" id="playerName" placeholder="Ej. Alex Rivera" maxlength="32" value="${playerNameInput}" autocomplete="off">
+        </div>
+        <div style="max-width:360px;margin:0 auto 12px;text-align:left">
+          <label for="startNight" style="display:block;font-size:12px;color:var(--accent);margin-bottom:5px">
+            NOCHE INICIAL (SELECTOR DE ESCENARIO):
+          </label>
+          <select id="startNight">
+            ${Array.from({length: TOTAL_NIGHTS}, (_, idx) => {
+              let tag = "";
+              if (idx === 0) tag = " — Recarga rapida";
+              else if (idx === 2) tag = " — Pulsares activos";
+              else if (idx === 4) tag = " — Interferencia solar";
+              else if (idx === 5) tag = " — Recarga lenta";
+              else if (idx === 8) tag = " — Fallo optico CRT";
+              else if (idx === 9) tag = " — Subcategorias + Anomalias";
+              else if (idx === 10) tag = " — Recarga nula";
+              return `<option value="${idx}" ${selectedStartNight === idx ? "selected" : ""}>Noche ${idx + 1}${tag}</option>`;
+            }).join("")}
+          </select>
+        </div>
+        <div style="max-width:360px;margin:0 auto 18px;text-align:left">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#7dd3fc;cursor:pointer">
+            <input type="checkbox" id="freeModeChk" ${sandboxMode ? "checked" : ""}>
+            <span>Modo Libre (Atlas completo y mejoras al maximo)</span>
+          </label>
+        </div>
+        <div class="row" style="justify-content:center">
+          <button id="go">Encender sistema</button>
+          <button class="sandbox-btn" id="goSandbox">Iniciar en Modo Libre</button>
+        </div>
+      </div>`;
+  } else if (V === "mail") {
+    const sm = mail.find(m => m.id === selMail) || mail[0];
+    if (sm && !sm.read) { sm.read = 1; selMail = sm.id; }
+    const canEndShift = allNightAssignsClosed();
+    h = `
+      <div class="mail-layout">
+        <div class="mail-list">
+          ${mail.map(m => `<div class="mi ${m.read ? "" : "un"} ${m.kind === "anon_warn" || m.kind === "buyer" ? "anom-mail" : ""} ${sm && sm.id === m.id ? "sel" : ""}" data-m="${m.id}">
+            <div>${m.read ? "[LEIDO]" : "[NUEVO]"} ${m.subj}</div>
+          </div>`).join("")}
+        </div>
+        <div class="card" style="margin:0">
+          ${sm ? `
+            <div style="border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:8px">
+              <b>${sm.subj}</b>
+            </div>
+            <div class="mail-body">${sm.body}</div>
+          ` : `<span class="mut">Selecciona un mensaje</span>`}
+        </div>
+      </div>
+      <div class="card between">
+        <div>
+          <div style="font-size:12px" class="mut">TELEMETRIA DE SATELITE EN MEMORIA:</div>
+          <div style="font-size:12px">${savedSatLog ? savedSatLog : "[Ninguna captura guardada]"}</div>
+        </div>
+        <button id="sendSatMail" ${savedSatLog ? "" : "disabled"}>Enviar reporte de satelite (+$45 CR)</button>
+      </div>
+      <div class="card between">
+        <div>
+          <div style="font-size:12px" class="mut">CONTROL DE GUARDIA (${shiftLabel(shift)} / ${TOTAL_NIGHTS}):</div>
+          <div style="font-size:12px">${canEndShift ? "Los 3 encargos diarios han finalizado. Puedes cerrar la guardia o continuar enviando extras." : "Completa los 3 encargos diarios para cerrar la guardia anticipadamente."}</div>
+        </div>
+        <button class="alt" id="restBtn" ${canEndShift ? "" : "disabled"}>Finalizar guardia</button>
+      </div>
+      <div class="card">
+        <div class="mut" style="font-size:12px;margin-bottom:4px">BITACORA DE CAMPO DEL OPERADOR:</div>
+        <textarea id="notesBox" style="min-height:56px" placeholder="Anota frecuencias, firmas espectrales o notas de guardia...">${notes}</textarea>
+      </div>`;
+  } else if (V === "map") {
+    const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
+    h = `
+      ${srv ? `
+        <div class="srv-banner between">
+          <div>
+            <b>[!] FALLO DE SERVIDOR // ${srv.count} RELES DESINCRONIZADOS</b>
+            <div style="font-size:12px">La alineacion de antenas y la descarga de tramas estan detenidas hasta restablecer los reles.</div>
+          </div>
+          <button class="bad" id="goSrvFromMap">Reparar Servidor</button>
+        </div>
+      ` : ""}
+      <canvas id="cv" width="640" height="310"></canvas>
+      ${pendingOverrideSig ? `
+        <div class="card warnbox between">
+          <div>
+            <b>ANTENAS OCUPADAS // RASTREO EN CURSO (#${busySig ? busySig.id : ""})</b>
+            <div style="font-size:12px">Ya existe una busqueda activa. Si insistes, se borrara la investigacion en curso y comenzara con el eco #${pendingOverrideSig.id} (-8 PWR).</div>
+          </div>
+          <div class="row" style="margin:0">
+            <button class="warn" id="confirmOverrideBtn">Insistir y reemplazar</button>
+            <button class="alt" id="cancelOverrideBtn">Mantener actual</button>
+          </div>
+        </div>
+      ` : ""}
+      <div class="between" style="margin-top:8px">
+        <span class="mut" style="font-size:12px">${busySig ? `Antenas ocupadas rastreando senal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})...` : "Antenas libres (-8 PWR por fijacion de eco)."}</span>
+        <button class="alt" id="rd">Pulso Radar (-6 PWR)</button>
+      </div>`;
+  } else if (V === "proc") {
+    const ready = sigs.filter(s => s.st === "raw");
+    if (cur && !ready.includes(cur)) cur = null;
+    if (!cur && ready[0]) { cur = ready[0]; knobF = 50; knobP = 50; choiceCat = null; choiceMod = null; }
+    const brokenOptics = isCrtBroken();
+
+    h = `<div class="row">
+      <span class="mut" style="font-size:12px">BUFFER:</span>
+      ${ready.length ? ready.map(s => `<button class="${s === cur ? "" : "alt"}" data-s="${s.id}">TRAMA #${s.id}</button>`).join("") : `<span class="mut">Sin tramas descargadas</span>`}
+    </div>`;
+
+    if (cur) {
+      if (cur.isCorruptSignal) {
+        h += `
+          <div class="card dangerbox">
+            <b>ERROR DE TRAMA // SENAL CORRUPTA (#${cur.id})</b>
+            <p class="mut" style="margin:6px 0">La interferencia magnetica destruyo la integridad de esta captura. No es posible sintonizarla ni catalogarla.</p>
+            <button class="bad" id="dropBtn">Descartar trama danada y buscar otra</button>
+          </div>`;
+      } else {
+        const tuned = isTuned(cur);
+        const [rw, rh] = CRT_RES[Math.min(5, G.f)];
+        const pF = proxPct(knobF, cur.tgF);
+        const pP = proxPct(knobP, cur.tgP);
+        const colF = pF >= 88 ? "#4ade80" : pF >= 55 ? "#eab308" : "#ef4444";
+        const colP = pP >= 88 ? "#4ade80" : pP >= 55 ? "#eab308" : "#ef4444";
+
+        h += `
+          <div class="crt-wrap">
+            ${brokenOptics ? `
+              <div class="crt-offline">
+                <b style="font-size:15px;letter-spacing:1px">[ERROR DE VIDEO // MONITOR CRT FUERA DE LINEA]</b>
+                <p style="font-size:12px;margin:8px 0 0;max-width:340px">
+                  Fallo de instrumentacion de Noche 9: no es posible visualizar la imagen del objeto. Identificalo mediante audio y espectrograma.
+                </p>
+              </div>
+            ` : `
+              <canvas id="crt" width="${rw}" height="${rh}"></canvas>
+            `}
+            <div class="between" style="width:100%;max-width:420px;margin-top:6px;font-size:11px">
+              <span class="mut">${brokenOptics ? "VIDEO: SIN SENAL // AUDIO ACTIVO" : `CRT ${rw}x${rh}px // FILTRO NV.${G.f}/5`}</span>
+              <span class="mut">${cur.fixed ? "[CAPTURA FIJADA]" : "SENAL SIN FIJAR"}</span>
+            </div>
+          </div>
+          <div class="card">
+            <div>
+              <div class="row" style="margin-bottom:2px">
+                <span style="width:95px;font-size:12px">FRECUENCIA</span>
+                <input type="range" id="knF" min="0" max="100" value="${knobF}">
+                <span id="valF" style="width:32px;text-align:right">${knobF}</span>
+              </div>
+              <div class="prox-wrap">
+                <span class="mut" style="width:95px">PROXIMIDAD:</span>
+                <div class="prox-bar"><div class="prox-fill" id="barF" style="width:${pF}%;background:${colF}"></div></div>
+                <span id="txtF" style="width:82px;text-align:right;color:${colF}">${pF}%</span>
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <div class="row" style="margin-bottom:2px">
+                <span style="width:95px;font-size:12px">POLARIDAD</span>
+                <input type="range" id="knP" min="0" max="100" value="${knobP}">
+                <span id="valP" style="width:32px;text-align:right">${knobP}</span>
+              </div>
+              <div class="prox-wrap">
+                <span class="mut" style="width:95px">PROXIMIDAD:</span>
+                <div class="prox-bar"><div class="prox-fill" id="barP" style="width:${pP}%;background:${colP}"></div></div>
+                <span id="txtP" style="width:82px;text-align:right;color:${colP}">${pP}%</span>
+              </div>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <button class="alt" id="playAu">${activeVoice ? "Detener audio" : "Escuchar audio (-2 PWR)"}</button>
+              <button id="fixBtn" ${tuned && !cur.fixed ? "" : "disabled"}>Fijar captura</button>
+              <button class="bad" id="dropBtn">Descartar</button>
+            </div>
+          </div>`;
+
+        if (cur.fixed) {
+          const needSub = isSubcatEnabled();
+          const catModels = choiceCat !== null ? MODELS.filter(m => m.cat === choiceCat) : [];
+          const canQueue = choiceCat !== null && (!needSub || choiceMod !== null);
+
+          h += `<div class="card">
+            <div class="mut" style="font-size:12px;margin-bottom:6px">1. SELECCIONA CATEGORIA PRINCIPAL:</div>
+            <div class="grid">
+              ${CLASSES.map((c, i) => `<button class="${choiceCat === i ? "" : "alt"}" data-k="${i}">${c}</button>`).join("")}
+            </div>
+            ${needSub && choiceCat !== null ? `
+              <div class="mut" style="font-size:12px;margin:10px 0 6px">2. ESPECIFICA SUBCATEGORIA:</div>
+              <div class="grid">
+                ${catModels.map(m => `<button class="${choiceMod === m.id ? "" : "alt"}" data-mod="${m.id}">${m.name}</button>`).join("")}
+              </div>
+            ` : ""}
+            <div class="row" style="justify-content:flex-end;margin-top:10px">
+              <button id="queueBtn" ${canQueue ? "" : "disabled"}>Preparar paquete para Plataforma</button>
+            </div>
+          </div>`;
+        }
+      }
+    }
+  } else if (V === "plat") {
+    const selPkg = outbox.find(p => p.id === selPkgId) || outbox[0] || null;
+    if (selPkg) selPkgId = selPkg.id;
+    const nightAssigns = mail.filter(m => m.kind === "as" && m.night === shift);
+    const extrasMode = allNightAssignsClosed();
+
+    h = `
+      <div class="card">
+        <b>PLATAFORMA DE ENVIO INDEPENDIENTE</b>
+        <div class="mut" style="font-size:12px">Selecciona un paquete preparado y elige manualmente su destinatario.</div>
+        <div class="row" style="margin-top:8px">
+          ${outbox.length
+            ? outbox.map(p => {
+                const mod = MODELS.find(m => m.id === p.chosenMod);
+                const lbl = `PAQ #${p.sigId} · ${CLASSES[p.chosenCat]}${mod ? ` (${mod.name})` : ""}`;
+                return `<button class="${selPkg && selPkg.id === p.id ? "" : "alt"}" data-pkg="${p.id}">${lbl}</button>`;
+              }).join("")
+            : `<span class="mut">No hay paquetes preparados en cola. Procesa y fija una captura primero.</span>`}
+        </div>
+      </div>`;
+
+    if (selPkg) {
+      h += `
+        <div class="card">
+          <div class="mut" style="font-size:12px;margin-bottom:8px">DESTINATARIOS DISPONIBLES PARA PAQUETE #${selPkg.sigId}:</div>
+          ${nightAssigns.map((a, idx) => {
+            const mod = a.modelId ? MODELS.find(m => m.id === a.modelId) : null;
+            const reqTxt = `${CLASSES[a.cat]}${mod ? ` (${mod.name})` : ""}`;
+            return `<div class="between" style="padding:7px 0;border-bottom:1px solid #1b2e22">
+              <div>
+                <b>Encargo ${idx + 1}/3 · ${a.sciName}</b>
+                <div class="mut" style="font-size:12px">Solicita: ${reqTxt} · Pago: $${a.reward} CR</div>
+              </div>
+              <button data-send-as="${a.id}" ${a.done || a.failed ? "disabled" : ""}>
+                ${a.done ? "ENTREGADO" : a.failed ? "EXPIRADO" : "Enviar a encargo"}
+              </button>
+            </div>`;
+          }).join("")}
+
+          <div class="between" style="padding:9px 0;border-bottom:1px solid #1b2e22">
+            <div>
+              <b>Archivo Central (Envio Libre / Extra)</b>
+              <div class="mut" style="font-size:12px">
+                ${extrasMode
+                  ? "Asignaciones diarias completadas: tarifa extra -25% ($36 CR), Satelites conservan 100% ($60 CR)."
+                  : "Envio secundario fuera de asignacion (-25% = $36 CR; Satelites 100% = $60 CR)."}
+              </div>
+            </div>
+            <button class="alt" id="sendCentralBtn">Enviar a Central</button>
+          </div>
+
+          ${shadowBuyerUnlocked ? `
+            <div class="between" style="padding:9px 0">
+              <div>
+                <b style="color:#d8b4fe">Canal Cifrado // Intermediario Sombra</b>
+                <div class="mut" style="font-size:12px">Compra directa de lecturas anomalas fuera de la red oficial ($240 CR).</div>
+              </div>
+              <button class="shadow" id="sendShadowBtn">Transmitir por Canal Cifrado</button>
+            </div>
+          ` : ""}
+        </div>`;
+    }
+  } else if (V === "atlas") {
+    h = `
+      <div class="card">
+        <b>ATLAS DE CUERPOS CELESTES (${discoveredModels.size}/${MODELS.length} DESCUBIERTOS)</b>
+        <div class="atlas-grid">
+          ${MODELS.map(m => {
+            const unlocked = discoveredModels.has(m.id);
+            if (!unlocked) {
+              return `<div class="atlas-card locked">
+                <div style="font-size:11px" class="mut">${CLASSES[m.cat].toUpperCase()}</div>
+                <b>[NO DESCUBIERTO]</b>
+                <div class="mut" style="font-size:11px">Verifica esta senal en Central para desbloquear su registro visual y sonoro.</div>
+              </div>`;
+            }
+            return `<div class="atlas-card">
+              <div class="between">
+                <span style="font-size:11px;color:var(--accent)">${CLASSES[m.cat].toUpperCase()}</span>
+                <button class="alt" style="padding:2px 7px;font-size:11px" data-atlas-au="${m.id}">🔊 Audio</button>
+              </div>
+              <b>${m.name}</b>
+              <canvas class="atlas-cv" width="96" height="58" data-atlas-mid="${m.id}"></canvas>
+              <div class="mut" style="font-size:11px">${m.desc}</div>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+
+    if (discoveredAnomalies.length > 0) {
+      h += `
+        <div class="paper-sheet">
+          <h3>REGISTRO EN PAPEL // ANOMALIAS (${discoveredAnomalies.length}/${ANOMALY_DEFS.length})</h3>
+          <div class="paper-grid">
+            ${discoveredAnomalies.map((a, idx) => `
+              <div class="paper-entry">
+                <div class="between">
+                  <b>${a.anomTitle}</b>
+                  <button class="paper-btn" data-anom-au="${idx}">🔊 Audio</button>
+                </div>
+                <canvas class="paper-cv" width="96" height="58" data-anom-idx="${idx}"></canvas>
+                <div class="paper-bin">${a.textData}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>`;
+    }
+  } else if (V === "spec") {
+    const ready = sigs.filter(s => s.st === "raw");
+    if (cur && !ready.includes(cur)) cur = null;
+    if (!cur && ready[0]) { cur = ready[0]; knobF = 50; knobP = 50; choiceCat = null; choiceMod = null; }
+
+    h = `<div class="row">
+      <span class="mut" style="font-size:12px">ANALISIS ESPECTRAL:</span>
+      ${ready.length ? ready.map(s => `<button class="${s === cur ? "" : "alt"}" data-s="${s.id}">TRAMA #${s.id}</button>`).join("") : `<span class="mut">Sin tramas en buffer</span>`}
+    </div>`;
+
+    if (cur) {
+      h += `
+        <canvas id="spec" width="640" height="190"></canvas>
+        <div class="card">
+          <div class="between">
+            <b>SUBPORTADORA // TRAMA #${cur.id}</b>
+            ${cur.cat === 3 && !cur.anom ? `<button id="saveSatBtn">Guardar datos de satelite</button>` : ""}
+          </div>
+          <div class="databox ${cur.anom ? "anom" : ""}">${cur.textData}</div>
+        </div>`;
+    }
+  } else if (V === "srv") {
+    h = srv ? `
+      <div class="card">
+        <b>ENLACE DE RELES INTERRUMPIDO (${srv.count} MODULOS)</b>
+        <p class="mut">Activa los ${srv.count} reles en el orden correcto de sincronizacion (avance: ${srv.step}/${srv.count}).</p>
+        <div class="grid">
+          ${Array.from({length: srv.count}, (_, i) => {
+            const on = srv.latched[i];
+            return `<button class="${on ? "" : "alt"}" data-b="${i}">RELE 0${i + 1}</button>`;
+          }).join("")}
+        </div>
+      </div>` : `<div class="card"><b>SERVIDOR EN LINEA</b><p class="mut">Sin incidencias.</p></div>`;
+  } else if (V === "shop") {
+    const upgrades = [
+      ["a", "Servomotores de Antena", "Acelera el giro de antenas y la descarga.", 5, 85 + 55 * G.a],
+      ["f", "Filtro CRT Optico", "Aumenta la resolucion del CRT y reduce la estatica.", 5, 80 + 50 * G.f],
+      ["b", "Banco de Baterias", "Aumenta la capacidad maxima de PWR (+20 por nivel).", 5, 75 + 45 * G.b],
+      ["spec", "Modulo Espectrograma", "Habilita Espectrograma y lectura de subportadoras.", 5, 65 + 40 * G.spec]
+    ];
+    h = upgrades.map(([k, name, desc, maxLv, cost]) => {
+      const lv = G[k];
+      return `<div class="card between">
+        <div>
+          <b>${name}</b> <span class="mut">[NV ${lv}/${maxLv}]</span>
+          <div class="mut" style="font-size:12px">${desc}</div>
+        </div>
+        <button data-u="${k}" ${lv >= maxLv || G.money < cost ? "disabled" : ""}>${lv >= maxLv ? "MAXIMO" : `$${cost} CR`}</button>
+      </div>`;
+    }).join("") + `
+    <div class="card between">
+      <div>
+        <b>Celda de Energia Auxiliar (+45 PWR)</b>
+        <div class="mut" style="font-size:12px">Suministro de emergencia para guardias de baja o nula recarga.</div>
+      </div>
+      <button id="buyCellBtn" ${G.money < 30 || en >= cap ? "disabled" : ""}>$30 CR</button>
+    </div>`;
+  } else if (V === "end") {
+    if (gameOverReason === "ARREST") {
+      h = `
+        <div class="card dangerbox" style="padding:22px">
+          <div style="font-size:12px;color:#fca5a5;letter-spacing:1.5px">INTERVENCION GUBERNAMENTAL // DIVISION DEL ESPACIO DE NACIONES UNIDAS</div>
+          <h2 style="margin:8px 0;color:#f87171">ESTACION ERIAL-7 CLAUSURADA</h2>
+          <p>
+            Al transmitir una senal anomala a traves de la red oficial, los filtros de seguridad de la <b>Division del Espacio de Naciones Unidas</b> rastrearon el origen hasta tu terminal.
+          </p>
+          <p class="mut">
+            Fuerzas de contencion orbital han clausurado la estacion Erial-7 y has sido puesto bajo arresto preventivo para investigacion.
+          </p>
+          <div class="row" style="margin-top:16px">
+            <button id="rsBtn">Iniciar nueva partida</button>
+          </div>
+        </div>`;
+    } else {
+      h = `
+        <div class="card" style="padding:22px">
+          <div style="font-size:12px;color:var(--accent);letter-spacing:1.5px">CAMPANA COMPLETADA // 15 NOCHES</div>
+          <h2 style="margin:8px 0;color:var(--accent)">GUARDIA FINALIZADA · OP. ${S.playerName.toUpperCase()}</h2>
+          <p>
+            Has completado las 15 noches de vigilancia en la Estacion Erial-7.
+          </p>
+          <div class="row">
+            <span class="pill">Creditos finales: $${G.money} CR</span>
+            <span class="pill">Modelos en Atlas: ${discoveredModels.size}/${MODELS.length}</span>
+            <span class="pill">Anomalias registradas: ${discoveredAnomalies.length}/${ANOMALY_DEFS.length}</span>
+          </div>
+          <div class="row" style="margin-top:16px">
+            <button id="rsBtn">Iniciar nueva partida</button>
+          </div>
+        </div>`;
+    }
+  }
+
+  w.innerHTML = h;
+  bindEvents(w);
+}
+
+function bindEvents(w) {
+  const on = (sel, fn) => { const el = w.querySelector(sel); if (el) el.onclick = fn; };
+
+  const pn = w.querySelector("#playerName");
+  const sn = w.querySelector("#startNight");
+  const fm = w.querySelector("#freeModeChk");
+  if (pn) {
+    pn.oninput = e => { playerNameInput = e.target.value; };
+    pn.onkeydown = e => {
+      if (e.key === "Enter") {
+        beep(520, 0.1);
+        start(pn.value, sn ? sn.value : selectedStartNight, fm ? fm.checked : sandboxMode);
+      }
+    };
+    setTimeout(() => pn.focus(), 30);
+  }
+  if (sn) {
+    sn.onchange = e => { selectedStartNight = +e.target.value; };
+  }
+  if (fm) {
+    fm.onchange = e => { sandboxMode = !!e.target.checked; };
+  }
+
+  on("#go", () => {
+    const val = w.querySelector("#playerName")?.value || playerNameInput;
+    const nightVal = sn ? sn.value : selectedStartNight;
+    const freeVal = fm ? fm.checked : sandboxMode;
+    beep(520, 0.1);
+    start(val, nightVal, freeVal);
+  });
+
+  on("#goSandbox", () => {
+    const val = (w.querySelector("#playerName")?.value || playerNameInput).trim() || "Operador Test";
+    const nightVal = sn ? sn.value : selectedStartNight;
+    beep(620, 0.1);
+    start(val, nightVal, true);
+  });
+
+  on("#goSrvFromMap", () => {
+    beep(420, 0.05);
+    V = "srv";
+    render();
+  });
+
+  w.querySelectorAll("[data-m]").forEach(el => el.onclick = () => {
+    markFirst();
+    const m = mail.find(x => x.id === el.dataset.m);
+    if (m) { m.read = 1; selMail = m.id; beep(380, 0.04); render(); }
+  });
+
+  const nb = w.querySelector("#notesBox");
+  if (nb) nb.oninput = e => { notes = e.target.value; syncLiveTelemetry(false, false); };
+
+  on("#sendSatMail", () => {
+    if (!savedSatLog) return;
+    markFirst();
+    const log = savedSatLog;
+    savedSatLog = null;
+    satReportsSent++;
+    if (R) R.satReports++;
+    G.money += 45;
+    beep(640, 0.1);
+    addMail(
+      "RE: REPORTE DE TELEMETRIA SATELITAL [RECIBIDO]",
+      `Registro orbital archivado:
+${log}
+
+Bonificacion acreditada: +$45 CR.`
+    );
+    msg("[OK] Reporte satelital enviado (+$45 CR)", 1);
+    syncLiveTelemetry(false, true);
+    updTop();
+    render();
+  });
+
+  on("#restBtn", () => {
+    if (!allNightAssignsClosed()) return;
+    beep(480, 0.1);
+    advanceNight(false);
+  });
+
+  const cv = $("#cv");
+  if (cv) {
+    cv.onpointerdown = e => {
+      moved = 0;
+      drag = {x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y};
+      try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    };
+    cv.onpointermove = e => {
+      if (!drag) return;
+      const r = cv.getBoundingClientRect();
+      const dx = (e.clientX - drag.x) * 640 / r.width;
+      const dy = (e.clientY - drag.y) * 310 / r.height;
+      if (Math.hypot(dx, dy) > 6) moved = 1;
+      if (moved) {
+        cam.x = Math.max(0, Math.min(W - 640, drag.cx - dx));
+        cam.y = Math.max(0, Math.min(H - 310, drag.cy - dy));
+      }
+    };
+    cv.onpointerup = cv.onpointercancel = () => { drag = null; };
+    cv.onclick = e => {
+      if (moved) return;
+      markFirst();
+      const r = cv.getBoundingClientRect();
+      const x = (e.clientX - r.left) * 640 / r.width + cam.x;
+      const y = (e.clientY - r.top) * 310 / r.height + cam.y;
+      const hit = sigs.find(s => (s.st === "echo" || s.st === "align" || s.st === "dl") && Math.hypot(s.x - x, s.y - y) < 32);
+      if (!hit) { if (R) R.invalid++; syncLiveTelemetry(false, false); return; }
+
+      if (hit.st === "echo") {
+        const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
+        if (busySig) {
+          if (pendingOverrideSig && pendingOverrideSig.id === hit.id) {
+            if (en < 8) { beep(180, 0.15, "sawtooth"); return msg("[ERR] Energia insuficiente (8 PWR)", 0); }
+            busySig.st = "gone";
+            pendingOverrideSig = null;
+            en -= 8;
+            hit.st = "align";
+            ensureSectorDiversity();
+            beep(340, 0.12, "triangle");
+            msg(`[OK] Busqueda anterior cancelada // Rastreando #${hit.id}`, 1);
+            updTop();
+            render();
+            return;
+          }
+          pendingOverrideSig = hit;
+          beep(220, 0.1, "sawtooth");
+          msg(`[AVISO] Antenas ocupadas con #${busySig.id}. Insiste para cancelar y cambiar.`, 0);
+          render();
+          return;
+        }
+
+        if (en < 8) { if (R) R.invalid++; beep(180, 0.15, "sawtooth"); return msg("[ERR] Energia insuficiente (8 PWR)", 0); }
+        en -= 8;
+        hit.st = "align";
+        pendingOverrideSig = null;
+        beep(320, 0.12, "triangle");
+        syncLiveTelemetry(false, true);
+        updTop();
+        render();
+      }
+    };
+  }
+
+  on("#confirmOverrideBtn", () => {
+    if (!pendingOverrideSig) return;
+    const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
+    if (en < 8) { beep(180, 0.15, "sawtooth"); return msg("[ERR] Energia insuficiente (8 PWR)", 0); }
+    if (busySig) busySig.st = "gone";
+    en -= 8;
+    pendingOverrideSig.st = "align";
+    const newId = pendingOverrideSig.id;
+    pendingOverrideSig = null;
+    ensureSectorDiversity();
+    beep(340, 0.12, "triangle");
+    msg(`[OK] Investigacion reemplazada // Rastreando #${newId}`, 1);
+    updTop();
+    render();
+  });
+
+  on("#cancelOverrideBtn", () => {
+    pendingOverrideSig = null;
+    render();
+  });
+
+  on("#rd", () => {
+    markFirst();
+    if (rd > 0) return;
+    if (en < 6) { if (R) R.invalid++; return msg("[ERR] Energia insuficiente (6 PWR)", 0); }
+    en -= 6; rd = 7;
+    beep(580, 0.12);
+    updTop();
+  });
+
+  w.querySelectorAll("[data-s]").forEach(el => el.onclick = () => {
+    cur = sigs.find(s => s.id === +el.dataset.s) || null;
+    knobF = 50;
+    knobP = 50;
+    choiceCat = null;
+    choiceMod = null;
+    stopVoice();
+    render();
+  });
+
+  const knF = $("#knF"), knP = $("#knP");
+  if (knF) knF.oninput = e => {
+    knobF = +e.target.value;
+    const vf = $("#valF");
+    if (vf) vf.textContent = knobF;
+    if (R) R.retunes++;
+    if (cur) {
+      const pF = proxPct(knobF, cur.tgF);
+      const colF = pF >= 88 ? "#4ade80" : pF >= 55 ? "#eab308" : "#ef4444";
+      const bf = $("#barF"), tf = $("#txtF");
+      if (bf) { bf.style.width = `${pF}%`; bf.style.background = colF; }
+      if (tf) { tf.textContent = `${pF}%`; tf.style.color = colF; }
+      const fb = $("#fixBtn");
+      if (fb) fb.disabled = !(isTuned(cur) && !cur.fixed);
+    }
+  };
+  if (knP) knP.oninput = e => {
+    knobP = +e.target.value;
+    const vp = $("#valP");
+    if (vp) vp.textContent = knobP;
+    if (R) R.retunes++;
+    if (cur) {
+      const pP = proxPct(knobP, cur.tgP);
+      const colP = pP >= 88 ? "#4ade80" : pP >= 55 ? "#eab308" : "#ef4444";
+      const bp = $("#barP"), tp = $("#txtP");
+      if (bp) { bp.style.width = `${pP}%`; bp.style.background = colP; }
+      if (tp) { tp.textContent = `${pP}%`; tp.style.color = colP; }
+      const fb = $("#fixBtn");
+      if (fb) fb.disabled = !(isTuned(cur) && !cur.fixed);
+    }
+  };
+
+  on("#playAu", () => {
+    if (!cur) return;
+    if (activeVoice) { stopVoice(); render(); return; }
+    if (en < 2) { if (R) R.invalid++; return msg("[ERR] Energia insuficiente (2 PWR)", 0); }
+    en -= 2;
+    if (R) R.repeats++;
+    playSignalAudio(cur);
+    syncLiveTelemetry(false, false);
+    updTop();
+    render();
+  });
+
+  on("#fixBtn", () => {
+    if (!cur || !isTuned(cur)) return;
+    cur.fixed = true;
+    beep(620, 0.08);
+
+    if (cur.anom) {
+      if (!discoveredAnomalies.some(a => a.anomType === cur.anomType)) {
+        discoveredAnomalies.push({
+          anomType: cur.anomType,
+          anomTitle: cur.anomTitle,
+          modelId: cur.modelId,
+          img: cur.img,
+          seed: cur.seed,
+          anom: true,
+          textData: cur.textData
+        });
+      }
+      onFirstAnomalyDiscovered();
+    }
+
+    syncLiveTelemetry(false, true);
+    render();
+  });
+
+  on("#dropBtn", () => {
+    if (!cur) return;
+    stopVoice();
+    cur.st = "gone";
+    cur = null;
+    knobF = 50;
+    knobP = 50;
+    choiceCat = null;
+    choiceMod = null;
+    ensureSectorDiversity();
+    msg("Trama descartada", 1);
+    render();
+  });
+
+  w.querySelectorAll("[data-k]").forEach(el => el.onclick = () => {
+    choiceCat = +el.dataset.k;
+    choiceMod = null;
+    beep(440, 0.04);
+    render();
+  });
+
+  w.querySelectorAll("[data-mod]").forEach(el => el.onclick = () => {
+    choiceMod = el.dataset.mod;
+    beep(490, 0.04);
+    render();
+  });
+
+  on("#queueBtn", () => {
+    if (!cur || choiceCat === null) return;
+    if (isSubcatEnabled() && choiceMod === null) return;
+    stopVoice();
+    const pkgId = uid();
+    outbox.push({
+      id: pkgId,
+      sigId: cur.id,
+      trueCat: cur.cat,
+      trueMod: cur.modelId,
+      anom: cur.anom,
+      anomTitle: cur.anomTitle,
+      chosenCat: choiceCat,
+      chosenMod: choiceMod
+    });
+    selPkgId = pkgId;
+    cur.st = "gone";
+    cur = null;
+    knobF = 50;
+    knobP = 50;
+    choiceCat = null;
+    choiceMod = null;
+    ensureSectorDiversity();
+    beep(560, 0.1);
+    msg("[OK] Paquete enviado a Plataforma de Envio", 1);
+    V = "plat";
+    render();
+  });
+
+  w.querySelectorAll("[data-pkg]").forEach(el => el.onclick = () => {
+    selPkgId = el.dataset.pkg;
+    render();
+  });
+
+  w.querySelectorAll("[data-send-as]").forEach(el => el.onclick = () => {
+    const pkgIdx = outbox.findIndex(p => p.id === selPkgId);
+    if (pkgIdx < 0) return;
+    const pkg = outbox.splice(pkgIdx, 1)[0];
+    selPkgId = outbox[0]?.id || null;
+    beep(540, 0.1);
+    msg("[OK] Paquete despachado a asignacion", 1);
+    pendingEvals.push({
+      at: performance.now() + 1800,
+      pkg,
+      targetType: "assign",
+      assignId: el.dataset.sendAs
+    });
+    render();
+  });
+
+  on("#sendCentralBtn", () => {
+    const pkgIdx = outbox.findIndex(p => p.id === selPkgId);
+    if (pkgIdx < 0) return;
+    const pkg = outbox.splice(pkgIdx, 1)[0];
+    selPkgId = outbox[0]?.id || null;
+    beep(540, 0.1);
+    msg("[OK] Paquete despachado a Archivo Central", 1);
+    pendingEvals.push({
+      at: performance.now() + 1800,
+      pkg,
+      targetType: "central"
+    });
+    render();
+  });
+
+  on("#sendShadowBtn", () => {
+    const pkgIdx = outbox.findIndex(p => p.id === selPkgId);
+    if (pkgIdx < 0) return;
+    const pkg = outbox.splice(pkgIdx, 1)[0];
+    selPkgId = outbox[0]?.id || null;
+    beep(620, 0.12);
+    msg("[OK] Paquete enviado por Canal Cifrado", 1);
+    pendingEvals.push({
+      at: performance.now() + 1800,
+      pkg,
+      targetType: "shadow"
+    });
+    render();
+  });
+
+  w.querySelectorAll("[data-atlas-au]").forEach(el => el.onclick = () => {
+    playSignalAudio({modelId: el.dataset.atlasAu, anom: false});
+  });
+
+  w.querySelectorAll("[data-anom-au]").forEach(el => el.onclick = () => {
+    const item = discoveredAnomalies[+el.dataset.anomAu];
+    if (item) playSignalAudio(item);
+  });
+
+  on("#saveSatBtn", () => {
+    if (!cur || cur.cat !== 3 || cur.anom) return;
+    savedSatLog = cur.textData;
+    beep(600, 0.08);
+    msg("[OK] Telemetria satelital guardada", 1);
+  });
+
+  w.querySelectorAll("[data-b]").forEach(el => el.onclick = () => {
+    if (!srv) return;
+    const idx = +el.dataset.b;
+    if (srv.latched[idx]) return;
+    const expected = srv.seq[srv.step];
+    if (idx === expected) {
+      srv.latched[idx] = true;
+      srv.step++;
+      en = Math.max(0, en - 1);
+      beep(440 + srv.step * 90, 0.09);
+      if (srv.step >= srv.seq.length) {
+        if (R) R.fix += +((performance.now() - srv.t) / 1000).toFixed(1);
+        srv = null;
+        msg("[OK] Servidor restablecido", 1);
+        syncLiveTelemetry(false, true);
+      }
+      render();
+    } else {
+      srv.step = 0;
+      srv.latched = Array(srv.count).fill(false);
+      beep(150, 0.16, "sawtooth");
+      msg("[ERR] Secuencia de reles reiniciada", 0);
+      render();
+    }
+  });
+
+  w.querySelectorAll("[data-u]").forEach(el => el.onclick = () => {
+    const k = el.dataset.u;
+    if (G[k] >= 5) return;
+    const costs = {
+      a: 85 + 55 * G.a,
+      f: 80 + 50 * G.f,
+      b: 75 + 45 * G.b,
+      spec: 65 + 40 * G.spec
+    };
+    const cost = costs[k];
+    if (G.money < cost) return;
+    G.money -= cost;
+    G[k]++;
+    if (k === "b") { cap = 100 + 20 * G.b; en = Math.min(cap, en + 20); }
+    beep(660, 0.1);
+    msg(`[OK] Mejora instalada (NV ${G[k]}/5)`, 1);
+    syncLiveTelemetry(false, true);
+    updTop();
+    render();
+  });
+
+  on("#buyCellBtn", () => {
+    if (G.money < 30 || en >= cap) return;
+    G.money -= 30;
+    en = Math.min(cap, en + 45);
+    beep(680, 0.1);
+    msg("[OK] Celda auxiliar conectada (+45 PWR)", 1);
+    updTop();
+    render();
+  });
+
+  on("#rsBtn", () => { V = "intro"; updTop(); render(); });
+}
+
+render();
+updTop();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
