@@ -388,6 +388,8 @@ const $ = s => document.querySelector(s);
 const CLASSES = ["Estrella", "Planeta", "Asteroide", "Satelite", "Pulsar"];
 const TOTAL_NIGHTS = 15;
 const EXTRA_SIGNALS_PER_NIGHT = 10;
+const MAX_NIGHT_SIGNALS_AFTER_CATALOG = 13;
+const MAX_MEMORY_SIGNALS = 5;
 const ECHO_LOCK_COST = 4;
 const W = 2600, H = 1650;
 const stars = Array.from({length: 720}, () => [Math.random()*W, Math.random()*H, Math.random()*1.6 + 0.5]);
@@ -670,6 +672,7 @@ let shift = 0; // 0 = Noche 1 ... 14 = Noche 15
 let nightAssignments = [];
 let nightAssignPool = [];
 let nightExtraSpawned = 0;
+let nightTotalSpawned = 0;
 let usedPlanetModelsThisNight = new Set();
 let isTransitioningNight = false;
 let nextMailChimeAt = 0;
@@ -1098,6 +1101,39 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId
   };
 }
 
+function getStoredMemoryCount() {
+  return sigs.filter(s => s.st === "raw").length + outbox.length;
+}
+
+function getReservedMemoryCount() {
+  return getStoredMemoryCount() + sigs.filter(s => s.st === "align" || s.st === "dl").length;
+}
+
+function getUncatalogedNightAssignments() {
+  const nightAsgs = nightAssignments.filter(a => a.night === shift && !a.done && !a.failed);
+  const availableOutbox = [...outbox];
+  const uncataloged = [];
+
+  for (const asg of nightAsgs) {
+    const matchIdx = availableOutbox.findIndex(p =>
+      !p.anom &&
+      p.trueCat === asg.cat &&
+      p.chosenCat === asg.cat &&
+      (!asg.modelId || (p.trueMod === asg.modelId && p.chosenMod === asg.modelId))
+    );
+    if (matchIdx >= 0) {
+      availableOutbox.splice(matchIdx, 1);
+    } else {
+      uncataloged.push(asg);
+    }
+  }
+  return uncataloged;
+}
+
+function areNightAssignmentsCataloged() {
+  return getUncatalogedNightAssignments().length === 0;
+}
+
 function ensureSectorDiversity() {
   if (!isPulsarEnabled()) {
     sigs.forEach(s => { if (s.cat === 4 && s.st === "echo") s.st = "gone"; });
@@ -1109,32 +1145,44 @@ function ensureSectorDiversity() {
   const inSector = () => sigs.filter(s => s.st === "echo" || s.st === "align" || s.st === "dl");
   const heldOrQueued = sigs.filter(s => s.st === "raw");
 
-  // 1. Asegurar las 3 señales de asignación de la noche (ratio aumentado y presencia garantizada si aún no están entregadas ni en buffer)
-  for (const target of nightAssignPool) {
-    const asg = nightAssignments.find(a => a.id === target.assignId);
-    if (!asg || asg.done || asg.failed) continue;
-    const alreadyPresent = [...inSector(), ...heldOrQueued].some(s =>
-      !s.anom && !s.isCorruptSignal && s.cat === target.cat && (!target.modelId || s.modelId === target.modelId)
-    ) || outbox.some(p =>
-      !p.anom && p.trueCat === target.cat && (!target.modelId || p.trueMod === target.modelId)
-    );
+  // 1. Garantizar que toda asignación aún no catalogada (ni entregada) tenga su señal disponible en mapa o procesador
+  const uncatalogedAsgs = getUncatalogedNightAssignments();
+  const availableSignals = [...inSector(), ...heldOrQueued];
 
-    if (!alreadyPresent && inSector().length < 5) {
-      sigs.push(makeSignal(target.cat, false, null, target.modelId, target.assignId));
+  for (const asg of uncatalogedAsgs) {
+    const matchIdx = availableSignals.findIndex(s =>
+      !s.anom &&
+      !s.isCorruptSignal &&
+      s.cat === asg.cat &&
+      (!asg.modelId || s.modelId === asg.modelId)
+    );
+    if (matchIdx >= 0) {
+      availableSignals.splice(matchIdx, 1);
+    } else {
+      // Si el radar ya tiene 5 ecos, liberar un eco extra inactivo para dar prioridad a la señal de asignación
+      if (inSector().length >= 5) {
+        const idleExtra = sigs.find(s => s.st === "echo" && !s.assignRefId);
+        if (idleExtra) idleExtra.st = "gone";
+      }
+      const spawnMod = asg.spawnModelId || asg.modelId || null;
+      const newSig = makeSignal(asg.cat, false, null, spawnMod, asg.id);
+      sigs.push(newSig);
+      nightTotalSpawned++;
     }
   }
 
-  // 2. Completar con hasta 10 señales adicionales por noche; al alcanzar las 10 dejan de aparecer nuevas señales
+  // 2. Completar ecos en sector:
+  // Mientras las señales de las asignaciones no hayan sido catalogadas, se pueden seguir generando señales.
+  // Una vez catalogadas (aún sin enviar en Plataforma), aplica el límite total de 13 señales por noche.
   const allowedCats = isPulsarEnabled() ? [0, 1, 2, 3, 4] : [0, 1, 2, 3];
-  while (inSector().length < 5 && nightExtraSpawned < EXTRA_SIGNALS_PER_NIGHT) {
+  while (inSector().length < 5 && (!areNightAssignmentsCataloged() || nightTotalSpawned < MAX_NIGHT_SIGNALS_AFTER_CATALOG)) {
     const curSector = inSector();
     const missingCats = allowedCats.filter(c => !curSector.some(s => s.cat === c && !s.anom));
     let chosenCat;
     if (missingCats.length > 0) {
       chosenCat = missingCats[Math.floor(Math.random() * missingCats.length)];
     } else {
-      // Ligeramente mayor peso a categorías solicitadas en asignaciones activas
-      const activeCats = activeAssigns().map(a => a.cat);
+      const activeCats = getUncatalogedNightAssignments().map(a => a.cat);
       const weightedPool = [...allowedCats, ...activeCats];
       chosenCat = weightedPool[Math.floor(Math.random() * weightedPool.length)];
     }
@@ -1142,6 +1190,7 @@ function ensureSectorDiversity() {
     const forceAnom = isAnomEnabled() && !curSector.some(s => s.anom) && nightExtraSpawned === 2 ? true : null;
     sigs.push(makeSignal(chosenCat, forceAnom, null, null, null));
     nightExtraSpawned++;
+    nightTotalSpawned++;
   }
 }
 
@@ -1149,6 +1198,7 @@ function initShift() {
   pendingOverrideSig = null;
   usedPlanetModelsThisNight = new Set();
   nightExtraSpawned = 0;
+  nightTotalSpawned = 0;
   nightAssignPool = [];
   sigs = sigs.filter(s => s.st === "raw"); // Conservar únicamente tramas ya descargadas en buffer
 
@@ -1314,7 +1364,7 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
   }
 
   sigs = []; cam = {x: 750, y: 480}; mail = []; selMail = null;
-  nightAssignments = []; nightAssignPool = []; nightExtraSpawned = 0; usedPlanetModelsThisNight = new Set(); isTransitioningNight = false;
+  nightAssignments = []; nightAssignPool = []; nightExtraSpawned = 0; nightTotalSpawned = 0; usedPlanetModelsThisNight = new Set(); isTransitioningNight = false;
   shift = clampedNight; srv = null; crashes = 0; cur = null; rd = 0;
   knobF = 50; knobP = 50; choiceCat = null; choiceMod = null;
   outbox = []; selPkgId = null; pendingOverrideSig = null;
@@ -1433,6 +1483,7 @@ function updTop() {
     <span class="pill ${shift >= 8 ? "night" : ""}">${shiftLabel(shift)}/${TOTAL_NIGHTS}</span>
     <span class="pill ${pwrClass}">PWR ${Math.round(en)}/${cap}${pwrTag}</span>
     <span class="pill">CR $${G.money}</span>
+    <span class="pill ${getStoredMemoryCount() >= MAX_MEMORY_SIGNALS ? "slowrech" : ""}">MEM ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}</span>
     <span class="pill">ENCARGOS: ${3 - remAssigns}/3</span>
     <button class="alt" id="muteBtn" style="padding:3px 8px;font-size:11px">${muted ? "SONIDO: OFF" : "SONIDO: ON"}</button>
     <button class="logout-btn" id="logoutShiftBtn" ${canLogout ? "" : "disabled"}>Cerrar sesión</button>
@@ -1590,8 +1641,9 @@ function evaluatePlatformDispatch(ev) {
         `Pago emitido: $0 CR.`,
         {sender: asg.sciName, tag: `N${shift + 1} · ERR`}
       );
+      ensureSectorDiversity();
       syncLiveTelemetry(false, true);
-      if (V === "mail") render();
+      if (V === "mail" || V === "map") render();
       else updBadges();
       return;
     }
@@ -2566,11 +2618,13 @@ function render() {
         ` : ""}
         <div class="map-hud-bar">
           <span class="mut">${
-            busySig
-              ? `Antenas ocupadas rastreando senal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})...`
-              : sigs.filter(s => s.st === "echo").length === 0 && nightExtraSpawned >= EXTRA_SIGNALS_PER_NIGHT
-                ? "No quedan mas senales en el sector durante esta noche."
-                : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco).`
+            getReservedMemoryCount() >= MAX_MEMORY_SIGNALS && !busySig
+              ? `Memoria llena (${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}): envia en Plataforma o descarta en Procesador.`
+              : busySig
+                ? `Antenas ocupadas rastreando senal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}]`
+                : sigs.filter(s => s.st === "echo").length === 0 && areNightAssignmentsCataloged() && nightTotalSpawned >= MAX_NIGHT_SIGNALS_AFTER_CATALOG
+                  ? "No quedan mas senales en el sector durante esta noche."
+                  : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco) · Memoria: ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}.`
           }</span>
           <button class="alt" id="rd">Pulso Radar (-6 PWR)</button>
         </div>
@@ -2582,7 +2636,7 @@ function render() {
 
     h = `<div class="proc-shell">
       <div class="proc-buffer-bar">
-        <span class="mut" style="font-size:12px">BUFFER:</span>
+        <span class="mut" style="font-size:12px">MEMORIA (${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}) · BUFFER:</span>
         ${ready.length ? ready.map(s => `<button class="${s === cur ? "" : "alt"}" data-s="${s.id}">TRAMA #${s.id}</button>`).join("") : `<span class="mut">Sin tramas descargadas</span>`}
       </div>`;
 
@@ -2684,7 +2738,10 @@ function render() {
 
     h = `
       <div class="card">
-        <b>PLATAFORMA DE ENVIO INDEPENDIENTE</b>
+        <div class="between">
+          <b>PLATAFORMA DE ENVIO INDEPENDIENTE</b>
+          <span class="mut" style="font-size:12px">MEMORIA: ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS} (Cola: ${outbox.length} · Procesador: ${sigs.filter(s => s.st === "raw").length})</span>
+        </div>
         <div class="mut" style="font-size:12px">Selecciona un paquete preparado y elige manualmente su destinatario.</div>
         <div class="row" style="margin-top:8px">
           ${outbox.length
@@ -3065,6 +3122,11 @@ function bindEvents(w) {
           return;
         }
 
+        if (getReservedMemoryCount() >= MAX_MEMORY_SIGNALS) {
+          if (R) R.invalid++;
+          beep(180, 0.15, "sawtooth");
+          return msg(`[ERR] Memoria llena (${MAX_MEMORY_SIGNALS}/${MAX_MEMORY_SIGNALS}) // Envia o descarta senales antes de capturar mas`, 0);
+        }
         if (en < ECHO_LOCK_COST) { if (R) R.invalid++; beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
         en -= ECHO_LOCK_COST;
         hit.st = "align";
@@ -3196,6 +3258,7 @@ function bindEvents(w) {
     choiceMod = null;
     ensureSectorDiversity();
     msg("Trama descartada", 1);
+    updTop();
     render();
   });
 
@@ -3238,6 +3301,7 @@ function bindEvents(w) {
     beep(560, 0.1);
     msg("[OK] Paquete enviado a Plataforma de Envio", 1);
     V = "plat";
+    updTop();
     render();
   });
 
@@ -3259,6 +3323,7 @@ function bindEvents(w) {
       targetType: "assign",
       assignId: el.dataset.sendAs
     });
+    updTop();
     render();
   });
 
@@ -3274,6 +3339,7 @@ function bindEvents(w) {
       pkg,
       targetType: "central"
     });
+    updTop();
     render();
   });
 
@@ -3289,6 +3355,7 @@ function bindEvents(w) {
       pkg,
       targetType: "shadow"
     });
+    updTop();
     render();
   });
 
