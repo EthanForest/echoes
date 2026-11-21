@@ -220,16 +220,27 @@ const VOYAGER_BINARY = VOYAGER_GREETINGS_TEXT
   .map(ch => ch.charCodeAt(0).toString(2).padStart(8, "0"))
   .join(" ");
 
+const SIN_IMAGEN_BINARY = "00101110 00101110 00101110 00101110 00101110 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 00100011 00100000 01000001 01010110 01001111 01001001 01000100 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 00100011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01100110 01101111 01101111 01100100 00100000 01000001 01010110 01001111 01001001 00100011 00100000 00100011 00100011 01001001 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 00100011 00100000 01000011 00100011 01010011 01010100 01010011 00100011 01000001 00100011 01001111 00100011 00100011 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100011 01000001 00100011 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100011 01000001 01010110 01001111 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01000001 01010110 00100011 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100000 01100110 01101111 01101111 01100100 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01000001 01010110 00100011 01001001 01000100 00100000 01010100 01001000 01001001 01010011 00100011 01001111 01000010 01001010 01000101 01000011 01010100 00100011 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 00100011 01010011 01010100 01010011 00100011 01000001 01010110 01001111 01001001 01000100 00100000 01100011 01101111 01101101 01100101 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 00100011 00100011 00100000 01000011 01001111 00101110 00101110 00101110 00101110 00101110";
+
 // Definición de las 13 anomalías del sector vinculadas a Signals/ (activas desde Noche 10)
 const ANOMALY_DEFS = [
   {
     type: "voyager",
     title: "Voyager 1",
-    img: "Signals/space_probe.png",
+    img: "Signals/voyager_i.png",
     cat: 3,
     freq: 164,
     wave: "triangle",
     textData: VOYAGER_BINARY
+  },
+  {
+    type: "earth_echo",
+    title: "Tierra",
+    img: "Signals/earth_anomaly.png",
+    cat: 1,
+    freq: 118,
+    wave: "sine",
+    textData: "... ¿Hola?"
   },
   {
     type: "dyson",
@@ -238,106 +249,97 @@ const ANOMALY_DEFS = [
     cat: 0,
     freq: 92,
     wave: "sawtooth",
-    textData: "MEGAESTRUCTURA // ECLIPSE ARTIFICIAL 94% // ORIGEN DESCONOCIDO"
-  },
-  {
-    type: "failed_planet",
-    title: "Planeta Fallido",
-    img: "Signals/noimage_anomaly.png",
-    cat: 1,
-    freq: 68,
-    wave: "sawtooth",
-    textData: "MASA SUB-ESTELAR FRACTURADA // NUCLEO EXPUESTO // SIN ORBITA"
-  },
-  {
-    type: "dark_eyes",
-    title: "???",
-    img: "Signals/iris_anomaly.png",
-    cat: 4,
-    freq: 54,
-    wave: "triangle",
-    textData: "01001111 01001010 01001111 01010011 // NOS OBSERVA DESDE EL VACIO"
-  },
-  {
-    type: "astronaut",
-    title: "Traje a la Deriva",
-    img: "Signals/astronaut_anomaly.png",
-    cat: 3,
-    freq: 158,
-    wave: "triangle",
-    textData: "BIOMETRIA NULA // PORTADORA DE TRAJE EVA // SIN REGISTRO DE MISION"
-  },
-  {
-    type: "cyst",
-    title: "Quiste Orbital",
-    img: "Signals/cyst_anomaly.png",
-    cat: 2,
-    freq: 96,
-    wave: "sawtooth",
-    textData: "MASA ORGANICA DENSA // PULSO LENTO 0.4 HZ // ENVOLTURA CALCAREA"
-  },
-  {
-    type: "earth_echo",
-    title: "Eco Terrestre",
-    img: "Signals/earth_anomaly.png",
-    cat: 1,
-    freq: 118,
-    wave: "sine",
-    textData: "ESPECTRO DE OXIGENO-NITROGENO // COORDENADAS INVERTIDAS // REFLEJO"
-  },
-  {
-    type: "flock",
-    title: "Enjambre Sideral",
-    img: "Signals/flock_anomaly.png",
-    cat: 2,
-    freq: 266,
-    wave: "triangle",
-    textData: "MULTIPLES VECTORES SINCRONIZADOS // TRAYECTORIA NO BALISTICA"
-  },
-  {
-    type: "macula",
-    title: "Macula Sombria",
-    img: "Signals/macula_anomaly.png",
-    cat: 0,
-    freq: 81,
-    wave: "sawtooth",
-    textData: "ABSORCION LUMINICA TOTAL // VACIO FOTONICO EN NUCLEO ESTELAR"
-  },
-  {
-    type: "moon_anomaly",
-    title: "Satelite Hueco",
-    img: "Signals/moon_anomaly.png",
-    cat: 1,
-    freq: 95,
-    wave: "square",
-    textData: "RESONANCIA DE CAVIDAD INTERNA // DENSIDAD ANOMALA EN CORTEZA"
+    textData: "..."
   },
   {
     type: "spaceship",
-    title: "Casco Derelict",
+    title: "Nave Espacial",
     img: "Signals/spaceship_anomaly.png",
     cat: 3,
     freq: 194,
     wave: "sawtooth",
-    textData: "GEOMETRIA NO HUMANA // REACTOR EN REPOSO CRIOGENICO"
+    textData: "¿Quién está ahí?"
   },
   {
-    type: "virgo_dragon",
-    title: "Filamento de Virgo",
-    img: "Signals/virgo_dragon_anomaly.png",
+    type: "dark_eyes",
+    title: "The Iris",
+    img: "Signals/iris_anomaly.png",
     cat: 4,
-    freq: 128,
+    freq: 54,
     wave: "triangle",
-    textData: "ESTRUCTURA SERPENTINA DE PLASMA // EMISION SINCROTRON COHERENTE"
+    textData: "Nos observa..."
   },
   {
     type: "vitreous",
-    title: "Cuerpo Vitreo",
+    title: "Vitreous",
     img: "Signals/vitreous_anomaly.png",
     cat: 2,
     freq: 215,
     wave: "sine",
-    textData: "REFRACCION CRISTALINA PURA // SIN FIRMA QUIMICA CONVENCIONAL"
+    textData: "..."
+  },
+  {
+    type: "macula",
+    title: "Macula",
+    img: "Signals/macula_anomaly.png",
+    cat: 0,
+    freq: 81,
+    wave: "sawtooth",
+    textData: "..."
+  },
+  {
+    type: "cyst",
+    title: "Cyst",
+    img: "Signals/cyst_anomaly.png",
+    cat: 2,
+    freq: 96,
+    wave: "sawtooth",
+    textData: "..."
+  },
+  {
+    type: "moon_anomaly",
+    title: "¿Luna?",
+    img: "Signals/moon_anomaly.png",
+    cat: 1,
+    freq: 95,
+    wave: "square",
+    textData: "¿Qué pasó aquí?"
+  },
+  {
+    type: "astronaut",
+    title: "Astronauta",
+    img: "Signals/astronaut_anomaly.png",
+    cat: 3,
+    freq: 158,
+    wave: "triangle",
+    textData: "0...1....6...5...Está muy caliente aqui"
+  },
+  {
+    type: "failed_planet",
+    title: "Sin Imagen",
+    img: "Signals/noimage_anomaly.png",
+    cat: 1,
+    freq: 68,
+    wave: "sawtooth",
+    textData: SIN_IMAGEN_BINARY
+  },
+  {
+    type: "flock",
+    title: "Flock",
+    img: "Signals/flock_anomaly.png",
+    cat: 2,
+    freq: 266,
+    wave: "triangle",
+    textData: "..."
+  },
+  {
+    type: "virgo_dragon",
+    title: "Virgo Red Dragon",
+    img: "Signals/virgo_dragon_anomaly.png",
+    cat: 4,
+    freq: 128,
+    wave: "triangle",
+    textData: "..."
   }
 ];
 
@@ -1351,39 +1353,57 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
     try {
       const srcData = offCx.getImageData(0, 0, w, h).data;
       for (let y = 0; y < h; y++) {
-        const scanline = (y % 2 === 0) ? 0.90 : 1.0;
+        const scanline = (y % 2 === 0) ? 0.86 : 1.0;
         for (let x = 0; x < w; x++) {
           const idx = (y * w + x) * 4;
           const alpha = srcData[idx + 3] / 255;
-          const rawLum = (srcData[idx] * 0.299 + srcData[idx + 1] * 0.587 + srcData[idx + 2] * 0.114) * alpha;
-          const lum = Math.max(8, rawLum);
+          const r0 = srcData[idx] * alpha;
+          const g0 = srcData[idx + 1] * alpha;
+          const b0 = srcData[idx + 2] * alpha;
           const snow = Math.random() * 255;
-          const finalVal = Math.max(0, Math.min(255, (lum * (1 - staticAmt) + snow * staticAmt) * scanline));
+
+          let r = (r0 * (1 - staticAmt) + snow * staticAmt) * scanline;
+          let g = (g0 * (1 - staticAmt) + snow * staticAmt) * scanline;
+          let b = (b0 * (1 - staticAmt) + snow * staticAmt) * scanline;
 
           if (sepiaMode) {
-            d[idx] = Math.min(255, finalVal * 1.05);
-            d[idx + 1] = Math.min(255, finalVal * 0.92);
-            d[idx + 2] = Math.min(255, finalVal * 0.72);
-          } else {
-            d[idx] = finalVal;
-            d[idx + 1] = finalVal;
-            d[idx + 2] = finalVal;
+            r *= 1.04;
+            g *= 0.99;
+            b *= 0.90;
           }
+
+          d[idx] = Math.max(0, Math.min(255, r));
+          d[idx + 1] = Math.max(0, Math.min(255, g));
+          d[idx + 2] = Math.max(0, Math.min(255, b));
           d[idx + 3] = 255;
         }
       }
       cx.putImageData(img, 0, 0);
       return;
     } catch (_) {
-      // Fallback directo si se abre via file:// sin servidor local
+      // Fallback a color con filtro CRT si se abre via file:// sin servidor local
       cx.imageSmoothingEnabled = false;
       cx.fillStyle = sepiaMode ? "#1e1912" : "#000000";
       cx.fillRect(0, 0, w, h);
       cx.save();
-      cx.filter = sepiaMode ? "grayscale(100%) sepia(55%)" : "grayscale(100%)";
-      cx.globalAlpha = Math.max(0.15, 1 - staticAmt * 0.85);
+      cx.globalAlpha = Math.max(0.18, 1 - staticAmt * 0.85);
       cx.drawImage(sprite, ox, oy, dw, dh);
       cx.restore();
+      // Scanlines CRT y estatica sobre el fallback a color
+      cx.fillStyle = "rgba(0, 0, 0, 0.18)";
+      for (let y = 0; y < h; y += 2) {
+        cx.fillRect(0, y, w, 1);
+      }
+      if (staticAmt > 0.04) {
+        const specks = Math.floor(w * h * staticAmt * 0.35);
+        for (let i = 0; i < specks; i++) {
+          const sx = Math.floor(Math.random() * w);
+          const sy = Math.floor(Math.random() * h);
+          const v = Math.floor(Math.random() * 255);
+          cx.fillStyle = `rgba(${v},${v},${v},0.45)`;
+          cx.fillRect(sx, sy, 1, 1);
+        }
+      }
       return;
     }
   }
