@@ -34,9 +34,8 @@ main{max-width:860px;margin:0 auto}
 .pill{background:#122019;border:1px solid var(--border);padding:2px 7px;border-radius:4px}
 .pill.night{border-color:#991b1b;color:#fca5a5;background:#1f0d0d}
 .pill.lowtime{border-color:#ca8a04;color:#fde047}
-.pill.slowrech{border-color:#a16207;color:#fef08a;background:#1c1705}
+.pill.slowrech{border-color:#ca8a04;color:#fde047;background:#221b08}
 .pill.norech{border-color:#b45309;color:#fdba74;background:#231307}
-.pill.sandbox{border-color:#0284c7;color:#7dd3fc;background:#081c29}
 #tabs{display:flex;overflow-x:auto;background:#080e0b;border-bottom:1px solid var(--border)}
 .tab{
   flex:none;background:transparent;color:var(--mut);border:0;border-right:1px solid var(--border);
@@ -57,8 +56,6 @@ button.bad{background:#7f1d1d;border-color:#b91c1c;color:#fef2f2}
 button.warn{background:#78350f;border-color:#d97706;color:#fef3c7}
 button.shadow{background:#231438;border-color:#7e22ce;color:#f3e8ff}
 button.shadow:hover:not(:disabled){background:#321c52}
-button.sandbox-btn{background:#0c4a6e;border-color:#0284c7;color:#e0f2fe}
-button.sandbox-btn:hover:not(:disabled){background:#075985}
 button:disabled{opacity:.35;cursor:not-allowed}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
 .between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
@@ -67,7 +64,6 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .card.warnbox{border-color:#d97706;background:#1f1609}
 .card.dangerbox{border-color:#b91c1c;background:#220b0b}
 .card.shadowbox{border-color:#7e22ce;background:#160d24}
-.card.sandboxbox{border-color:#0284c7;background:#0a1924}
 .mut{color:var(--mut)}
 .mail-layout{display:grid;grid-template-columns:1fr;gap:10px}
 @media(min-width:660px){.mail-layout{grid-template-columns:265px 1fr}}
@@ -80,21 +76,12 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .mail-body{white-space:pre-line;font-size:13px;line-height:1.55}
 #cv{width:100%;height:310px;border:1px solid var(--border);border-radius:6px;background:#03060a;display:block;touch-action:none;cursor:grab}
 #cv:active{cursor:grabbing}
-.srv-banner{
-  background:#2a0909;border:2px solid #ef4444;border-radius:6px;padding:10px 12px;
-  margin-bottom:8px;color:#fecaca;animation:srvPulse 1.4s infinite alternate;
-}
-@keyframes srvPulse{from{border-color:#991b1b;background:#220808}to{border-color:#ef4444;background:#350c0c}}
 .crt-wrap{
   background:#040404;border:2px solid #2b382e;border-radius:6px;padding:8px;
   display:flex;flex-direction:column;align-items:center;position:relative;
 }
+.crt-wrap.opt-fail{border-color:#991b1b;background:#110505}
 #crt{width:100%;max-width:420px;height:240px;image-rendering:pixelated;background:#0a0a0a;border:1px solid #222;display:block}
-.crt-offline{
-  width:100%;max-width:420px;height:240px;background:#080505;border:1px solid #7f1d1d;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:16px;color:#fca5a5;
-}
 #spec{width:100%;height:190px;background:#040806;border:1px solid var(--border);border-radius:6px;display:block}
 .databox{
   background:#070c09;border:1px solid var(--border);border-radius:5px;padding:9px;
@@ -102,12 +89,18 @@ button:disabled{opacity:.35;cursor:not-allowed}
 }
 .databox.anom{border-color:#991b1b;color:#fca5a5;background:#140808}
 input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer}
-input[type=text], select{
-  width:100%;background:#070d0a;color:var(--fg);
+input[type=text]{
+  width:100%;max-width:340px;background:#070d0a;color:var(--fg);
   border:1px solid #348a57;border-radius:5px;padding:9px 12px;font:14px inherit;
   outline:none;
 }
-input[type=text]:focus, select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(74,222,128,.2)}
+input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(74,222,128,.2)}
+select{
+  width:100%;max-width:340px;background:#070d0a;color:var(--fg);
+  border:1px solid #348a57;border-radius:5px;padding:9px 12px;font:13px inherit;
+  outline:none;cursor:pointer;
+}
+select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(74,222,128,.2)}
 textarea{
   width:100%;min-height:85px;background:#070d0a;color:var(--fg);
   border:1px solid var(--border);border-radius:5px;padding:8px;font:12px inherit;
@@ -183,170 +176,175 @@ const SHIFT_DURATION = 600; // 10 minutos por noche
 const W = 1400, H = 900;
 const stars = Array.from({length: 340}, () => [Math.random()*W, Math.random()*H, Math.random()*1.5 + 0.4]);
 
-// Catálogo completo adaptado a los sprites de la carpeta Signals/
+// Catálogo de 28 modelos normales vinculados a Signals/
 const MODELS = [
-  // 0: Estrella
-  {id:"est_enana", cat:0, name:"Enana Amarilla", img:"Signals/yellow_dwarf.png", freq:210, wave:"sine", desc:"Secuencia principal estable de espectro solar."},
-  {id:"est_enana_roja", cat:0, name:"Enana Roja", img:"Signals/red_dwarf.png", freq:190, wave:"sine", desc:"Emision tenue de baja temperatura y larga vida."},
-  {id:"est_gigante", cat:0, name:"Gigante Roja", img:"Signals/red_giant.png", freq:175, wave:"sine", desc:"3 bandas anchas de baja frecuencia y corona extensa."},
-  {id:"est_binaria", cat:0, name:"Estrella Binaria", img:"Signals/binary_star.png", freq:255, wave:"triangle", desc:"Doble pico orbital con modulacion en 3 bandas."},
-  {id:"est_trinaria", cat:0, name:"Sistema Trinario", img:"Signals/trinary_star.png", freq:295, wave:"triangle", desc:"Tres focos gravitacionales sincronizados."},
-  // 1: Planeta / Luna / Enano
-  {id:"pla_venus", cat:1, name:"Venus", img:"Signals/venus.png", freq:104, wave:"sine", desc:"Atmosfera densa de alta reflectividad termica."},
-  {id:"pla_marte", cat:1, name:"Marte", img:"Signals/mars.png", freq:110, wave:"sine", desc:"Planeta rocoso con casquetes polares y oxido."},
-  {id:"pla_jupiter", cat:1, name:"Jupiter", img:"Signals/jupiter.png", freq:132, wave:"sine", desc:"Gigante gaseoso con franjas atmosfericas densas."},
-  {id:"pla_saturno", cat:1, name:"Saturno", img:"Signals/saturn.png", freq:148, wave:"triangle", desc:"Sistema de anillos de alta densidad orbital."},
-  {id:"pla_urano", cat:1, name:"Urano", img:"Signals/uranus.png", freq:138, wave:"sine", desc:"Gigante helado de inclinacion axial extrema."},
-  {id:"pla_neptuno", cat:1, name:"Neptuno", img:"Signals/neptune.png", freq:142, wave:"sine", desc:"Vientos supersonicos en atmosfera profunda."},
-  {id:"pla_exoplaneta", cat:1, name:"Exoplaneta", img:"Signals/exoplanet.png", freq:124, wave:"sine", desc:"Mundo extrasolar detectado en transito."},
-  {id:"pla_luna", cat:1, name:"Luna", img:"Signals/moon.png", freq:92, wave:"sine", desc:"Satelite natural rocoso de baja gravedad."},
-  {id:"pla_io", cat:1, name:"Io", img:"Signals/io.png", freq:98, wave:"triangle", desc:"Satelite volcanico con flujo magnetico intenso."},
-  {id:"pla_europa", cat:1, name:"Europa", img:"Signals/europa.png", freq:101, wave:"sine", desc:"Corteza helada con oceano subsuperficial."},
-  {id:"pla_ceres", cat:1, name:"Ceres", img:"Signals/ceres.png", freq:88, wave:"sine", desc:"Planeta enano del cinturon principal."},
-  {id:"pla_pluton", cat:1, name:"Pluton", img:"Signals/pluto.png", freq:84, wave:"sine", desc:"Cuerpo transneptuniano helado."},
-  {id:"pla_makemake", cat:1, name:"Makemake", img:"Signals/makemake.png", freq:86, wave:"sine", desc:"Planeta enano del cinturon de Kuiper."},
-  // 2: Asteroide / Cometa
-  {id:"ast_metalico", cat:2, name:"Asteroide Metalico", img:"Signals/metallic_asteroid.png", freq:320, wave:"triangle", desc:"Trazas diagonales definidas de alta reflectividad."},
-  {id:"ast_condrita", cat:2, name:"Condrita Carbonacea", img:"Signals/chondrite_asteroid.png", freq:285, wave:"sine", desc:"Trazas diagonales suaves con deriva constante."},
-  {id:"ast_cometa", cat:2, name:"Cometa de Nucleo Activo", img:"Signals/comet.png", freq:355, wave:"sawtooth", desc:"Trazas diagonales alargadas por estela volatil."},
-  // 3: Satelite
-  {id:"sat_com", cat:3, name:"Satelite de Comunicaciones", img:"Signals/comms_satellite.png", freq:760, wave:"sawtooth", desc:"Columnas de bloques digitales + subportadora TLM."},
-  {id:"sat_sonda", cat:3, name:"Sonda Orbital", img:"Signals/space_probe.png", freq:810, wave:"sawtooth", desc:"Paquetes telemetricos espaciados + subportadora."},
-  {id:"sat_telescopio", cat:3, name:"Telescopio Espacial", img:"Signals/space_telescope.png", freq:720, wave:"square", desc:"Bloques regulares de observacion profunda."},
-  {id:"sat_estacion", cat:3, name:"Estacion Modular", img:"Signals/station.png", freq:850, wave:"sawtooth", desc:"Tramas continuas de alta densidad telemetrica."},
-  // 4: Pulsar (aparece a partir de Noche 3 -> shift >= 2)
-  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", freq:480, wave:"square", desc:"Columnas verticales periodicas de cadencia rapida."},
-  {id:"pul_magnetar", cat:4, name:"Magnetar", img:"Signals/magnetar.png", freq:430, wave:"square", desc:"Pulsos verticales de altisima intensidad magnetica."},
-  {id:"pul_binario", cat:4, name:"Pulsar Binario", img:"Signals/binary_pulsar.png", freq:515, wave:"square", desc:"Doble tren de pulsos verticales con deriva de fase."}
+  // 0: Estrella (5 modelos)
+  {id:"est_enana", cat:0, name:"Enana Amarilla", img:"Signals/yellow_dwarf.png", freq:210, wave:"sine", pattern:"band3", desc:"Estrella de secuencia principal con 3 bandas horizontales anchas y estables."},
+  {id:"est_enana_roja", cat:0, name:"Enana Roja", img:"Signals/red_dwarf.png", freq:188, wave:"sine", pattern:"band3", desc:"Emision termica tenue de baja masa y larga vida orbital."},
+  {id:"est_gigante", cat:0, name:"Gigante Roja", img:"Signals/red_giant.png", freq:175, wave:"sine", pattern:"band3", desc:"3 bandas anchas de baja frecuencia y corona extensa."},
+  {id:"est_binaria", cat:0, name:"Estrella Binaria", img:"Signals/binary_star.png", freq:255, wave:"triangle", pattern:"band3", desc:"Doble pico orbital con modulacion en 3 bandas."},
+  {id:"est_trinaria", cat:0, name:"Sistema Trinario", img:"Signals/trinary_star.png", freq:295, wave:"triangle", pattern:"band3", desc:"Tres focos gravitacionales sincronizados."},
+  // 1: Planeta y Lunas/Enanos (13 modelos)
+  {id:"pla_venus", cat:1, name:"Venus", img:"Signals/venus.png", freq:106, wave:"sine", pattern:"band4", desc:"Planeta rocoso con cobertura nubosa densa de alto albedo."},
+  {id:"pla_marte", cat:1, name:"Marte", img:"Signals/mars.png", freq:112, wave:"sine", pattern:"band4", desc:"Planeta rocoso con casquetes polares y superficie ferrosa."},
+  {id:"pla_jupiter", cat:1, name:"Jupiter", img:"Signals/jupiter.png", freq:132, wave:"sine", pattern:"band4", desc:"Gigante gaseoso con franjas atmosfericas densas."},
+  {id:"pla_saturno", cat:1, name:"Saturno", img:"Signals/saturn.png", freq:148, wave:"triangle", pattern:"band4", desc:"Gigante gaseoso con sistema de anillos de alta densidad."},
+  {id:"pla_urano", cat:1, name:"Urano", img:"Signals/uranus.png", freq:138, wave:"sine", pattern:"band4", desc:"Gigante helado con eje de rotacion fuertemente inclinado."},
+  {id:"pla_neptuno", cat:1, name:"Neptuno", img:"Signals/neptune.png", freq:144, wave:"sine", pattern:"band4", desc:"Gigante helado profundo con vientos supersonicos."},
+  {id:"pla_exoplaneta", cat:1, name:"Exoplaneta", img:"Signals/exoplanet.png", freq:124, wave:"sine", pattern:"band4", desc:"Mundo extrasolar detectado por transito espectral."},
+  {id:"pla_luna", cat:1, name:"Luna", img:"Signals/moon.png", freq:94, wave:"sine", pattern:"band4", desc:"Satelite natural rocoso marcado por cuencas de impacto."},
+  {id:"pla_io", cat:1, name:"Io", img:"Signals/io.png", freq:98, wave:"triangle", pattern:"band4", desc:"Satelite volcanico activo con flujo de plasma orbital."},
+  {id:"pla_europa", cat:1, name:"Europa", img:"Signals/europa.png", freq:102, wave:"sine", pattern:"band4", desc:"Corteza de hielo fracturada sobre oceano subsuperficial."},
+  {id:"pla_ceres", cat:1, name:"Ceres", img:"Signals/ceres.png", freq:88, wave:"sine", pattern:"band4", desc:"Planeta enano del cinturon principal de asteroides."},
+  {id:"pla_pluton", cat:1, name:"Pluton", img:"Signals/pluto.png", freq:84, wave:"sine", pattern:"band4", desc:"Planeta enano helado del cinturon de Kuiper."},
+  {id:"pla_makemake", cat:1, name:"Makemake", img:"Signals/makemake.png", freq:86, wave:"sine", pattern:"band4", desc:"Cuerpo transneptuniano brillante de superficie metanica."},
+  // 2: Asteroide (3 modelos)
+  {id:"ast_metalico", cat:2, name:"Asteroide Metalico", img:"Signals/metallic_asteroid.png", freq:320, wave:"triangle", pattern:"diag", desc:"Trazas diagonales definidas de alta reflectividad."},
+  {id:"ast_condrita", cat:2, name:"Condrita Carbonacea", img:"Signals/chondrite_asteroid.png", freq:285, wave:"sine", pattern:"diag", desc:"Trazas diagonales suaves con deriva constante."},
+  {id:"ast_cometa", cat:2, name:"Cometa de Nucleo Activo", img:"Signals/comet.png", freq:355, wave:"sawtooth", pattern:"diag", desc:"Trazas diagonales alargadas por estela volatil."},
+  // 3: Satelite (4 modelos)
+  {id:"sat_com", cat:3, name:"Satelite de Comunicaciones", img:"Signals/comms_satellite.png", freq:760, wave:"sawtooth", pattern:"blocks", desc:"Columnas de bloques digitales + subportadora TLM."},
+  {id:"sat_sonda", cat:3, name:"Sonda Orbital", img:"Signals/space_probe.png", freq:810, wave:"sawtooth", pattern:"blocks", desc:"Paquetes telemetricos espaciados + subportadora."},
+  {id:"sat_telescopio", cat:3, name:"Telescopio Espacial", img:"Signals/space_telescope.png", freq:720, wave:"square", pattern:"blocks", desc:"Bloques regulares de observacion profunda."},
+  {id:"sat_estacion", cat:3, name:"Estacion Modular", img:"Signals/station.png", freq:850, wave:"sawtooth", pattern:"blocks", desc:"Tramas continuas de alta densidad telemetrica."},
+  // 4: Pulsar (3 modelos, aparece a partir de Noche 3 -> shift >= 2)
+  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", freq:480, wave:"square", pattern:"pulses", desc:"Columnas verticales periodicas de cadencia rapida."},
+  {id:"pul_magnetar", cat:4, name:"Magnetar", img:"Signals/magnetar.png", freq:430, wave:"square", pattern:"pulses", desc:"Pulsos verticales de altisima intensidad magnetica."},
+  {id:"pul_binario", cat:4, name:"Pulsar Binario", img:"Signals/binary_pulsar.png", freq:515, wave:"square", pattern:"pulses", desc:"Doble tren de pulsos verticales con deriva de fase."}
 ];
 
-// Catálogo completo de las 12 anomalías de Signals/ (aparecen desde Noche 10 -> shift >= 9)
+// Saludos en diferentes idiomas codificados únicamente en binario ASCII de 8 bits
+const VOYAGER_GREETINGS_TEXT = "HELLO | HOLA | BONJOUR | NI HAO | PRIVET | KONNICHIWA";
+const VOYAGER_BINARY = VOYAGER_GREETINGS_TEXT
+  .split("")
+  .map(ch => ch.charCodeAt(0).toString(2).padStart(8, "0"))
+  .join(" ");
+
+// Definición de las 13 anomalías del sector vinculadas a Signals/ (activas desde Noche 10)
 const ANOMALY_DEFS = [
   {
-    anomType: "dyson",
+    type: "voyager",
+    title: "Voyager 1",
+    img: "Signals/space_probe.png",
+    cat: 3,
+    freq: 164,
+    wave: "triangle",
+    textData: VOYAGER_BINARY
+  },
+  {
+    type: "dyson",
     title: "Esfera de Dyson",
     img: "Signals/dyson_anomaly.png",
     cat: 0,
+    freq: 92,
+    wave: "sawtooth",
+    textData: "MEGAESTRUCTURA // ECLIPSE ARTIFICIAL 94% // ORIGEN DESCONOCIDO"
+  },
+  {
+    type: "failed_planet",
+    title: "Planeta Fallido",
+    img: "Signals/noimage_anomaly.png",
+    cat: 1,
     freq: 68,
     wave: "sawtooth",
-    textData: "MEGAESTRUCTURA // OCLUSION SOLAR 99.4% // EMISION INFRARROJA ARTIFICIAL"
+    textData: "MASA SUB-ESTELAR FRACTURADA // NUCLEO EXPUESTO // SIN ORBITA"
   },
   {
-    anomType: "failed_planet",
-    title: "Planeta Fallido",
-    img: "Signals/earth_anomaly.png",
-    cat: 1,
-    freq: 56,
-    wave: "sawtooth",
-    textData: "NUCLEO FRACTURADO // ORBITA COLAPSADA // RESTOS DE BIOSFERA"
-  },
-  {
-    anomType: "dark_eyes",
+    type: "dark_eyes",
     title: "???",
-    img: "Signals/noimage_anomaly.png",
+    img: "Signals/iris_anomaly.png",
     cat: 4,
-    freq: 44,
-    wave: "square",
-    textData: "01001110 01001111 01010011 00100000 01010110 01000101 // LECTURA BIOMETRICA EN VACIO"
+    freq: 54,
+    wave: "triangle",
+    textData: "01001111 01001010 01001111 01010011 // NOS OBSERVA DESDE EL VACIO"
   },
   {
-    anomType: "astronaut",
-    title: "Cosmonauta a la Deriva",
+    type: "astronaut",
+    title: "Traje a la Deriva",
     img: "Signals/astronaut_anomaly.png",
     cat: 3,
-    freq: 142,
+    freq: 158,
     wave: "triangle",
-    textData: "TRAJE PRESURIZADO // PULSO CARDIACO 0 BPM // TRANSMISION DE VOZ EN BUCLE"
+    textData: "BIOMETRIA NULA // PORTADORA DE TRAJE EVA // SIN REGISTRO DE MISION"
   },
   {
-    anomType: "cyst",
+    type: "cyst",
     title: "Quiste Orbital",
     img: "Signals/cyst_anomaly.png",
     cat: 2,
-    freq: 62,
+    freq: 96,
     wave: "sawtooth",
-    textData: "MASA ORGANICA DENSA // MEMBRANA PULSANTE // TEMPERATURA 37.2 C"
+    textData: "MASA ORGANICA DENSA // PULSO LENTO 0.4 HZ // ENVOLTURA CALCAREA"
   },
   {
-    anomType: "flock",
-    title: "Enjambre Silencioso",
+    type: "earth_echo",
+    title: "Eco Terrestre",
+    img: "Signals/earth_anomaly.png",
+    cat: 1,
+    freq: 118,
+    wave: "sine",
+    textData: "ESPECTRO DE OXIGENO-NITROGENO // COORDENADAS INVERTIDAS // REFLEJO"
+  },
+  {
+    type: "flock",
+    title: "Enjambre Sideral",
     img: "Signals/flock_anomaly.png",
     cat: 2,
-    freq: 195,
+    freq: 266,
     wave: "triangle",
-    textData: "MULTIPLES VECTORES SINCRONIZADOS // SIN FIRMA TERMICA"
+    textData: "MULTIPLES VECTORES SINCRONIZADOS // TRAYECTORIA NO BALISTICA"
   },
   {
-    anomType: "iris",
-    title: "Iris Estelar",
-    img: "Signals/iris_anomaly.png",
-    cat: 0,
-    freq: 74,
-    wave: "sine",
-    textData: "APERTURA OPTICA EN CORONA // ENFOQUE DIRECTO HACIA ERIAL-7"
-  },
-  {
-    anomType: "macula",
-    title: "Macula Negra",
+    type: "macula",
+    title: "Macula Sombria",
     img: "Signals/macula_anomaly.png",
     cat: 0,
-    freq: 52,
+    freq: 81,
     wave: "sawtooth",
-    textData: "MANCHA FOTOSPHERICA ANOMALA // ABSORCION TOTAL DE LUZ"
+    textData: "ABSORCION LUMINICA TOTAL // VACIO FOTONICO EN NUCLEO ESTELAR"
   },
   {
-    anomType: "moon_anom",
+    type: "moon_anomaly",
     title: "Satelite Hueco",
     img: "Signals/moon_anomaly.png",
     cat: 1,
-    freq: 82,
+    freq: 95,
     wave: "square",
-    textData: "RESONANCIA METALICA INTERNA // GEOMETRIA SUBTERRANEA"
+    textData: "RESONANCIA DE CAVIDAD INTERNA // DENSIDAD ANOMALA EN CORTEZA"
   },
   {
-    anomType: "spaceship",
-    title: "Navio Derelict",
+    type: "spaceship",
+    title: "Casco Derelict",
     img: "Signals/spaceship_anomaly.png",
     cat: 3,
-    freq: 118,
+    freq: 194,
     wave: "sawtooth",
-    textData: "CASCO NO CATALOGADO // REACTOR INACTIVO // BALIZA DE AUXILIO"
+    textData: "GEOMETRIA NO HUMANA // REACTOR EN REPOSO CRIOGENICO"
   },
   {
-    anomType: "virgo_dragon",
+    type: "virgo_dragon",
     title: "Filamento de Virgo",
     img: "Signals/virgo_dragon_anomaly.png",
     cat: 4,
-    freq: 94,
+    freq: 128,
     wave: "triangle",
-    textData: "ESTELA GRAVITACIONAL SERPENTEANTE // DESPLAZAMIENTO SUPRALUMINICO"
+    textData: "ESTRUCTURA SERPENTINA DE PLASMA // EMISION SINCROTRON COHERENTE"
   },
   {
-    anomType: "vitreous",
+    type: "vitreous",
     title: "Cuerpo Vitreo",
     img: "Signals/vitreous_anomaly.png",
-    cat: 1,
-    freq: 108,
+    cat: 2,
+    freq: 215,
     wave: "sine",
-    textData: "REFRACCION CRISTALINA // DISTORSION OPTICA DE FONDO"
+    textData: "REFRACCION CRISTALINA PURA // SIN FIRMA QUIMICA CONVENCIONAL"
   }
 ];
 
-// Caché y precarga de todos los sprites de Signals/
+// Caché de sprites PNG en Signals/
 const IMG_CACHE = {};
 const offCv = document.createElement("canvas");
 const offCx = offCv.getContext("2d");
-
-function preloadAllSprites() {
-  const paths = new Set();
-  MODELS.forEach(m => { if (m.img) paths.add(m.img); });
-  ANOMALY_DEFS.forEach(a => { if (a.img) paths.add(a.img); });
-  paths.forEach(src => {
-    const im = new Image();
-    im.src = src;
-    IMG_CACHE[src] = im;
-  });
-}
 
 function getSprite(src) {
   if (!src) return null;
@@ -359,7 +357,10 @@ function getSprite(src) {
   return (im.complete && im.naturalWidth > 0) ? im : null;
 }
 
-preloadAllSprites();
+function preloadAllSprites() {
+  MODELS.forEach(m => { if (m.img) getSprite(m.img); });
+  ANOMALY_DEFS.forEach(a => { if (a.img) getSprite(a.img); });
+}
 
 // Resolución CRT progresiva según mejora de Filtro (NV 0/5 a NV 5/5)
 const CRT_RES = [
@@ -372,13 +373,36 @@ const CRT_RES = [
 ];
 
 const SCIENTISTS = [
-  {name: "Dra. Elena Alreyd", inst: "Observatorio Astrofisico Sur"},
-  {name: "Dr. Julian Charles", inst: "Instituto de Dinamica Orbital"},
-  {name: "Dra. Claire Powell", inst: "Consorcio Espectral Nordico"},
-  {name: "Dr. Tiago Branco", inst: "Red de Radioastronomia Austral"},
-  {name: "Dra. Valeria Rojas", inst: "Laboratorio de Cuerpos Menores"},
-  {name: "Dr. Nikos Koustoulas", inst: "Centro de Radiofrecuencia Egea"},
-  {name: "Dr. Arthur Hammond", inst: "Division de Telemetria Profunda"}
+  {name: "Dra. Elena Vance", inst: "Observatorio Astrofisico Sur"},
+  {name: "Dr. Kenji Takahashi", inst: "Instituto de Dinamica Orbital"},
+  {name: "Dra. Sofia Lindqvist", inst: "Consorcio Espectral Nordico"},
+  {name: "Dr. Mateo Salgado", inst: "Red de Radioastronomia Austral"},
+  {name: "Dra. Aris Thorne", inst: "Laboratorio de Cuerpos Menores"},
+  {name: "Dr. Julian Alreyd", inst: "Centro de Interferometria Profunda"},
+  {name: "Dra. Claire Charles", inst: "Departamento de Astrofisica Estelar"},
+  {name: "Dr. Arthur Powell", inst: "Observatorio Meridian"},
+  {name: "Dra. Helena Branco", inst: "Instituto Lusitano de Radioastronomia"},
+  {name: "Dr. Emiliano Rojas", inst: "Estacion Austral de Telemetria"},
+  {name: "Dra. Nadia Koustoulas", inst: "Consorcio Egeo de Espacio Profundo"},
+  {name: "Dr. Victor Hammond", inst: "Laboratorio de Propulsiones y Sondas"}
+];
+
+const NIGHT_SCENARIO_LABELS = [
+  "Noche 1 — Inicio (Recarga rápida)",
+  "Noche 2 — Guardia estándar (Recarga rápida)",
+  "Noche 3 — Pulsares activos (Recarga rápida)",
+  "Noche 4 — Guardia intermedia (Recarga rápida)",
+  "Noche 5 — Interferencia solar / Tramas corruptas",
+  "Noche 6 — Desgaste térmico (Recarga lenta)",
+  "Noche 7 — Guardia profunda (Recarga lenta)",
+  "Noche 8 — Víspera de tormenta (Recarga lenta)",
+  "Noche 9 — Evento: Fallo óptico CRT (Sin imagen)",
+  "Noche 10 — Subcategorías y Anomalías activas",
+  "Noche 11 — Corte de generador (Sin recarga)",
+  "Noche 12 — Vigilancia crítica (Sin recarga)",
+  "Noche 13 — Sector profundo (Sin recarga)",
+  "Noche 14 — Penúltima guardia (Sin recarga)",
+  "Noche 15 — Guardia final (Sin recarga)"
 ];
 
 const LIVE_STORAGE_KEY = "erial7_live_sessions_v1";
@@ -397,7 +421,8 @@ let cloudQueuedSnap = null;
 let V = "intro", G = null, S = null;
 let playerNameInput = "";
 let selectedStartNight = 0;
-let sandboxMode = false;
+let freeModeSelected = false;
+let isFreeMode = false;
 let sessionStartPerf = 0;
 let liveSyncTimer = 0;
 let cloudSyncTimer = 0;
@@ -409,12 +434,12 @@ let shift = 0; // 0 = Noche 1 ... 14 = Noche 15
 let shiftLeft = SHIFT_DURATION;
 let srv = null, crashes = 0;
 let cur = null, knobF = 50, knobP = 50, choiceCat = null, choiceMod = null;
-let outbox = [];
+let outbox = []; // Paquetes clasificados listos en Plataforma de Envío
 let selPkgId = null;
-let pendingOverrideSig = null;
+let pendingOverrideSig = null; // Confirmación al insistir en cambiar búsqueda activa
 let savedSatLog = null, satReportsSent = 0;
-let discoveredModels = new Set();
-let discoveredAnomalies = [];
+let discoveredModels = new Set(); // Modelos normales verificados en Central
+let discoveredAnomalies = []; // Lista privada de anomalías encontradas (aparece en papel dentro de Atlas)
 let firstAnomalyFound = false;
 let shadowBuyerUnlocked = false;
 let gameOverReason = ""; // "ARREST" | "COMPLETED"
@@ -425,17 +450,23 @@ let au = null, muted = false, activeVoice = null;
 let pendingEvals = [];
 
 const uid = () => Math.random().toString(36).slice(2, 8).toUpperCase();
-const shiftLabel = idx => `NOCHE ${idx + 1}`;
-const isSubcatEnabled = () => sandboxMode || shift >= 9; // Noche 10+ o Modo Libre
-const isPulsarEnabled = () => sandboxMode || shift >= 2; // Noche 3+ o Modo Libre
-const isAnomEnabled = () => sandboxMode || shift >= 9;   // Noche 10+ o Modo Libre
-const isCrtBroken = () => !sandboxMode && shift === 8;   // Noche 9 (0-based == 8): fallo óptico de imagen
-const getEnergyMode = () => {
-  if (sandboxMode) return "fast";
-  if (shift <= 4) return "fast";   // Noches 1 a 5: recuperación más o menos rápida
-  if (shift <= 9) return "slow";   // Noches 6 a 10: recuperación más lenta
-  return "none";                   // Noches 11 a 15: recuperación nula
-};
+const shiftLabel = idx => isFreeMode ? `MODO LIBRE · N${idx + 1}` : `NOCHE ${idx + 1}`;
+const isSubcatEnabled = () => shift >= 9;   // Noche 10 en adelante (0-based >= 9)
+const isPulsarEnabled = () => shift >= 2;   // Noche 3 en adelante (0-based >= 2)
+const isAnomEnabled = () => shift >= 9;     // Todas las anomalías solo desde Noche 10 (0-based >= 9)
+const isOpticalFailed = () => shift === 8;  // Noche 9 (0-based === 8): fallo óptico/imagen CRT
+
+// Recuperación de energía escalonada:
+// Noches 1-5 (shift 0..4): rápida
+// Noches 6-10 (shift 5..9): lenta
+// Noches 11-15 (shift 10..14): nula (en Modo Libre se mantiene recarga rápida)
+function getEnergyRegenMode() {
+  if (isFreeMode) return "fast";
+  if (shift <= 4) return "fast";
+  if (shift <= 9) return "slow";
+  return "none";
+}
+
 const activeAssigns = () => mail.filter(m => m.kind === "as" && !m.done && !m.failed);
 const allNightAssignsClosed = () => {
   const list = mail.filter(m => m.kind === "as" && m.night === shift);
@@ -469,7 +500,8 @@ function buildSessionSnapshot(finalized = false) {
   return {
     id: S.id,
     playerName: S.playerName,
-    sandbox: sandboxMode,
+    startNight: selectedStartNight + 1,
+    freeMode: isFreeMode,
     date: S.date,
     dateISO: S.dateISO,
     totalPlayTime: S.totalPlayTime,
@@ -564,15 +596,10 @@ function playSignalAudio(sigObj) {
     au = au || new (window.AudioContext || window.webkitAudioContext)();
     if (au.state === "suspended") au.resume();
     const o = au.createOscillator(), g = au.createGain();
-    if (sigObj.anom) {
-      const aDef = ANOMALY_DEFS.find(a => a.anomType === sigObj.anomType) || ANOMALY_DEFS[0];
-      o.type = aDef.wave;
-      o.frequency.value = aDef.freq;
-    } else {
-      const mod = MODELS.find(m => m.id === sigObj.modelId) || MODELS[0];
-      o.type = mod.wave;
-      o.frequency.value = mod.freq;
-    }
+    const mod = MODELS.find(m => m.id === sigObj.modelId) || MODELS[0];
+    const anomDef = sigObj.anom ? ANOMALY_DEFS.find(a => a.type === sigObj.anomType) : null;
+    o.type = anomDef ? anomDef.wave : mod.wave;
+    o.frequency.value = anomDef ? anomDef.freq : mod.freq;
     g.gain.value = 0.07;
     o.connect(g); g.connect(au.destination);
     o.start();
@@ -594,53 +621,53 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null) {
     y = 110 + Math.random() * (H - 220);
   } while (tries++ < 60 && sigs.some(s => s.st !== "gone" && Math.hypot(s.x - x, s.y - y) < 195));
 
+  // Las anomalías SOLO aparecen a partir de Noche 10 (isAnomEnabled())
   const allowAnom = isAnomEnabled();
-  const anom = allowAnom ? (forcedAnom !== null ? forcedAnom : (Math.random() < 0.24)) : false;
+  const anom = allowAnom ? (forcedAnom !== null ? forcedAnom : (Math.random() < 0.22)) : false;
 
-  let actualCat = cat;
-  let anomType = "";
-  let anomTitle = "";
-  let imgPath = "";
-  let textData = "[Sin subportadora]";
-
+  let anomDef = null;
   if (anom) {
-    const chosenAnom = forcedAnomType
-      ? (ANOMALY_DEFS.find(a => a.anomType === forcedAnomType) || ANOMALY_DEFS[0])
-      : ANOMALY_DEFS[Math.floor(Math.random() * ANOMALY_DEFS.length)];
-    anomType = chosenAnom.anomType;
-    anomTitle = chosenAnom.title;
-    actualCat = chosenAnom.cat;
-    imgPath = chosenAnom.img;
-    textData = chosenAnom.textData;
+    if (forcedAnomType) {
+      anomDef = ANOMALY_DEFS.find(a => a.type === forcedAnomType) || ANOMALY_DEFS[0];
+    } else {
+      const undiscovered = ANOMALY_DEFS.filter(a => !discoveredAnomalies.some(d => d.anomType === a.type));
+      const pool = undiscovered.length ? undiscovered : ANOMALY_DEFS;
+      anomDef = pool[Math.floor(Math.random() * pool.length)];
+    }
   }
 
+  const actualCat = anomDef ? anomDef.cat : cat;
   const catModels = MODELS.filter(m => m.cat === actualCat);
   const chosenModel = catModels[Math.floor(Math.random() * catModels.length)];
-  if (!anom) {
-    imgPath = chosenModel.img;
-  }
 
-  const corruptProb = !sandboxMode && shift >= 4 ? Math.min(0.42, 0.16 + (shift - 4) * 0.03) : (sandboxMode ? 0 : 0.04);
+  // Probabilidad de señal corrupta a partir de Noche 5 (shift >= 4)
+  const corruptProb = shift >= 4 ? Math.min(0.42, 0.16 + (shift - 4) * 0.03) : 0.04;
   const isCorruptSignal = !anom && (Math.random() < corruptProb);
 
   const moving = (actualCat === 2 || actualCat === 3);
   const ang = Math.random() * Math.PI * 2;
   const spd = moving ? (2.1 + Math.random() * 1.4) : 0;
 
-  if (!anom) {
-    if (actualCat === 3) {
-      const satNum = 100 + Math.floor(Math.random() * 899);
-      const alt = 420 + Math.floor(Math.random() * 380);
-      const hex = uid();
-      textData = `TLM-SAT-${satNum} // ${chosenModel.name.toUpperCase()} // ALT:${alt}KM // PWR:88% // HASH:${hex}`;
-    } else {
-      textData = `ESPECTRO-${chosenModel.id.toUpperCase()} // INTENSIDAD:${62 + Math.floor(Math.random()*35)}%`;
-    }
+  let textData = "[Sin subportadora]";
+  let anomTitle = "";
+  let anomType = "";
+  if (anomDef) {
+    anomType = anomDef.type;
+    anomTitle = anomDef.title;
+    textData = anomDef.textData;
+  } else if (actualCat === 3) {
+    const satNum = 100 + Math.floor(Math.random() * 899);
+    const alt = 420 + Math.floor(Math.random() * 380);
+    const hex = uid();
+    textData = `TLM-SAT-${satNum} // ${chosenModel.name.toUpperCase()} // ALT:${alt}KM // PWR:88% // HASH:${hex}`;
+  } else {
+    textData = `ESPECTRO-${chosenModel.id.toUpperCase()} // INTENSIDAD:${62 + Math.floor(Math.random()*35)}%`;
   }
 
   return {
     id: ++sid, x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
-    cat: actualCat, modelId: chosenModel.id, img: imgPath, anom, anomType, anomTitle,
+    cat: actualCat, modelId: chosenModel.id, img: anomDef ? anomDef.img : chosenModel.img,
+    anom, anomType, anomTitle,
     isCorruptSignal, st: "echo", align: 0, prog: 0,
     tot: 0, bad: 0, acc: 0, seed: Math.random() * 100,
     tgF: 14 + Math.floor(Math.random() * 72),
@@ -666,18 +693,9 @@ function ensureSectorDiversity() {
     }
   }
 
-  // En Noche 10+ o Modo Libre, garantizar variedad de anomalías en el sector
-  if (isAnomEnabled()) {
-    const activeAnoms = inSector.filter(s => s.anom);
-    const targetAnomCount = sandboxMode ? 3 : 2;
-    while (activeAnoms.length < targetAnomCount) {
-      const unfound = ANOMALY_DEFS.filter(d => !discoveredAnomalies.some(a => a.anomType === d.anomType));
-      const pool = unfound.length ? unfound : ANOMALY_DEFS;
-      const pick = pool[Math.floor(Math.random() * pool.length)];
-      const newAnomSig = makeSignal(pick.cat, true, pick.anomType);
-      sigs.push(newAnomSig);
-      activeAnoms.push(newAnomSig);
-    }
+  // En Noche 10+, garantizar que siempre haya al menos 1 anomalía disponible en el sector
+  if (isAnomEnabled() && !inSector.some(s => s.anom)) {
+    sigs.push(makeSignal(3, true, null));
   }
 }
 
@@ -693,7 +711,7 @@ function initShift() {
     satReports: 0, specUses: 0, anomSent: 0, crash: 0, fix: 0
   };
 
-  // Generar 3 encargos científicos diarios
+  // Generar exactamente 3 encargos científicos diarios (pagos reducidos: $45-$65 CR)
   const allowedCats = isPulsarEnabled() ? [0, 1, 2, 3, 4] : [0, 1, 2, 3];
   const usedSci = new Set();
 
@@ -707,7 +725,7 @@ function initShift() {
     const cat = allowedCats[(shift + i) % allowedCats.length];
     const catModels = MODELS.filter(m => m.cat === cat);
     const mod = catModels[Math.floor(Math.random() * catModels.length)];
-    const reward = 45 + Math.floor(Math.random() * 21);
+    const reward = 45 + Math.floor(Math.random() * 21); // $45 a $65 CR
     const requireModel = isSubcatEnabled();
 
     const targetDesc = requireModel
@@ -716,11 +734,10 @@ function initShift() {
 
     addMail(
       `ENCARGO ${i + 1}/3 // ${sci.name.toUpperCase()}`,
-      `Remitente: ${sci.name} (${sci.inst})
-` +
-      `Solicitud para ${shiftLabel(shift)}: Registro espectral verificado de ${targetDesc}.
-` +
-      `Honorarios autorizados: $${reward} CR.`,
+      `Remitente: ${sci.name} (${sci.inst})\n` +
+      `Solicitud para ${shiftLabel(shift)}: Registro espectral verificado de ${targetDesc}.\n` +
+      `Honorarios autorizados: $${reward} CR.\n\n` +
+      `Procesa la captura y enviala manualmente a esta asignacion desde la pestana Plataforma.`,
       {
         kind: "as",
         night: shift,
@@ -734,39 +751,38 @@ function initShift() {
     );
   }
 
-  // Avisos específicos por noche
+  // Avisos narrativos y técnicos por noche
   if (shift === 2) {
     addMail(
       "BOLETIN TECNICO // NOCHE 3",
-      "Se han detectado emisiones de Pulsares en el cuadrante profundo."
+      "Se han detectado emisiones de Pulsares en el cuadrante. El catalogo de clasificacion ya incluye su firma espectral."
     );
   } else if (shift === 4) {
     addMail(
       "AVISO DE INTERFERENCIA SOLAR // NOCHE 5",
-      "Tormentas magneticas estan corrompiendo paquetes en transito."
+      "Tormentas magneticas estan corrompiendo paquetes en transito. Si una trama muestra corrupcion critica en el Procesador, descartala y captura otra senal."
     );
   } else if (shift === 5) {
     addMail(
-      "AVISO DE SUMINISTRO // NOCHE 6",
-      "Degradacion en los paneles colectores: a partir de esta guardia la recuperacion de energia sera mas lenta."
+      "DESGASTE DEL GENERADOR // NOCHE 6",
+      "Los acumuladores principales operan a capacidad reducida entre las Noches 6 y 10. La recuperacion pasiva de energia sera notablemente mas lenta."
     );
   } else if (shift === 8) {
+    // Evento de la Noche 9: fallo óptico / imagen CRT
     addMail(
-      "FALLO DE INSTRUMENTACION // NOCHE 9",
-      "ALERTA DE HARDWARE: Una sobrecarga ha danado el tubo de rayos catodicos y los sensores opticos de visualizacion.
-
-" +
-      "Durante esta guardia no podras ver la imagen de ningun objeto en el Procesador. Identifica las senales guiandote por el audio, la proximidad y el espectrograma."
+      "AVERIA CRITICA DE MONITOR OPTICO // NOCHE 9",
+      "ALERTA DE MANTENIMIENTO: Una sobretension ha danado el tubo de rayos catodicos del Procesador durante toda esta guardia.\n\n" +
+      "No podras visualizar la imagen de los objetos capturados esta noche. Identifica cada senal guiandote por su firma de audio, los medidores de proximidad y el espectrograma."
     );
   } else if (shift === 9) {
     addMail(
       "ACTUALIZACION DE PROTOCOLO // NOCHE 10",
-      "Los investigadores ahora requieren especificar la subcategoria exacta de cada cuerpo celeste."
+      "El monitor optico ha sido restablecido. A partir de esta noche los investigadores exigen especificar la subcategoria exacta de cada cuerpo celeste al clasificarlo."
     );
   } else if (shift === 10) {
     addMail(
       "CORTE DE GENERADOR AUXILIAR // NOCHE 11",
-      "El generador de respaldo ha quedado fuera de servicio: la recuperacion automatica de energia es nula hasta el final de la campana."
+      "A partir de esta guardia (Noches 11 a 15), la recarga automatica de energia queda completamente deshabilitada. Adquiere Celdas Auxiliares en Taller para mantener el suministro."
     );
   }
 
@@ -774,21 +790,24 @@ function initShift() {
   syncLiveTelemetry(false, true);
 }
 
-function start(operatorName, startNightIdx = 0, isSandbox = false) {
+function start(operatorName, startNightIdx = 0, sandboxMode = false) {
   const cleanName = (operatorName || "").trim();
   if (!cleanName) {
     msg("[ERR] Ingresa tu nombre antes de iniciar la guardia", 0);
     return;
   }
+  preloadAllSprites();
+  const clampedNight = Math.max(0, Math.min(TOTAL_NIGHTS - 1, Number(startNightIdx) || 0));
+  selectedStartNight = clampedNight;
+  isFreeMode = Boolean(sandboxMode);
+
   const nowDate = new Date();
   sessionStartPerf = performance.now();
-  sandboxMode = !!isSandbox;
-  shift = Math.max(0, Math.min(TOTAL_NIGHTS - 1, Number(startNightIdx) || 0));
-
   S = {
     id: uid(),
     playerName: cleanName,
-    sandbox: sandboxMode,
+    startNight: clampedNight + 1,
+    freeMode: isFreeMode,
     date: formatLocalDateTime(nowDate),
     dateISO: nowDate.toISOString(),
     totalPlayTime: 0,
@@ -797,62 +816,54 @@ function start(operatorName, startNightIdx = 0, isSandbox = false) {
     survey: null
   };
 
-  if (sandboxMode) {
+  if (isFreeMode) {
     G = {money: 9999, a: 5, f: 5, b: 5, spec: 5};
     cap = 200;
     en = 200;
+  } else {
+    G = {money: 75, a: 0, f: 0, b: 0, spec: 0};
+    cap = 100;
+    en = 100;
+  }
+
+  sigs = []; mail = []; selMail = null; notes = "";
+  shift = clampedNight; shiftLeft = SHIFT_DURATION; srv = null; crashes = 0; cur = null; rd = 0;
+  knobF = 50; knobP = 50; choiceCat = null; choiceMod = null;
+  outbox = []; selPkgId = null; pendingOverrideSig = null;
+  savedSatLog = null; satReportsSent = 0;
+
+  if (isFreeMode) {
     discoveredModels = new Set(MODELS.map(m => m.id));
     discoveredAnomalies = ANOMALY_DEFS.map((a, idx) => ({
-      anomType: a.anomType,
       anomTitle: a.title,
-      modelId: MODELS[0].id,
+      anomType: a.type,
+      modelId: MODELS.find(m => m.cat === a.cat)?.id || "est_enana",
       img: a.img,
-      seed: 1.5 + idx,
+      seed: 1.7 + idx * 1.3,
       anom: true,
       textData: a.textData
     }));
     firstAnomalyFound = true;
     shadowBuyerUnlocked = true;
   } else {
-    G = {money: 75, a: 0, f: 0, b: 0, spec: 0};
-    cap = 100;
-    en = 100;
     discoveredModels = new Set();
     discoveredAnomalies = [];
     firstAnomalyFound = false;
     shadowBuyerUnlocked = false;
   }
 
-  sigs = []; mail = []; selMail = null; notes = "";
-  shiftLeft = SHIFT_DURATION; srv = null; crashes = 0; cur = null; rd = 0;
-  knobF = 50; knobP = 50; choiceCat = null; choiceMod = null;
-  outbox = []; selPkgId = null; pendingOverrideSig = null;
-  savedSatLog = null; satReportsSent = 0;
   gameOverReason = "";
   pendingEvals = [];
 
   const introId = addMail(
     `PROTOCOLO DE OPERACIONES // OP. ${cleanName.toUpperCase()}`,
-    `Estacion de Escucha Erial-7.
-
-` +
-    "Obtencion de senales:
-" +
-    "1. Mapa Estelar: Selecciona un eco activo para alinear las antenas y descargar su trama.
-" +
-    "2. Procesador: Ajusta Frecuencia y Polaridad hasta estabilizar la senal, fija la captura y clasifica el objeto.
-" +
-    "3. Plataforma: Despacha el paquete clasificado a su destinatario correspondiente."
+    `Estacion de Escucha Erial-7 · Inicio en ${shiftLabel(shift)} de ${TOTAL_NIGHTS}${isFreeMode ? " [MODO LIBRE ACTIVO]" : ""}.\n\n` +
+    "Obtencion de senales:\n" +
+    "1. Mapa Estelar: Selecciona un eco para alinear antenas y descargar la trama.\n" +
+    "2. Procesador: Ajusta Frecuencia y Polaridad, fija la captura y cataloga el objeto.\n" +
+    "3. Plataforma: Despacha el paquete resultante desde la Plataforma de Envio."
   );
   selMail = introId;
-
-  if (sandboxMode) {
-    addMail(
-      "MODO LIBRE ACTIVADO // ACCESO TOTAL",
-      "Todas las mejoras del Taller (NV 5/5), el Atlas completo (28 cuerpos celestes y 12 anomalias), energia ilimitada y el Canal Cifrado estan desbloqueados para pruebas."
-    );
-  }
-
   initShift();
   V = "mail";
   render();
@@ -908,12 +919,12 @@ function updTop() {
   }
   const remAssigns = activeAssigns().length;
   const lowTime = shiftLeft <= 120;
-  const eMode = getEnergyMode();
-  const pwrClass = sandboxMode ? "sandbox" : (eMode === "none" ? "norech" : (eMode === "slow" ? "slowrech" : ""));
-  const pwrTag = sandboxMode ? " [LIBRE]" : (eMode === "none" ? " [SIN RECARGA]" : (eMode === "slow" ? " [RECARGA LENTA]" : ""));
+  const regenMode = getEnergyRegenMode();
+  const pwrClass = regenMode === "none" ? "norech" : regenMode === "slow" ? "slowrech" : "";
+  const pwrTag = isFreeMode ? " [LIBRE]" : regenMode === "none" ? " [SIN RECARGA]" : regenMode === "slow" ? " [RECARGA LENTA]" : "";
+
   st.innerHTML = `
     <span class="pill">OP: ${S.playerName}</span>
-    ${sandboxMode ? `<span class="pill sandbox">MODO LIBRE</span>` : ""}
     <span class="pill ${shift >= 8 ? "night" : ""}">${shiftLabel(shift)}/${TOTAL_NIGHTS}</span>
     <span class="pill ${lowTime ? "lowtime" : ""}">T-${fmtClock(shiftLeft)}</span>
     <span class="pill ${pwrClass}">PWR ${Math.round(en)}/${cap}${pwrTag}</span>
@@ -954,6 +965,7 @@ function triggerCrash() {
   if (R) R.crash++;
   srv = makeServerChallenge();
   beep(140, 0.32, "sawtooth", 0.08);
+  // Sin correo de fallo de servidor: se notifica en pantalla dentro del Mapa Estelar
   msg("[ALERTA] Fallo de servidor // Revisa Mapa Estelar o Servidor", 0);
   syncLiveTelemetry(false, true);
   if (V === "srv" || V === "map") render();
@@ -964,38 +976,31 @@ function onFirstAnomalyDiscovered() {
   if (firstAnomalyFound) return;
   firstAnomalyFound = true;
 
+  // 1. Correo de la División del Espacio de Naciones Unidas invitando a reportar cualquier incidencia
   addMail(
     "DIVISION DEL ESPACIO DE NACIONES UNIDAS // PROTOCOLO DE INCIDENCIAS",
-    "Comunicado oficial de la Oficina de Asuntos del Espacio Ultraterrestre (Division del Espacio de Naciones Unidas):
-
-" +
-    "Nuestros monitores orbitales han registrado una fluctuacion no catalogada en el cuadrante de la Estacion Erial-7.
-
-" +
+    "Comunicado oficial de la Oficina de Asuntos del Espacio Ultraterrestre (Division del Espacio de Naciones Unidas):\n\n" +
+    "Nuestros monitores orbitales han registrado una fluctuacion no catalogada en el cuadrante de la Estacion Erial-7.\n\n" +
     "Le invitamos a reportar de inmediato cualquier incidencia, senal anomala o lectura fuera de parametro a traves de los canales oficiales de Central para su analisis institucional.",
     {kind: "un_notice"}
   );
 
+  // 2. Correo anónimo advirtiéndote que NO la envíes por canales oficiales
   addMail(
     "[REMITENTE OCULTO] // NO LA ENVIES POR LA RED",
-    "Detectamos que acabas de fijar una lectura anomala en tu terminal.
-
-" +
-    "ADVERTENCIA: No transmitas esa senal a los cientificos ni al Archivo Central. Si la subes a la red oficial, activaras los protocolos de seguridad de la Division del Espacio de Naciones Unidas: clausuraran la estacion y te arrestaran para interrogatorio.
-
-" +
+    "Detectamos que acabas de fijar una lectura anomala en tu terminal.\n\n" +
+    "ADVERTENCIA: No transmitas esa senal a los cientificos ni al Archivo Central. Si la subes a la red oficial, activaras los protocolos de seguridad de la Division del Espacio de Naciones Unidas: clausuraran la estacion y te arrestaran para interrogatorio.\n\n" +
     "Guardala en tus apuntes personales. Alguien mas se pondra en contacto contigo pronto.",
     {kind: "anon_warn"}
   );
 
+  // 3. Poco después llega el comprador privado ofreciendo comprarla por un poco más
   setTimeout(() => {
     if (V === "end") return;
     shadowBuyerUnlocked = true;
     addMail(
       "INTERMEDIARIO SOMBRA // OFERTA PRIVADA ($240 CR)",
-      "Sabemos lo que tienes en el buffer de Erial-7. Nos interesan las lecturas anomalas que las agencias oficiales intentan ocultar.
-
-" +
+      "Sabemos lo que tienes en el buffer de Erial-7. Nos interesan las lecturas anomalas que las agencias oficiales intentan ocultar.\n\n" +
       "Hemos habilitado un Canal Cifrado en tu Plataforma de Envio. Transmite alli cualquier senal anomala y te transferiremos $240 CR sin dejar rastro en los servidores de Naciones Unidas.",
       {kind: "buyer"}
     );
@@ -1073,11 +1078,8 @@ function evaluatePlatformDispatch(ev) {
       if (R) R.silentErrors++;
       addMail(
         `RE: ${asg.sciName.toUpperCase()} [ARCHIVO ERRONEO]`,
-        `El paquete enviado (#${pkg.sigId}) no coincide con los parametros solicitados o contiene una clasificacion erronea.
-
-` +
-        `Lectura real verificada: ${CLASSES[pkg.trueCat]}${modObj ? ` (${modObj.name})` : ""}.
-` +
+        `El paquete enviado (#${pkg.sigId}) no coincide con los parametros solicitados o contiene una clasificacion erronea.\n\n` +
+        `Lectura real verificada: ${CLASSES[pkg.trueCat]}${modObj ? ` (${modObj.name})` : ""}.\n` +
         `Pago emitido: $0 CR.`
       );
       syncLiveTelemetry(false, true);
@@ -1091,9 +1093,7 @@ function evaluatePlatformDispatch(ev) {
     G.money += asg.reward;
     addMail(
       `RE: ${asg.sciName.toUpperCase()} [ENCARGO VALIDADO]`,
-      `Excelente trabajo, Operador. Los datos de ${CLASSES[pkg.trueCat]} (${modObj ? modObj.name : ""}) han sido incorporados a nuestra investigacion.
-
-` +
+      `Excelente trabajo, Operador. Los datos de ${CLASSES[pkg.trueCat]} (${modObj ? modObj.name : ""}) han sido incorporados a nuestra investigacion.\n\n` +
       `Honorarios transferidos: +$${asg.reward} CR.`
     );
     msg(`[OK] Encargo validado (+$${asg.reward} CR)`, 1);
@@ -1111,8 +1111,7 @@ function evaluatePlatformDispatch(ev) {
       if (R) R.silentErrors++;
       addMail(
         `CENTRAL // PAQUETE #${pkg.sigId} [ARCHIVO ERRONEO]`,
-        `La verificacion automatica detecto discrepancias en tu etiqueta (${CLASSES[pkg.chosenCat]}).
-` +
+        `La verificacion automatica detecto discrepancias en tu etiqueta (${CLASSES[pkg.chosenCat]}).\n` +
         `Cuerpo real: ${CLASSES[pkg.trueCat]}${modObj ? ` (${modObj.name})` : ""}. Abono: $0 CR.`
       );
       syncLiveTelemetry(false, true);
@@ -1186,22 +1185,22 @@ function tick(dt) {
     return;
   }
 
-  // Recuperación de energía escalonada:
+  // Recuperación de energía escalonada por tramos de noches:
   // Noches 1 a 5 (shift 0..4): rápida
   // Noches 6 a 10 (shift 5..9): lenta
   // Noches 11 a 15 (shift 10..14): nula
-  const eMode = getEnergyMode();
-  if (eMode === "fast") {
+  const regenMode = getEnergyRegenMode();
+  if (regenMode === "fast") {
     en = Math.min(cap, en + dt * (en < 25 ? 1.45 : 0.90));
-  } else if (eMode === "slow") {
-    en = Math.min(cap, en + dt * (en < 25 ? 0.42 : 0.22));
+  } else if (regenMode === "slow") {
+    en = Math.min(cap, en + dt * (en < 20 ? 0.42 : 0.22));
   }
 
   if (rd > 0) rd = Math.max(0, rd - dt);
 
   const alignDur = Math.max(1.1, 4.4 - G.a * 0.65);
   const dlDur = Math.max(3.8, 12.0 - G.a * 1.6);
-  const noiseProb = sandboxMode ? 0 : Math.max(0.02, 0.24 - G.f * 0.04);
+  const noiseProb = Math.max(0.02, 0.24 - G.f * 0.04);
   let activeDl = false;
 
   sigs.forEach(s => {
@@ -1291,74 +1290,101 @@ function tick(dt) {
   }
 }
 
-// Renderizador híbrido: usa el sprite PNG de Signals/ con filtro CRT y respaldo procedural
-function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMode = false) {
+// Renderizador procedural de modelos y anomalías
+function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMode = false, opticalFailure = false) {
   if (!cv) return;
   const cx = cv.getContext("2d");
   const w = cv.width, h = cv.height;
   const img = cx.createImageData(w, h);
   const d = img.data;
 
-  const baseFloor = [0.60, 0.44, 0.30, 0.18, 0.09, 0.02][Math.min(5, Math.max(0, filterLv))];
-  const staticAmt = sepiaMode ? 0.05 : Math.min(0.98, baseFloor + tuneErr * (1 - baseFloor));
+  // Evento Noche 9: fallo óptico total en el monitor CRT del Procesador
+  if (opticalFailure) {
+    for (let y = 0; y < h; y++) {
+      const band = Math.sin(y * 0.4 + t * 22) > 0.72 ? 42 : 0;
+      for (let x = 0; x < w; x++) {
+        const noise = (Math.random() * 28 + band) * ((y % 2 === 0) ? 0.7 : 1.0);
+        const idx = (y * w + x) * 4;
+        d[idx] = Math.min(255, noise * 1.45);
+        d[idx + 1] = Math.min(255, noise * 0.42);
+        d[idx + 2] = Math.min(255, noise * 0.42);
+        d[idx + 3] = 255;
+      }
+    }
+    cx.putImageData(img, 0, 0);
+    return;
+  }
 
-  // Intentar cargar sprite personalizado desde Signals/
+  const baseFloor = [0.60, 0.44, 0.30, 0.18, 0.09, 0.02][Math.min(5, Math.max(0, filterLv))];
+  const staticAmt = sepiaMode ? 0.06 : Math.min(0.98, baseFloor + tuneErr * (1 - baseFloor));
+
   const modObj = MODELS.find(m => m.id === spec.modelId);
-  const anomObj = spec.anomType ? ANOMALY_DEFS.find(a => a.anomType === spec.anomType) : null;
-  const spriteSrc = spec.img || (anomObj && anomObj.img) || (modObj && modObj.img);
+  const spriteSrc = spec.img || (modObj && modObj.img);
   const sprite = getSprite(spriteSrc);
 
   if (sprite) {
+    offCv.width = w;
+    offCv.height = h;
+    offCx.imageSmoothingEnabled = false;
+    offCx.fillStyle = "#000000";
+    offCx.fillRect(0, 0, w, h);
+
+    const aspect = sprite.naturalWidth / sprite.naturalHeight;
+    let dw = w, dh = h;
+    if (w / h > aspect) {
+      dw = Math.round(h * aspect);
+    } else {
+      dh = Math.round(w / aspect);
+    }
+    const ox = Math.floor((w - dw) / 2);
+    const oy = Math.floor((h - dh) / 2);
+    offCx.drawImage(sprite, ox, oy, dw, dh);
+
     try {
-      offCv.width = w;
-      offCv.height = h;
-      offCx.imageSmoothingEnabled = false;
-      offCx.fillStyle = "#000000";
-      offCx.fillRect(0, 0, w, h);
-
-      // Mantener relación de aspecto centrada dentro del CRT
-      const sw = sprite.naturalWidth || w;
-      const sh = sprite.naturalHeight || h;
-      const scaleFit = Math.min((w * 0.92) / sw, (h * 0.92) / sh);
-      const dw = Math.max(1, Math.round(sw * scaleFit));
-      const dh = Math.max(1, Math.round(sh * scaleFit));
-      const dx0 = Math.floor((w - dw) / 2);
-      const dy0 = Math.floor((h - dh) / 2);
-      offCx.drawImage(sprite, dx0, dy0, dw, dh);
-
-      const srcPixels = offCx.getImageData(0, 0, w, h).data;
-      for (let i = 0; i < d.length; i += 4) {
-        const y = Math.floor((i / 4) / w);
+      const srcData = offCx.getImageData(0, 0, w, h).data;
+      for (let y = 0; y < h; y++) {
         const scanline = (y % 2 === 0) ? 0.90 : 1.0;
-        const alpha = srcPixels[i + 3] / 255;
-        const rawLum = (srcPixels[i] * 0.299 + srcPixels[i + 1] * 0.587 + srcPixels[i + 2] * 0.114) * alpha;
-        const lum = Math.max(10, rawLum);
-        const snow = Math.random() * 255;
-        const finalVal = Math.max(0, Math.min(255, (lum * (1 - staticAmt) + snow * staticAmt) * scanline));
+        for (let x = 0; x < w; x++) {
+          const idx = (y * w + x) * 4;
+          const alpha = srcData[idx + 3] / 255;
+          const rawLum = (srcData[idx] * 0.299 + srcData[idx + 1] * 0.587 + srcData[idx + 2] * 0.114) * alpha;
+          const lum = Math.max(8, rawLum);
+          const snow = Math.random() * 255;
+          const finalVal = Math.max(0, Math.min(255, (lum * (1 - staticAmt) + snow * staticAmt) * scanline));
 
-        if (sepiaMode) {
-          d[i]     = Math.min(255, finalVal * 1.05);
-          d[i + 1] = Math.min(255, finalVal * 0.92);
-          d[i + 2] = Math.min(255, finalVal * 0.72);
-        } else {
-          d[i]     = finalVal;
-          d[i + 1] = finalVal;
-          d[i + 2] = finalVal;
+          if (sepiaMode) {
+            d[idx] = Math.min(255, finalVal * 1.05);
+            d[idx + 1] = Math.min(255, finalVal * 0.92);
+            d[idx + 2] = Math.min(255, finalVal * 0.72);
+          } else {
+            d[idx] = finalVal;
+            d[idx + 1] = finalVal;
+            d[idx + 2] = finalVal;
+          }
+          d[idx + 3] = 255;
         }
-        d[i + 3] = 255;
       }
       cx.putImageData(img, 0, 0);
       return;
     } catch (_) {
-      // Si se abre en file:// sin servidor local y CORS bloquea getImageData, pasa al respaldo procedural
+      // Fallback directo si se abre via file:// sin servidor local
+      cx.imageSmoothingEnabled = false;
+      cx.fillStyle = sepiaMode ? "#1e1912" : "#000000";
+      cx.fillRect(0, 0, w, h);
+      cx.save();
+      cx.filter = sepiaMode ? "grayscale(100%) sepia(55%)" : "grayscale(100%)";
+      cx.globalAlpha = Math.max(0.15, 1 - staticAmt * 0.85);
+      cx.drawImage(sprite, ox, oy, dw, dh);
+      cx.restore();
+      return;
     }
   }
 
-  // Respaldo procedural si la imagen aún está cargando o sin servidor HTTP
   const cx0 = w / 2, cy0 = h / 2;
   const scale = Math.min(w, h) / 96;
   const mid = spec.modelId || "est_enana";
   const seed = spec.seed || 1.5;
+  const anomType = spec.anomType || "";
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -1367,48 +1393,134 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
       const dist = Math.hypot(dx, dy);
       let lum = 10;
 
-      if (spec.anom) {
-        if (spec.anomType === "dyson") {
-          const ring1 = Math.abs(dist - 24) < 2.2 && Math.abs(dx) > 5;
-          const ring2 = Math.abs(Math.hypot(dx * 0.65, dy * 1.35) - 22) < 2.0;
-          if (dist < 11) lum = 245 - dist * 4;
-          else if (ring1 || ring2) lum = 215;
-        } else if (spec.anomType === "failed_planet") {
-          const split = (dx - dy * 0.45);
-          const offX = split > 1.5 ? 4.5 : (split < -1.5 ? -4.5 : 0);
-          const offY = split > 1.5 ? -2.5 : (split < -1.5 ? 2.5 : 0);
-          const dFrag = Math.hypot(dx - offX, dy - offY);
-          if (Math.abs(split) >= 1.8 && dFrag < 21) {
-            lum = 175 + Math.sin(dx * 0.6 + dy * 0.4) * 35;
-          } else if (Math.abs(split) < 1.8 && dist < 17) {
-            lum = 230 + Math.sin(t * 8 + dist) * 20;
-          }
-        } else if (spec.anomType === "dark_eyes") {
-          const headDist = Math.hypot(dx * 1.18, dy * 0.88);
-          const leftEye = Math.hypot(dx + 7.5, dy + 3.5);
-          const rightEye = Math.hypot(dx - 7.5, dy + 3.5);
-          if (headDist < 22) {
-            lum = 195 - headDist * 2.2;
-            if (leftEye < 4.3 || rightEye < 4.3) lum = 6;
-          }
-        } else {
-          if (dist < 18) lum = 180 + Math.sin(t * 10 + dist) * 40;
-        }
-      } else if (mid.startsWith("est_")) {
-        if (dist < 22) lum = 235 - dist * 2;
-        else if (dist < 42) lum = Math.max(14, 155 - (dist - 22) * 6);
-      } else if (mid.startsWith("pla_")) {
-        if (dist < 24) lum = 175 + Math.sin(dy * 0.75) * 40 - dx * 0.8;
-      } else if (mid.startsWith("ast_")) {
+      if (anomType === "voyager") {
+        // Voyager 1: plato parabólico fracturado, bus decagonal y antena magnetómetro
+        const dish = Math.hypot(dx + 6, dy + 2);
+        const crack = Math.abs(dx - dy * 0.7 + 4) < 1.6;
+        const bus = Math.abs(dx - 8) < 6 && Math.abs(dy - 5) < 5;
+        const boom = Math.abs(dy - (dx - 8) * 0.45 - 5) < 1.2 && dx >= 12 && dx <= 34;
+        const frag1 = Math.hypot(dx + 22, dy - 14) < 3.2;
+        const frag2 = Math.hypot(dx - 24, dy + 16) < 2.6;
+        if (dish < 15 && dish > 10 && !crack) lum = 225;
+        else if (dish <= 10 && !crack) lum = 145;
+        else if (bus) lum = 205;
+        else if (boom) lum = 185;
+        else if (frag1 || frag2) lum = 195;
+      } else if (anomType === "dyson") {
+        // Esfera de Dyson: estrella central parcialmente eclipsada por anillos geodésicos orbitales
+        const core = dist < 15;
+        const shellOuter = dist >= 22 && dist <= 26;
+        const latRing = Math.abs(dy - Math.sin(dx * 0.14 + t * 1.4) * 9) < 2.1 && dist <= 26;
+        const lonRing = Math.abs(dx - Math.cos(dy * 0.14 - t * 1.1) * 9) < 2.1 && dist <= 26;
+        const gap = ((Math.floor(dx + 40) + Math.floor(dy + 40)) % 7 === 0);
+        if (shellOuter && !gap) lum = 235;
+        else if ((latRing || lonRing) && !gap) lum = 215;
+        else if (core) lum = 155 + Math.sin(t * 6) * 20;
+      } else if (anomType === "failed_planet") {
+        // Planeta Fallido: cuerpo masivo agrietado con núcleo incandescente expuesto y fragmentos orbitales
         const ang = Math.atan2(dy, dx);
-        const rad = 22 + Math.sin(ang * 3 + seed) * 7;
-        if (dist < rad) lum = 185 + Math.sin(dx * 0.4) * 35;
-      } else if (mid.startsWith("sat_")) {
-        if ((Math.abs(dx) < 8 && Math.abs(dy) < 9) || (Math.abs(dx) <= 40 && Math.abs(dy) < 5)) lum = 215;
-      } else if (mid.startsWith("pul_")) {
+        const rad = 25 + Math.sin(ang * 5 + seed) * 3;
+        const fissure = Math.abs(Math.sin(dx * 0.22 + dy * 0.18)) < 0.16 && dist < rad;
+        const deb1 = Math.hypot(dx - 31, dy + 12) < 3.2;
+        const deb2 = Math.hypot(dx + 30, dy - 15) < 2.8;
+        if (dist < rad) {
+          lum = fissure ? (235 + Math.sin(t * 8) * 18) : (105 - dx * 0.9);
+        } else if (deb1 || deb2) {
+          lum = 190;
+        }
+      } else if (anomType === "dark_eyes") {
+        // Silueta pálida ovalada con dos cuencas oculares negras profundas (sin boca)
+        const oval = Math.hypot(dx * 1.15, dy * 0.85);
+        const leftEye = Math.hypot(dx + 9, dy + 4) < 5.2;
+        const rightEye = Math.hypot(dx - 9, dy + 4) < 5.2;
+        if (oval < 27) {
+          if (leftEye || rightEye) lum = 4;
+          else lum = 205 - oval * 2.4 + Math.sin(t * 5 + dy * 0.3) * 10;
+        }
+      } else if (mid === "est_enana") {
+        if (dist < 20) lum = 235 - dist * 2;
+        else if (dist < 40) lum = Math.max(14, 155 - (dist - 20) * 6);
+        if ((Math.abs(dx) < 1.6 || Math.abs(dy) < 1.6) && dist < 48) lum = Math.max(lum, 185 - dist * 2.5);
+      } else if (mid === "est_gigante") {
+        if (dist < 30) lum = 240 - dist * 1.4;
+        else if (dist < 50) lum = Math.max(14, 180 - (dist - 30) * 7 + Math.sin(Math.atan2(dy, dx)*10 + t*2)*16);
+      } else if (mid === "est_binaria") {
+        const off = 14;
+        const a = t * 1.4;
+        const d1 = Math.hypot(dx - Math.cos(a)*off, dy - Math.sin(a)*off);
+        const d2 = Math.hypot(dx + Math.cos(a)*off, dy + Math.sin(a)*off);
+        if (d1 < 12) lum = 240 - d1 * 5;
+        if (d2 < 9) lum = Math.max(lum, 225 - d2 * 6);
+      } else if (mid === "est_trinaria") {
+        for (let k = 0; k < 3; k++) {
+          const a = t * 1.2 + k * (Math.PI * 2 / 3);
+          const dk = Math.hypot(dx - Math.cos(a)*15, dy - Math.sin(a)*15);
+          if (dk < 9) lum = Math.max(lum, 235 - dk * 6);
+        }
+      } else if (mid === "pla_rocoso") {
+        if (dist < 22) lum = 165 - dx * 1.2 + Math.sin(dx * 0.5) * Math.cos(dy * 0.5) * 28;
+      } else if (mid === "pla_gaseoso") {
+        if (dist < 27) lum = 175 + Math.sin(dy * 0.75) * 48 - dx * 0.9;
+      } else if (mid === "pla_anillos") {
+        const rx = dx * 0.86 + dy * 0.5;
+        const ry = -dx * 0.5 + dy * 0.86;
+        const ring = Math.abs(Math.hypot(rx * 0.36, ry * 1.45) - 27) < 3.8;
+        if (dist < 20) lum = 165 + Math.sin(ry * 0.6) * 35 - dx * 0.9;
+        else if (ring) lum = 220;
+      } else if (mid === "pla_enano") {
+        if (dist < 13) lum = 180 - dx * 1.4;
+      } else if (mid === "pla_oceanico") {
+        if (dist < 23) lum = 195 + Math.sin(dx * 0.25 + t * 2) * 18 - dx * 0.7;
+      } else if (mid === "ast_metalico") {
+        const ang = Math.atan2(dy, dx);
+        const rad = 22 + Math.sin(ang * 3 + seed) * 7 + Math.cos(ang * 5) * 4;
+        if (dist < rad) lum = 195 + Math.sin(dx * 0.4) * 40;
+      } else if (mid === "ast_condrita") {
+        const ang = Math.atan2(dy, dx);
+        const rad = 24 + Math.cos(ang * 4 + seed) * 6;
+        if (dist < rad) lum = 125 + Math.sin(dx * 0.5) * Math.cos(dy * 0.5) * 35;
+      } else if (mid === "ast_cometa") {
+        const head = Math.hypot(dx + 14, dy);
+        if (head < 10) lum = 240 - head * 6;
+        else if (dx > -14 && Math.abs(dy) < (dx + 14) * 0.38 && dx < 38) {
+          lum = Math.max(14, 175 - (dx + 14) * 3.1);
+        }
+      } else if (mid === "sat_com") {
+        const core = Math.abs(dx) < 7 && Math.abs(dy) < 9;
+        const panel = Math.abs(dx) >= 11 && Math.abs(dx) <= 42 && Math.abs(dy) < 6;
+        const strut = Math.abs(dy) < 1.8 && Math.abs(dx) < 42;
+        if (core) lum = 225;
+        else if (panel) lum = ((x % 5 === 0 || y % 4 === 0) ? 95 : 190);
+        else if (strut) lum = 170;
+      } else if (mid === "sat_sonda") {
+        const dish = Math.hypot(dx + 8, dy);
+        const body = dx >= 4 && dx <= 22 && Math.abs(dy) < 6;
+        if (dish < 14 && dish > 9) lum = 230;
+        else if (body) lum = 195;
+      } else if (mid === "sat_telescopio") {
+        const tube = Math.abs(dx) < 22 && Math.abs(dy) < 8;
+        const flap = dx < -18 && dx > -28 && Math.abs(dy + 10) < 4;
+        if (tube) lum = 210 - Math.abs(dy) * 8;
+        else if (flap) lum = 180;
+      } else if (mid === "sat_estacion") {
+        const truss = Math.abs(dy) < 2.2 && Math.abs(dx) < 44;
+        const modV = Math.abs(dx) < 5 && Math.abs(dy) < 22;
+        const wings = (Math.abs(dx + 28) < 6 || Math.abs(dx - 28) < 6) && Math.abs(dy) < 18;
+        if (truss || modV) lum = 225;
+        else if (wings) lum = 175;
+      } else if (mid === "pul_ms") {
         const beam = Math.abs(dy - dx * Math.tan(t * 9)) < 2.4 && dist < 46;
-        if (dist < 12) lum = 245;
+        if (dist < 11) lum = 245;
         else if (beam) lum = 220;
+      } else if (mid === "pul_magnetar") {
+        const ring = Math.abs(dist - 24) < 2.5;
+        if (dist < 14) lum = 250;
+        else if (ring) lum = 200;
+      } else if (mid === "pul_binario") {
+        const d1 = Math.hypot(dx + 12, dy);
+        const d2 = Math.hypot(dx - 14, dy);
+        if (d1 < 10) lum = 245;
+        if (d2 < 14 && d2 > 10) lum = 195;
       }
 
       const snow = Math.random() * 255;
@@ -1513,7 +1625,6 @@ function drawMap(t) {
 }
 
 function drawCRT(t) {
-  if (isCrtBroken()) return;
   const cv = $("#crt");
   if (!cv || !cur) return;
   const [rw, rh] = CRT_RES[Math.min(5, G.f)];
@@ -1522,7 +1633,7 @@ function drawCRT(t) {
     cv.height = rh;
   }
   const tuneErr = cur.fixed ? 0 : Math.min(1, (offF(cur) + offP(cur)) * 0.75);
-  renderCelestialToCanvas(cv, cur, t, G.f, tuneErr, false);
+  renderCelestialToCanvas(cv, cur, t, G.f, tuneErr, false, isOpticalFailed());
 }
 
 function drawAtlasCanvases(t) {
@@ -1530,14 +1641,14 @@ function drawAtlasCanvases(t) {
     const mid = cv.dataset.atlasMid;
     const mod = MODELS.find(m => m.id === mid);
     if (mod) {
-      renderCelestialToCanvas(cv, {modelId: mod.id, img: mod.img, seed: 2.1, anom: false}, t, 5, 0, false);
+      renderCelestialToCanvas(cv, {modelId: mod.id, img: mod.img, seed: 2.1, anom: false, anomType: ""}, t, 5, 0, false, false);
     }
   });
   document.querySelectorAll("[data-anom-idx]").forEach(cv => {
     const idx = +cv.dataset.anomIdx;
     const item = discoveredAnomalies[idx];
     if (item) {
-      renderCelestialToCanvas(cv, item, t, 5, 0, true);
+      renderCelestialToCanvas(cv, item, t, 5, 0, true, false);
     }
   });
 }
@@ -1642,45 +1753,38 @@ function render() {
   let h = "";
   if (V === "intro") {
     h = `
-      <div class="card" style="padding:24px;text-align:center;margin-top:16px">
+      <div class="card" style="padding:24px;text-align:center;margin-top:22px">
         <div class="mut" style="font-size:12px;letter-spacing:2px">RED DE RADIOASTRONOMIA // SECTOR ERIAL-7</div>
         <h1 style="margin:10px 0 6px;font-size:24px;color:var(--accent)">FRECUENCIA DE FONDO</h1>
         <p class="mut" style="max-width:480px;margin:0 auto 18px">
           Terminal de escucha profunda, catalogacion cientifica y vigilancia orbital · Campana de 15 Noches.
         </p>
-        <div style="max-width:360px;margin:0 auto 12px;text-align:left">
-          <label for="playerName" style="display:block;font-size:12px;color:var(--accent);margin-bottom:5px">
-            NOMBRE DE OPERADOR:
+        <div style="max-width:340px;margin:0 auto 14px;text-align:left">
+          <label for="playerName" style="display:block;font-size:12px;color:var(--accent);margin-bottom:6px">
+            INGRESA TU NOMBRE DE OPERADOR:
           </label>
           <input type="text" id="playerName" placeholder="Ej. Alex Rivera" maxlength="32" value="${playerNameInput}" autocomplete="off">
         </div>
-        <div style="max-width:360px;margin:0 auto 12px;text-align:left">
-          <label for="startNight" style="display:block;font-size:12px;color:var(--accent);margin-bottom:5px">
-            NOCHE INICIAL (SELECTOR DE ESCENARIO):
+        <div style="max-width:340px;margin:0 auto 14px;text-align:left">
+          <label for="startNight" style="display:block;font-size:12px;color:var(--accent);margin-bottom:6px">
+            NOCHE DE INICIO (SELECTOR DE ESCENARIO):
           </label>
           <select id="startNight">
-            ${Array.from({length: TOTAL_NIGHTS}, (_, idx) => {
-              let tag = "";
-              if (idx === 0) tag = " — Recarga rapida";
-              else if (idx === 2) tag = " — Pulsares activos";
-              else if (idx === 4) tag = " — Interferencia solar";
-              else if (idx === 5) tag = " — Recarga lenta";
-              else if (idx === 8) tag = " — Fallo optico CRT";
-              else if (idx === 9) tag = " — Subcategorias + Anomalias";
-              else if (idx === 10) tag = " — Recarga nula";
-              return `<option value="${idx}" ${selectedStartNight === idx ? "selected" : ""}>Noche ${idx + 1}${tag}</option>`;
-            }).join("")}
+            ${NIGHT_SCENARIO_LABELS.map((lbl, idx) => `<option value="${idx}" ${selectedStartNight === idx ? "selected" : ""}>${lbl}</option>`).join("")}
           </select>
         </div>
-        <div style="max-width:360px;margin:0 auto 18px;text-align:left">
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#7dd3fc;cursor:pointer">
-            <input type="checkbox" id="freeModeChk" ${sandboxMode ? "checked" : ""}>
-            <span>Modo Libre (Atlas completo y mejoras al maximo)</span>
+        <div style="max-width:340px;margin:0 auto 18px;text-align:left;background:#0a120e;border:1px solid var(--border);border-radius:5px;padding:9px 11px">
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--fg)">
+            <input type="checkbox" id="freeModeChk" ${freeModeSelected ? "checked" : ""} style="margin-top:2px;accent-color:var(--accent);cursor:pointer">
+            <span>
+              <b style="color:var(--accent)">MODO LIBRE / SANDBOX</b><br>
+              <span class="mut" style="font-size:11px">Inicia con mejoras NV 5/5, 200 PWR con recarga activa, $9999 CR y todo el Atlas + anomalias desbloqueadas.</span>
+            </span>
           </label>
         </div>
         <div class="row" style="justify-content:center">
           <button id="go">Encender sistema</button>
-          <button class="sandbox-btn" id="goSandbox">Iniciar en Modo Libre</button>
+          <button class="alt" id="goFreeBtn">Iniciar en Modo Libre</button>
         </div>
       </div>`;
   } else if (V === "mail") {
@@ -1725,12 +1829,12 @@ function render() {
     const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
     h = `
       ${srv ? `
-        <div class="srv-banner between">
+        <div class="card dangerbox between" style="margin-top:0">
           <div>
-            <b>[!] FALLO DE SERVIDOR // ${srv.count} RELES DESINCRONIZADOS</b>
-            <div style="font-size:12px">La alineacion de antenas y la descarga de tramas estan detenidas hasta restablecer los reles.</div>
+            <b>[!] ALERTA DE SERVIDOR // ENLACE DE RELES CAIDO (${srv.count} MODULOS)</b>
+            <div style="font-size:12px">La alineacion y descarga de antenas estan detenidas hasta restablecer el servidor.</div>
           </div>
-          <button class="bad" id="goSrvFromMap">Reparar Servidor</button>
+          <button class="bad" id="goSrvBtn">Ir a Servidor</button>
         </div>
       ` : ""}
       <canvas id="cv" width="640" height="310"></canvas>
@@ -1754,7 +1858,6 @@ function render() {
     const ready = sigs.filter(s => s.st === "raw");
     if (cur && !ready.includes(cur)) cur = null;
     if (!cur && ready[0]) { cur = ready[0]; knobF = 50; knobP = 50; choiceCat = null; choiceMod = null; }
-    const brokenOptics = isCrtBroken();
 
     h = `<div class="row">
       <span class="mut" style="font-size:12px">BUFFER:</span>
@@ -1771,6 +1874,7 @@ function render() {
           </div>`;
       } else {
         const tuned = isTuned(cur);
+        const optFail = isOpticalFailed();
         const [rw, rh] = CRT_RES[Math.min(5, G.f)];
         const pF = proxPct(knobF, cur.tgF);
         const pP = proxPct(knobP, cur.tgP);
@@ -1778,19 +1882,10 @@ function render() {
         const colP = pP >= 88 ? "#4ade80" : pP >= 55 ? "#eab308" : "#ef4444";
 
         h += `
-          <div class="crt-wrap">
-            ${brokenOptics ? `
-              <div class="crt-offline">
-                <b style="font-size:15px;letter-spacing:1px">[ERROR DE VIDEO // MONITOR CRT FUERA DE LINEA]</b>
-                <p style="font-size:12px;margin:8px 0 0;max-width:340px">
-                  Fallo de instrumentacion de Noche 9: no es posible visualizar la imagen del objeto. Identificalo mediante audio y espectrograma.
-                </p>
-              </div>
-            ` : `
-              <canvas id="crt" width="${rw}" height="${rh}"></canvas>
-            `}
+          <div class="crt-wrap ${optFail ? "opt-fail" : ""}">
+            <canvas id="crt" width="${rw}" height="${rh}"></canvas>
             <div class="between" style="width:100%;max-width:420px;margin-top:6px;font-size:11px">
-              <span class="mut">${brokenOptics ? "VIDEO: SIN SENAL // AUDIO ACTIVO" : `CRT ${rw}x${rh}px // FILTRO NV.${G.f}/5`}</span>
+              <span class="mut" style="${optFail ? "color:#fca5a5" : ""}">${optFail ? "[ERROR OPTICO // MONITOR CRT AVERIADO]" : `CRT ${rw}x${rh}px // FILTRO NV.${G.f}/5`}</span>
               <span class="mut">${cur.fixed ? "[CAPTURA FIJADA]" : "SENAL SIN FIJAR"}</span>
             </div>
           </div>
@@ -1837,7 +1932,7 @@ function render() {
               ${CLASSES.map((c, i) => `<button class="${choiceCat === i ? "" : "alt"}" data-k="${i}">${c}</button>`).join("")}
             </div>
             ${needSub && choiceCat !== null ? `
-              <div class="mut" style="font-size:12px;margin:10px 0 6px">2. ESPECIFICA SUBCATEGORIA:</div>
+              <div class="mut" style="font-size:12px;margin:10px 0 6px">2. ESPECIFICA SUBCATEGORIA (HABILITADO DESDE NOCHE 10):</div>
               <div class="grid">
                 ${catModels.map(m => `<button class="${choiceMod === m.id ? "" : "alt"}" data-mod="${m.id}">${m.name}</button>`).join("")}
               </div>
@@ -1941,7 +2036,7 @@ function render() {
     if (discoveredAnomalies.length > 0) {
       h += `
         <div class="paper-sheet">
-          <h3>REGISTRO EN PAPEL // ANOMALIAS (${discoveredAnomalies.length}/${ANOMALY_DEFS.length})</h3>
+          <h3>REGISTRO EN PAPEL // ANOMALIAS</h3>
           <div class="paper-grid">
             ${discoveredAnomalies.map((a, idx) => `
               <div class="paper-entry">
@@ -2009,7 +2104,7 @@ function render() {
     <div class="card between">
       <div>
         <b>Celda de Energia Auxiliar (+45 PWR)</b>
-        <div class="mut" style="font-size:12px">Suministro de emergencia para guardias de baja o nula recarga.</div>
+        <div class="mut" style="font-size:12px">Suministro de emergencia indispensable cuando la recarga es lenta o nula.</div>
       </div>
       <button id="buyCellBtn" ${G.money < 30 || en >= cap ? "disabled" : ""}>$30 CR</button>
     </div>`;
@@ -2040,7 +2135,7 @@ function render() {
           <div class="row">
             <span class="pill">Creditos finales: $${G.money} CR</span>
             <span class="pill">Modelos en Atlas: ${discoveredModels.size}/${MODELS.length}</span>
-            <span class="pill">Anomalias registradas: ${discoveredAnomalies.length}/${ANOMALY_DEFS.length}</span>
+            <span class="pill">Anomalias registradas: ${discoveredAnomalies.length}</span>
           </div>
           <div class="row" style="margin-top:16px">
             <button id="rsBtn">Iniciar nueva partida</button>
@@ -2059,42 +2154,39 @@ function bindEvents(w) {
   const pn = w.querySelector("#playerName");
   const sn = w.querySelector("#startNight");
   const fm = w.querySelector("#freeModeChk");
-  if (pn) {
-    pn.oninput = e => { playerNameInput = e.target.value; };
-    pn.onkeydown = e => {
-      if (e.key === "Enter") {
-        beep(520, 0.1);
-        start(pn.value, sn ? sn.value : selectedStartNight, fm ? fm.checked : sandboxMode);
-      }
-    };
-    setTimeout(() => pn.focus(), 30);
-  }
   if (sn) {
     sn.onchange = e => { selectedStartNight = +e.target.value; };
   }
   if (fm) {
-    fm.onchange = e => { sandboxMode = !!e.target.checked; };
+    fm.onchange = e => { freeModeSelected = e.target.checked; };
+  }
+  if (pn) {
+    pn.oninput = e => { playerNameInput = e.target.value; };
+    pn.onkeydown = e => {
+      if (e.key === "Enter") {
+        const nightVal = sn ? +sn.value : selectedStartNight;
+        const freeVal = fm ? fm.checked : freeModeSelected;
+        beep(520, 0.1);
+        start(pn.value, nightVal, freeVal);
+      }
+    };
+    setTimeout(() => pn.focus(), 30);
   }
 
   on("#go", () => {
     const val = w.querySelector("#playerName")?.value || playerNameInput;
-    const nightVal = sn ? sn.value : selectedStartNight;
-    const freeVal = fm ? fm.checked : sandboxMode;
+    const nightVal = sn ? +sn.value : selectedStartNight;
+    const freeVal = fm ? fm.checked : freeModeSelected;
     beep(520, 0.1);
     start(val, nightVal, freeVal);
   });
 
-  on("#goSandbox", () => {
-    const val = (w.querySelector("#playerName")?.value || playerNameInput).trim() || "Operador Test";
-    const nightVal = sn ? sn.value : selectedStartNight;
-    beep(620, 0.1);
+  on("#goFreeBtn", () => {
+    const val = w.querySelector("#playerName")?.value || playerNameInput;
+    const nightVal = sn ? +sn.value : selectedStartNight;
+    freeModeSelected = true;
+    beep(620, 0.12);
     start(val, nightVal, true);
-  });
-
-  on("#goSrvFromMap", () => {
-    beep(420, 0.05);
-    V = "srv";
-    render();
   });
 
   w.querySelectorAll("[data-m]").forEach(el => el.onclick = () => {
@@ -2117,10 +2209,7 @@ function bindEvents(w) {
     beep(640, 0.1);
     addMail(
       "RE: REPORTE DE TELEMETRIA SATELITAL [RECIBIDO]",
-      `Registro orbital archivado:
-${log}
-
-Bonificacion acreditada: +$45 CR.`
+      `Registro orbital archivado:\n${log}\n\nBonificacion acreditada: +$45 CR.`
     );
     msg("[OK] Reporte satelital enviado (+$45 CR)", 1);
     syncLiveTelemetry(false, true);
@@ -2132,6 +2221,12 @@ Bonificacion acreditada: +$45 CR.`
     if (!allNightAssignsClosed()) return;
     beep(480, 0.1);
     advanceNight(false);
+  });
+
+  on("#goSrvBtn", () => {
+    beep(420, 0.05);
+    V = "srv";
+    render();
   });
 
   const cv = $("#cv");
@@ -2289,8 +2384,8 @@ Bonificacion acreditada: +$45 CR.`
     if (cur.anom) {
       if (!discoveredAnomalies.some(a => a.anomType === cur.anomType)) {
         discoveredAnomalies.push({
-          anomType: cur.anomType,
           anomTitle: cur.anomTitle,
+          anomType: cur.anomType,
           modelId: cur.modelId,
           img: cur.img,
           seed: cur.seed,
@@ -2413,7 +2508,7 @@ Bonificacion acreditada: +$45 CR.`
   });
 
   w.querySelectorAll("[data-atlas-au]").forEach(el => el.onclick = () => {
-    playSignalAudio({modelId: el.dataset.atlasAu, anom: false});
+    playSignalAudio({modelId: el.dataset.atlasAu, anom: false, anomType: ""});
   });
 
   w.querySelectorAll("[data-anom-au]").forEach(el => el.onclick = () => {
@@ -2488,6 +2583,7 @@ Bonificacion acreditada: +$45 CR.`
   on("#rsBtn", () => { V = "intro"; updTop(); render(); });
 }
 
+preloadAllSprites();
 render();
 updTop();
 requestAnimationFrame(loop);
