@@ -148,6 +148,58 @@ textarea{
 }
 #toast.ok{border-color:#22c55e;background:#0f291a}
 #toast.bad{border-color:#ef4444;background:#2b1111;color:#fecaca}
+.boot-screen{
+  background:#000000;border:2px solid #2a3a30;border-radius:6px;
+  padding:34px 20px 28px;margin:8px 0;min-height:420px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;position:relative;overflow:hidden;
+  box-shadow:inset 0 0 55px rgba(0,0,0,.95);
+}
+.boot-logo{
+  width:234px;height:192px;image-rendering:pixelated;image-rendering:crisp-edges;
+  display:block;margin:0 auto 22px;object-fit:contain;
+  animation:bootFadeIn .65s ease-out;
+}
+.boot-logo-mini{
+  width:117px;height:96px;image-rendering:pixelated;image-rendering:crisp-edges;
+  display:block;margin:0 auto 10px;object-fit:contain;
+}
+@keyframes bootFadeIn{
+  from{opacity:0;transform:scale(.97)}
+  to{opacity:1;transform:scale(1)}
+}
+.boot-bar-frame{
+  width:100%;max-width:360px;height:22px;padding:3px;
+  background:#0a0a0a;border-top:2px solid #4a5550;border-left:2px solid #4a5550;
+  border-right:2px solid #b8c4be;border-bottom:2px solid #b8c4be;
+  box-shadow:0 0 0 1px #000;margin:0 auto 10px;
+}
+.boot-bar-track{
+  width:100%;height:100%;background:#050807;overflow:hidden;position:relative;
+}
+.boot-bar-fill{
+  height:100%;width:0%;
+  background:repeating-linear-gradient(
+    90deg,
+    #38bdf8 0px,
+    #38bdf8 10px,
+    #050807 10px,
+    #050807 13px
+  );
+  box-shadow:0 0 10px rgba(56,189,248,.45);
+  transition:width .12s linear;
+}
+.boot-status{
+  font-size:12px;color:#b8d4c2;letter-spacing:.6px;min-height:18px;margin-top:4px;
+}
+.boot-audio-hint{
+  margin-top:18px;font-size:11px;color:#789c82;letter-spacing:.8px;
+  animation:blinkHint 1.3s steps(2,end) infinite;cursor:pointer;
+}
+@keyframes blinkHint{
+  0%,100%{opacity:1}
+  50%{opacity:.28}
+}
 </style>
 </head>
 <body>
@@ -428,7 +480,12 @@ const activeDbUrl = normalizeDbUrl(CLOUD_DB_URL);
 let cloudInFlight = false;
 let cloudQueuedSnap = null;
 
-let V = "intro", G = null, S = null;
+const COSMOS95_FALLBACK_DATA = "data:image/png;base64,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";
+let V = "boot", G = null, S = null;
+let bootElapsed = 0;
+let bootProgress = 0;
+let bootSoundPlayed = false;
+let bootLoginChimePending = false;
 let playerNameInput = "";
 let selectedStartNight = 0;
 let freeModeSelected = false;
@@ -597,6 +654,101 @@ function stopVoice() {
   if (!activeVoice) return;
   try { activeVoice.o.stop(); } catch (_) {}
   activeVoice = null;
+}
+
+function playStartupSound(forceReplay = false) {
+  if (muted) return false;
+  if (bootSoundPlayed && !forceReplay) return true;
+  try {
+    au = au || new (window.AudioContext || window.webkitAudioContext)();
+    if (au.state === "suspended") {
+      au.resume().catch(() => {});
+    }
+    if (au.state !== "running") {
+      return false;
+    }
+    bootSoundPlayed = true;
+    bootLoginChimePending = false;
+
+    const now = au.currentTime + 0.03;
+    const master = au.createGain();
+    const filter = au.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(360, now);
+    filter.frequency.exponentialRampToValueAtTime(2400, now + 0.85);
+    filter.frequency.exponentialRampToValueAtTime(980, now + 3.4);
+    filter.Q.value = 1.4;
+
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.linearRampToValueAtTime(0.16, now + 0.22);
+    master.gain.setValueAtTime(0.15, now + 1.65);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + 3.6);
+
+    filter.connect(master);
+    master.connect(au.destination);
+
+    // Acordes sintetizados estilo PC 1995 (EbMaj9 -> AbMaj9 -> Bb13sus -> EbMaj9)
+    const chords = [
+      { t: 0.00, dur: 1.05, freqs: [155.56, 233.08, 311.13, 392.00, 466.16, 587.33] },
+      { t: 0.82, dur: 1.05, freqs: [207.65, 311.13, 415.30, 523.25, 622.25, 783.99] },
+      { t: 1.58, dur: 2.00, freqs: [155.56, 233.08, 349.23, 392.00, 587.33, 932.33] }
+    ];
+
+    chords.forEach((ch, ci) => {
+      ch.freqs.forEach((f, fi) => {
+        const osc = au.createOscillator();
+        const vg = au.createGain();
+        osc.type = (fi % 2 === 0) ? "triangle" : "sine";
+        const detune = (fi % 2 === 0 ? -5 : 5) + ci * 1.5;
+        osc.frequency.setValueAtTime(f, now + ch.t);
+        osc.detune.setValueAtTime(detune, now + ch.t);
+
+        const voicePeak = (fi === 0 ? 0.22 : 0.13) / Math.sqrt(ch.freqs.length);
+        vg.gain.setValueAtTime(0.0001, now + ch.t);
+        vg.gain.linearRampToValueAtTime(voicePeak, now + ch.t + 0.14);
+        vg.gain.exponentialRampToValueAtTime(0.0001, now + ch.t + ch.dur);
+
+        osc.connect(vg);
+        vg.connect(filter);
+        osc.start(now + ch.t);
+        osc.stop(now + ch.t + ch.dur + 0.05);
+      });
+    });
+
+    // Destello cristalino superior (campana espacial 95)
+    [1174.66, 1567.98, 1864.66].forEach((bf, idx) => {
+      const bell = au.createOscillator();
+      const bg = au.createGain();
+      bell.type = "sine";
+      const bt = now + 0.45 + idx * 0.42;
+      bell.frequency.setValueAtTime(bf, bt);
+      bg.gain.setValueAtTime(0.0001, bt);
+      bg.gain.linearRampToValueAtTime(0.032, bt + 0.03);
+      bg.gain.exponentialRampToValueAtTime(0.0001, bt + 1.35);
+      bell.connect(bg);
+      bg.connect(au.destination);
+      bell.start(bt);
+      bell.stop(bt + 1.4);
+    });
+
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function startBootSequence() {
+  V = "boot";
+  bootElapsed = 0;
+  bootProgress = 0;
+  bootSoundPlayed = false;
+  bootLoginChimePending = true;
+  render();
+  updTop();
+  if (playStartupSound(true)) {
+    const hint = document.querySelector("#bootAudioHint");
+    if (hint) hint.style.display = "none";
+  }
 }
 
 function playSignalAudio(sigObj) {
@@ -919,8 +1071,10 @@ function updBadges() {
 
 function updTop() {
   const st = $("#st");
-  if (!G || V === "intro" || V === "end") {
-    st.innerHTML = `<span class="pill">SECTOR ERIAL-7</span>`;
+  if (!G || V === "boot" || V === "intro" || V === "end") {
+    st.innerHTML = V === "boot"
+      ? `<span class="pill">AVALANCHE BIOS v4.95</span><span class="pill">COSMOS 95</span>`
+      : `<span class="pill">COSMOS 95 // SECTOR ERIAL-7</span>`;
     const t = $("#toast");
     t.textContent = flash;
     t.className = flash ? (flashOk ? "ok" : "bad") : "";
@@ -1185,7 +1339,47 @@ function advanceNight(timedOut) {
   }
 }
 
+function computeBootProgress(sec) {
+  if (sec <= 0.6) return Math.round((sec / 0.6) * 18);
+  if (sec <= 1.5) return Math.round(18 + ((sec - 0.6) / 0.9) * 34);
+  if (sec <= 2.3) return Math.round(52 + ((sec - 1.5) / 0.8) * 14);
+  if (sec <= 3.5) return Math.round(66 + ((sec - 2.3) / 1.2) * 30);
+  if (sec <= 4.0) return Math.round(96 + ((sec - 3.5) / 0.5) * 4);
+  return 100;
+}
+
+function getBootStatusText(pct) {
+  if (pct < 20) return "AVALANCHE COSMOS 95 (R) · INICIANDO NUCLEO DEL SISTEMA...";
+  if (pct < 48) return "VERIFICANDO MEMORIA EXTENDIDA: 65536 KB OK";
+  if (pct < 72) return "CARGANDO CONTROLADORES DE TELEMETRIA ERIAL-7...";
+  if (pct < 96) return "SINCRONIZANDO MATRIZ DE RADIOASTRONOMIA...";
+  return "SISTEMA OPERATIVO LISTO · CARGANDO INICIO DE SESION...";
+}
+
+function drawBoot() {
+  const fill = document.querySelector("#bootBarFill");
+  const st = document.querySelector("#bootStatus");
+  const pctEl = document.querySelector("#bootPct");
+  if (fill) fill.style.width = `${bootProgress}%`;
+  if (pctEl) pctEl.textContent = `${bootProgress}%`;
+  if (st) st.textContent = getBootStatusText(bootProgress);
+}
+
 function tick(dt) {
+  if (V === "boot") {
+    bootElapsed += dt;
+    bootProgress = computeBootProgress(bootElapsed);
+    if (!bootSoundPlayed && playStartupSound(false)) {
+      const hint = document.querySelector("#bootAudioHint");
+      if (hint) hint.style.display = "none";
+    }
+    if (bootElapsed >= 4.45) {
+      V = "intro";
+      updTop();
+      render();
+    }
+    return;
+  }
   if (!G || V === "intro" || V === "end") return;
 
   shiftLeft -= dt;
@@ -1740,6 +1934,7 @@ function loop(now) {
   last = now;
   tick(dt);
   const t = now / 1000;
+  if (V === "boot") drawBoot();
   if (V === "map") drawMap(t);
   if (V === "proc") drawCRT(t);
   if (V === "spec") drawSpectrogram(t);
@@ -1749,7 +1944,7 @@ function loop(now) {
 
 function render() {
   const w = $("#win"), tb = $("#tabs");
-  if (V === "intro" || V === "end") {
+  if (V === "boot" || V === "intro" || V === "end") {
     tb.innerHTML = "";
   } else {
     const un = mail.filter(m => !m.read).length;
@@ -1779,17 +1974,46 @@ function render() {
   }
 
   let h = "";
-  if (V === "intro") {
+  if (V === "boot") {
     h = `
-      <div class="card" style="padding:24px;text-align:center;margin-top:22px">
-        <div class="mut" style="font-size:12px;letter-spacing:2px">RED DE RADIOASTRONOMIA // SECTOR ERIAL-7</div>
-        <h1 style="margin:10px 0 6px;font-size:24px;color:var(--accent)">FRECUENCIA DE FONDO</h1>
-        <p class="mut" style="max-width:480px;margin:0 auto 18px">
+      <div class="boot-screen" id="bootScreen">
+        <img
+          src="Cosmos95.png"
+          alt="Avalanche Cosmos 95"
+          class="boot-logo"
+          onerror="this.onerror=null;this.src=COSMOS95_FALLBACK_DATA;"
+        >
+        <div class="boot-bar-frame">
+          <div class="boot-bar-track">
+            <div class="boot-bar-fill" id="bootBarFill" style="width:${bootProgress}%"></div>
+          </div>
+        </div>
+        <div style="width:100%;max-width:360px;display:flex;justify-content:space-between;font-size:11px;color:#789c82;margin-bottom:4px">
+          <span>CARGANDO COSMOS 95...</span>
+          <span id="bootPct">${bootProgress}%</span>
+        </div>
+        <div class="boot-status" id="bootStatus">${getBootStatusText(bootProgress)}</div>
+        <div class="boot-audio-hint" id="bootAudioHint" style="display:${bootSoundPlayed ? "none" : "block"}">
+          [ HAZ CLIC O PULSA UNA TECLA PARA ACTIVAR SONIDO DE INICIO ]
+        </div>
+      </div>`;
+  } else if (V === "intro") {
+    h = `
+      <div class="card" style="padding:22px 24px;text-align:center;margin-top:12px">
+        <img
+          src="Cosmos95.png"
+          alt="Avalanche Cosmos 95"
+          class="boot-logo-mini"
+          onerror="this.onerror=null;this.src=COSMOS95_FALLBACK_DATA;"
+        >
+        <div class="mut" style="font-size:11px;letter-spacing:2px">AVALANCHE COSMOS 95 // SECTOR ERIAL-7</div>
+        <h1 style="margin:6px 0 6px;font-size:23px;color:var(--accent)">FRECUENCIA DE FONDO</h1>
+        <p class="mut" style="max-width:480px;margin:0 auto 16px;font-size:13px">
           Terminal de escucha profunda, catalogacion cientifica y vigilancia orbital · Campana de 15 Noches.
         </p>
         <div style="max-width:340px;margin:0 auto 14px;text-align:left">
           <label for="playerName" style="display:block;font-size:12px;color:var(--accent);margin-bottom:6px">
-            INGRESA TU NOMBRE DE OPERADOR:
+            INTRODUZCA SU NOMBRE DE USUARIO:
           </label>
           <input type="text" id="playerName" placeholder="Ej. Alex Rivera" maxlength="32" value="${playerNameInput}" autocomplete="off">
         </div>
@@ -1811,8 +2035,9 @@ function render() {
           </label>
         </div>
         <div class="row" style="justify-content:center">
-          <button id="go">Encender sistema</button>
+          <button id="go">Iniciar sistema</button>
           <button class="alt" id="goFreeBtn">Iniciar en Modo Libre</button>
+          <button class="alt" id="replayBootBtn" title="Repetir secuencia de arranque Cosmos 95">↻ Boot</button>
         </div>
       </div>`;
   } else if (V === "mail") {
@@ -2179,6 +2404,20 @@ function render() {
 function bindEvents(w) {
   const on = (sel, fn) => { const el = w.querySelector(sel); if (el) el.onclick = fn; };
 
+  const bootEl = w.querySelector("#bootScreen");
+  if (bootEl) {
+    bootEl.onclick = () => {
+      if (playStartupSound(false)) {
+        const hint = w.querySelector("#bootAudioHint");
+        if (hint) hint.style.display = "none";
+      }
+    };
+  }
+
+  on("#replayBootBtn", () => {
+    startBootSequence();
+  });
+
   const pn = w.querySelector("#playerName");
   const sn = w.querySelector("#startNight");
   const fm = w.querySelector("#freeModeChk");
@@ -2198,6 +2437,11 @@ function bindEvents(w) {
         start(pn.value, nightVal, freeVal);
       }
     };
+    pn.onfocus = () => {
+      if (bootLoginChimePending && !bootSoundPlayed) {
+        playStartupSound(false);
+      }
+    };
     setTimeout(() => pn.focus(), 30);
   }
 
@@ -2205,7 +2449,11 @@ function bindEvents(w) {
     const val = w.querySelector("#playerName")?.value || playerNameInput;
     const nightVal = sn ? +sn.value : selectedStartNight;
     const freeVal = fm ? fm.checked : freeModeSelected;
-    beep(520, 0.1);
+    if (bootLoginChimePending && !bootSoundPlayed) {
+      playStartupSound(false);
+    } else {
+      beep(520, 0.1);
+    }
     start(val, nightVal, freeVal);
   });
 
@@ -2611,11 +2859,21 @@ function bindEvents(w) {
   on("#rsBtn", () => { V = "intro"; updTop(); render(); });
 }
 
+function unlockBootAudioOnGesture() {
+  if (V === "boot" && !bootSoundPlayed) {
+    if (playStartupSound(false)) {
+      const hint = document.querySelector("#bootAudioHint");
+      if (hint) hint.style.display = "none";
+    }
+  }
+}
+window.addEventListener("pointerdown", unlockBootAudioOnGesture, { passive: true });
+window.addEventListener("keydown", unlockBootAudioOnGesture, { passive: true });
+
 function bootTerminal() {
   try {
     preloadAllSprites();
-    render();
-    updTop();
+    startBootSequence();
     requestAnimationFrame(loop);
   } catch (err) {
     const w = document.querySelector("#win");
