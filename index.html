@@ -3,118 +3,123 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Frecuencia de Fondo · Estación Erial-7</title>
+<title>Inicio de Sesion del Sistema</title>
 <style>
 :root{
-  --bg:#060a08;--panel:#0c1410;--card:#111d17;--border:#243d2b;
-  --fg:#c8f2d0;--mut:#789c82;--accent:#4ade80;--warn:#eab308;--bad:#ef4444;--blue:#38bdf8;
+  --bg:#000000;--panel:#000000;--card:#000000;--border:#22c55e;
+  --fg:#ffffff;--mut:#e4e4e7;--accent:#22c55e;--warn:#eab308;--bad:#ef4444;--blue:#38bdf8;
   box-sizing:border-box;
 }
 *{box-sizing:border-box}
 body{
-  margin:0;background:var(--bg);color:var(--fg);
+  margin:0;background:#000000;color:#ffffff;
   font:14px/1.45 ui-monospace,"Cascadia Code","Fira Code",Consolas,monospace;
   padding:env(safe-area-inset-top,8px) 8px env(safe-area-inset-bottom,12px);
 }
 main{max-width:860px;margin:0 auto}
 .terminal{
-  background:var(--panel);border:2px solid var(--border);border-radius:10px;
-  overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.78);position:relative;
+  background:#000000;border:2px solid #22c55e;border-radius:4px;
+  overflow:hidden;box-shadow:0 0 0 1px #000000, 0 12px 40px rgba(0,0,0,.92);position:relative;
 }
 .terminal::after{
   content:"";position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0px,rgba(0,0,0,.13) 1px,transparent 1px,transparent 3px);
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0px,rgba(0,0,0,.16) 1px,transparent 1px,transparent 3px);
 }
 .topbar{
   display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
-  padding:8px 12px;background:#080e0b;border-bottom:1px solid var(--border);font-size:12px;
+  padding:8px 12px;background:#000000;border-bottom:1px solid #22c55e;font-size:12px;color:#ffffff;
 }
-.topbar b{color:var(--accent);letter-spacing:1px}
+.topbar b{color:#ffffff;letter-spacing:1px}
 .stats{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.pill{background:#122019;border:1px solid var(--border);padding:2px 7px;border-radius:4px}
-.pill.night{border-color:#991b1b;color:#fca5a5;background:#1f0d0d}
-.pill.lowtime{border-color:#ca8a04;color:#fde047}
-.pill.slowrech{border-color:#ca8a04;color:#fde047;background:#221b08}
-.pill.norech{border-color:#b45309;color:#fdba74;background:#231307}
-#tabs{display:flex;overflow-x:auto;background:#080e0b;border-bottom:1px solid var(--border)}
+.pill{background:#000000;border:1px solid #22c55e;color:#ffffff;padding:2px 7px;border-radius:3px}
+.pill.night{border-color:#ef4444;color:#ffffff;background:#000000}
+.pill.lowtime{border-color:#eab308;color:#ffffff;background:#000000}
+.pill.slowrech{border-color:#eab308;color:#ffffff;background:#000000}
+.pill.norech{border-color:#f97316;color:#ffffff;background:#000000}
+#tabs{display:flex;overflow-x:auto;background:#000000;border-bottom:1px solid #22c55e}
 .tab{
-  flex:none;background:transparent;color:var(--mut);border:0;border-right:1px solid var(--border);
+  flex:none;background:#000000;color:#d4d4d8;border:0;border-right:1px solid #22c55e;
   padding:10px 13px;font:inherit;font-size:13px;cursor:pointer;transition:.15s;
 }
-.tab:hover{background:#111e17;color:var(--fg)}
-.tab.on{background:#172b20;color:var(--fg);box-shadow:inset 0 -3px var(--accent)}
-.bd{background:var(--warn);color:#000;border-radius:3px;padding:0 5px;font-weight:700;font-size:11px;margin-left:4px}
-#win{padding:14px;min-height:460px}
+.tab:hover{background:#061c0e;color:#ffffff}
+.tab.on{background:#000000;color:#ffffff;box-shadow:inset 0 -3px #22c55e}
+.bd{background:#22c55e;color:#000000;border-radius:3px;padding:0 5px;font-weight:700;font-size:11px;margin-left:4px}
+#win{padding:14px;min-height:460px;background:#000000;color:#ffffff;position:relative}
 button{
-  font:inherit;font-size:13px;background:#1f5c38;color:#ecfdf5;
-  border:1px solid #348a57;border-radius:5px;padding:8px 12px;cursor:pointer;
+  font:inherit;font-size:13px;background:#000000;color:#ffffff;
+  border:1px solid #22c55e;border-radius:3px;padding:8px 14px;cursor:pointer;
 }
-button:hover:not(:disabled){background:#277346}
-button.alt{background:#101b15;color:var(--fg);border:1px solid var(--border)}
-button.alt:hover:not(:disabled){background:#182920}
-button.bad{background:#7f1d1d;border-color:#b91c1c;color:#fef2f2}
-button.warn{background:#78350f;border-color:#d97706;color:#fef3c7}
-button.shadow{background:#231438;border-color:#7e22ce;color:#f3e8ff}
-button.shadow:hover:not(:disabled){background:#321c52}
+button:hover:not(:disabled){background:#072412;border-color:#4ade80;color:#ffffff}
+button.primary-os{
+  border-width:2px;font-weight:700;
+}
+button.alt{background:#000000;color:#ffffff;border:1px solid #22c55e}
+button.alt:hover:not(:disabled){background:#072412;border-color:#4ade80}
+button.bad{background:#000000;border:1px solid #ef4444;color:#ffffff}
+button.bad:hover:not(:disabled){background:#240808}
+button.warn{background:#000000;border:1px solid #eab308;color:#ffffff}
+button.warn:hover:not(:disabled){background:#241b06}
+button.shadow{background:#000000;border:1px solid #a855f7;color:#ffffff}
+button.shadow:hover:not(:disabled){background:#1c0b2e}
 button:disabled{opacity:.35;cursor:not-allowed}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
 .between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin:8px 0}
-.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px;margin:8px 0}
-.card.warnbox{border-color:#d97706;background:#1f1609}
-.card.dangerbox{border-color:#b91c1c;background:#220b0b}
-.card.shadowbox{border-color:#7e22ce;background:#160d24}
-.mut{color:var(--mut)}
+.card{background:#000000;border:1px solid #22c55e;border-radius:4px;padding:10px;margin:8px 0;color:#ffffff}
+.card.warnbox{border-color:#eab308;background:#000000}
+.card.dangerbox{border-color:#ef4444;background:#000000}
+.card.shadowbox{border-color:#a855f7;background:#000000}
+.mut{color:#e4e4e7}
 .mail-layout{display:grid;grid-template-columns:1fr;gap:10px}
 @media(min-width:660px){.mail-layout{grid-template-columns:265px 1fr}}
-.mail-list{border:1px solid var(--border);border-radius:6px;background:#09100c;max-height:340px;overflow-y:auto}
-.mi{padding:9px 10px;border-bottom:1px solid #18291e;cursor:pointer;font-size:12px}
-.mi:hover{background:#121f18}
-.mi.un{font-weight:700;border-left:3px solid var(--accent);background:#101c16}
-.mi.sel{background:#192e23}
+.mail-list{border:1px solid #22c55e;border-radius:4px;background:#000000;max-height:340px;overflow-y:auto}
+.mi{padding:9px 10px;border-bottom:1px solid #166534;cursor:pointer;font-size:12px;color:#ffffff}
+.mi:hover{background:#061c0e}
+.mi.un{font-weight:700;border-left:3px solid #22c55e;background:#000000}
+.mi.sel{background:#072412}
 .mi.anom-mail{border-left-color:#a855f7}
-.mail-body{white-space:pre-line;font-size:13px;line-height:1.55}
-#cv{width:100%;height:310px;border:1px solid var(--border);border-radius:6px;background:#03060a;display:block;touch-action:none;cursor:grab}
+.mail-body{white-space:pre-line;font-size:13px;line-height:1.55;color:#ffffff}
+#cv{width:100%;height:310px;border:1px solid #22c55e;border-radius:4px;background:#000000;display:block;touch-action:none;cursor:grab}
 #cv:active{cursor:grabbing}
 .crt-wrap{
-  background:#040404;border:2px solid #2b382e;border-radius:6px;padding:8px;
+  background:#000000;border:2px solid #22c55e;border-radius:4px;padding:8px;
   display:flex;flex-direction:column;align-items:center;position:relative;
 }
-.crt-wrap.opt-fail{border-color:#991b1b;background:#110505}
-#crt{width:100%;max-width:420px;height:240px;image-rendering:pixelated;background:#0a0a0a;border:1px solid #222;display:block}
-#spec{width:100%;height:190px;background:#040806;border:1px solid var(--border);border-radius:6px;display:block}
+.crt-wrap.opt-fail{border-color:#ef4444;background:#000000}
+#crt{width:100%;max-width:420px;height:240px;image-rendering:pixelated;background:#000000;border:1px solid #22c55e;display:block}
+#spec{width:100%;height:190px;background:#000000;border:1px solid #22c55e;border-radius:4px;display:block}
 .databox{
-  background:#070c09;border:1px solid var(--border);border-radius:5px;padding:9px;
-  font-size:12px;color:#a7f3d0;white-space:pre-wrap;word-break:break-all;margin-top:8px;
+  background:#000000;border:1px solid #22c55e;border-radius:4px;padding:9px;
+  font-size:12px;color:#ffffff;white-space:pre-wrap;word-break:break-all;margin-top:8px;
 }
-.databox.anom{border-color:#991b1b;color:#fca5a5;background:#140808}
-input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer}
+.databox.anom{border-color:#ef4444;color:#ffffff;background:#000000}
+input[type=range]{flex:1;accent-color:#22c55e;cursor:pointer}
 input[type=text]{
-  width:100%;max-width:340px;background:#070d0a;color:var(--fg);
-  border:1px solid #348a57;border-radius:5px;padding:9px 12px;font:14px inherit;
+  width:100%;max-width:340px;background:#000000;color:#ffffff;
+  border:1px solid #22c55e;border-radius:3px;padding:9px 12px;font:14px inherit;
   outline:none;
 }
-input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(74,222,128,.2)}
+input[type=text]:focus{border-color:#4ade80;box-shadow:0 0 0 2px rgba(34,197,94,.28)}
 select{
-  width:100%;max-width:340px;background:#070d0a;color:var(--fg);
-  border:1px solid #348a57;border-radius:5px;padding:9px 12px;font:13px inherit;
+  width:100%;max-width:100%;background:#000000;color:#ffffff;
+  border:1px solid #22c55e;border-radius:3px;padding:9px 12px;font:13px inherit;
   outline:none;cursor:pointer;
 }
-select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(74,222,128,.2)}
+select:focus{border-color:#4ade80;box-shadow:0 0 0 2px rgba(34,197,94,.28)}
 textarea{
-  width:100%;min-height:85px;background:#070d0a;color:var(--fg);
-  border:1px solid var(--border);border-radius:5px;padding:8px;font:12px inherit;
+  width:100%;min-height:85px;background:#000000;color:#ffffff;
+  border:1px solid #22c55e;border-radius:4px;padding:8px;font:12px inherit;
 }
-.prox-wrap{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:11px}
-.prox-bar{flex:1;height:7px;background:#070d0a;border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.prox-wrap{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:11px;color:#ffffff}
+.prox-bar{flex:1;height:7px;background:#000000;border:1px solid #22c55e;border-radius:3px;overflow:hidden}
 .prox-fill{height:100%;transition:width .08s,background .12s}
 .atlas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:10px}
 .atlas-card{
-  background:#0c1611;border:1px solid var(--border);border-radius:6px;padding:9px;
-  display:flex;flex-direction:column;gap:6px;
+  background:#000000;border:1px solid #22c55e;border-radius:4px;padding:9px;
+  display:flex;flex-direction:column;gap:6px;color:#ffffff;
 }
-.atlas-card.locked{opacity:.48;background:#080e0b}
-.atlas-cv{width:100%;height:110px;image-rendering:pixelated;background:#050806;border:1px solid #1f3326;border-radius:4px;display:block}
+.atlas-card.locked{opacity:.52;background:#000000;border-color:#15803d}
+.atlas-cv{width:100%;height:110px;image-rendering:pixelated;background:#000000;border:1px solid #22c55e;border-radius:3px;display:block}
 .paper-sheet{
   background:linear-gradient(180deg,#e9dec4 0%,#dfd0b0 100%);
   color:#2b2116;border:2px solid #8c734b;border-radius:6px;padding:14px;
@@ -143,26 +148,21 @@ textarea{
 }
 .paper-btn:hover{background:#473319}
 #toast{
-  margin-top:8px;padding:8px 12px;border-radius:6px;background:#15291e;
-  border:1px solid var(--border);color:var(--fg);text-align:center;font-size:12px;min-height:34px;
+  margin-top:8px;padding:8px 12px;border-radius:4px;background:#000000;
+  border:1px solid #22c55e;color:#ffffff;text-align:center;font-size:12px;min-height:34px;
 }
-#toast.ok{border-color:#22c55e;background:#0f291a}
-#toast.bad{border-color:#ef4444;background:#2b1111;color:#fecaca}
+#toast.ok{border-color:#22c55e;background:#000000;color:#ffffff}
+#toast.bad{border-color:#ef4444;background:#000000;color:#ffffff}
 .boot-screen{
-  background:#000000;border:2px solid #2a3a30;border-radius:6px;
+  background:#000000;border:2px solid #22c55e;border-radius:4px;
   padding:34px 20px 28px;margin:8px 0;min-height:420px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;position:relative;overflow:hidden;
-  box-shadow:inset 0 0 55px rgba(0,0,0,.95);
 }
 .boot-logo{
   width:234px;height:192px;image-rendering:pixelated;image-rendering:crisp-edges;
   display:block;margin:0 auto 22px;object-fit:contain;
   animation:bootFadeIn .65s ease-out;
-}
-.boot-logo-mini{
-  width:117px;height:96px;image-rendering:pixelated;image-rendering:crisp-edges;
-  display:block;margin:0 auto 10px;object-fit:contain;
 }
 @keyframes bootFadeIn{
   from{opacity:0;transform:scale(.97)}
@@ -170,35 +170,62 @@ textarea{
 }
 .boot-bar-frame{
   width:100%;max-width:360px;height:22px;padding:3px;
-  background:#0a0a0a;border-top:2px solid #4a5550;border-left:2px solid #4a5550;
-  border-right:2px solid #b8c4be;border-bottom:2px solid #b8c4be;
-  box-shadow:0 0 0 1px #000;margin:0 auto 10px;
+  background:#000000;border:1px solid #22c55e;
+  margin:0 auto 10px;
 }
 .boot-bar-track{
-  width:100%;height:100%;background:#050807;overflow:hidden;position:relative;
+  width:100%;height:100%;background:#000000;overflow:hidden;position:relative;
 }
 .boot-bar-fill{
   height:100%;width:0%;
   background:repeating-linear-gradient(
     90deg,
-    #38bdf8 0px,
-    #38bdf8 10px,
-    #050807 10px,
-    #050807 13px
+    #22c55e 0px,
+    #22c55e 10px,
+    #000000 10px,
+    #000000 13px
   );
-  box-shadow:0 0 10px rgba(56,189,248,.45);
   transition:width .12s linear;
 }
 .boot-status{
-  font-size:12px;color:#b8d4c2;letter-spacing:.6px;min-height:18px;margin-top:4px;
+  font-size:12px;color:#ffffff;letter-spacing:.6px;min-height:18px;margin-top:4px;
 }
 .boot-audio-hint{
-  margin-top:18px;font-size:11px;color:#789c82;letter-spacing:.8px;
+  margin-top:18px;font-size:11px;color:#ffffff;letter-spacing:.8px;
   animation:blinkHint 1.3s steps(2,end) infinite;cursor:pointer;
 }
 @keyframes blinkHint{
   0%,100%{opacity:1}
   50%{opacity:.28}
+}
+.login-win{
+  background:#000000;border:2px solid #22c55e;border-radius:4px;
+  max-width:460px;margin:28px auto;padding:0;overflow:hidden;
+}
+.os-win-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 12px;background:#000000;border-bottom:1px solid #22c55e;
+  font-size:12px;color:#ffffff;letter-spacing:.8px;
+}
+.login-body{
+  padding:28px 24px 26px;text-align:center;background:#000000;color:#ffffff;
+}
+.user-avatar-frame{
+  width:96px;height:96px;margin:0 auto 18px;
+  background:#000000;border:2px solid #22c55e;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+}
+.os-modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.86);
+  display:flex;align-items:center;justify-content:center;padding:14px;z-index:50;
+}
+.os-modal-win{
+  width:100%;max-width:460px;background:#000000;border:2px solid #22c55e;
+  border-radius:4px;color:#ffffff;overflow:hidden;
+  box-shadow:0 0 0 2px #000000, 0 0 28px rgba(34,197,94,.25);
+}
+.os-modal-body{
+  padding:18px 20px;background:#000000;color:#ffffff;text-align:left;
 }
 </style>
 </head>
@@ -206,7 +233,7 @@ textarea{
 <main>
 <div class="terminal">
   <div class="topbar">
-    <b>ERIAL-7 // TERMINAL DE ESCUCHA</b>
+    <b id="topTitle">INICIO DE SESION</b>
     <div class="stats" id="st"></div>
   </div>
   <div id="tabs"></div>
@@ -486,6 +513,7 @@ let bootElapsed = 0;
 let bootProgress = 0;
 let bootSoundPlayed = false;
 let bootLoginChimePending = false;
+let adminModalOpen = false;
 let playerNameInput = "";
 let selectedStartNight = 0;
 let freeModeSelected = false;
@@ -1071,16 +1099,31 @@ function updBadges() {
 
 function updTop() {
   const st = $("#st");
+  const topTitle = $("#topTitle");
   if (!G || V === "boot" || V === "intro" || V === "end") {
+    if (topTitle) {
+      topTitle.textContent = V === "boot"
+        ? "ARRANQUE DEL SISTEMA"
+        : V === "intro"
+          ? "INICIO DE SESION DEL SISTEMA"
+          : "ERIAL-7 // TERMINAL DE ESCUCHA";
+    }
+    document.title = V === "intro" || V === "boot"
+      ? "Inicio de Sesion del Sistema"
+      : "Frecuencia de Fondo · Estación Erial-7";
     st.innerHTML = V === "boot"
-      ? `<span class="pill">AVALANCHE BIOS v4.95</span><span class="pill">COSMOS 95</span>`
-      : `<span class="pill">COSMOS 95 // SECTOR ERIAL-7</span>`;
+      ? `<span class="pill">BIOS v4.95</span>`
+      : V === "intro"
+        ? `<span class="pill">TERMINAL LOCAL</span>`
+        : `<span class="pill">SESION FINALIZADA</span>`;
     const t = $("#toast");
     t.textContent = flash;
     t.className = flash ? (flashOk ? "ok" : "bad") : "";
     t.style.visibility = flash ? "visible" : "hidden";
     return;
   }
+  if (topTitle) topTitle.textContent = "ERIAL-7 // TERMINAL DE ESCUCHA";
+  document.title = "Frecuencia de Fondo · Estación Erial-7";
   const remAssigns = activeAssigns().length;
   const lowTime = shiftLeft <= 120;
   const regenMode = getEnergyRegenMode();
@@ -1988,8 +2031,8 @@ function render() {
             <div class="boot-bar-fill" id="bootBarFill" style="width:${bootProgress}%"></div>
           </div>
         </div>
-        <div style="width:100%;max-width:360px;display:flex;justify-content:space-between;font-size:11px;color:#789c82;margin-bottom:4px">
-          <span>CARGANDO COSMOS 95...</span>
+        <div style="width:100%;max-width:360px;display:flex;justify-content:space-between;font-size:11px;color:#ffffff;margin-bottom:4px">
+          <span>CARGANDO SISTEMA...</span>
           <span id="bootPct">${bootProgress}%</span>
         </div>
         <div class="boot-status" id="bootStatus">${getBootStatusText(bootProgress)}</div>
@@ -1999,47 +2042,68 @@ function render() {
       </div>`;
   } else if (V === "intro") {
     h = `
-      <div class="card" style="padding:22px 24px;text-align:center;margin-top:12px">
-        <img
-          src="Cosmos95.png"
-          alt="Avalanche Cosmos 95"
-          class="boot-logo-mini"
-          onerror="this.onerror=null;this.src=COSMOS95_FALLBACK_DATA;"
-        >
-        <div class="mut" style="font-size:11px;letter-spacing:2px">AVALANCHE COSMOS 95 // SECTOR ERIAL-7</div>
-        <h1 style="margin:6px 0 6px;font-size:23px;color:var(--accent)">FRECUENCIA DE FONDO</h1>
-        <p class="mut" style="max-width:480px;margin:0 auto 16px;font-size:13px">
-          Terminal de escucha profunda, catalogacion cientifica y vigilancia orbital · Campana de 15 Noches.
-        </p>
-        <div style="max-width:340px;margin:0 auto 14px;text-align:left">
-          <label for="playerName" style="display:block;font-size:12px;color:var(--accent);margin-bottom:6px">
-            INTRODUZCA SU NOMBRE DE USUARIO:
-          </label>
-          <input type="text" id="playerName" placeholder="Ej. Alex Rivera" maxlength="32" value="${playerNameInput}" autocomplete="off">
+      <div class="login-win">
+        <div class="os-win-bar">
+          <span>CONTROL DE ACCESO</span>
+          <span>[USR]</span>
         </div>
-        <div style="max-width:340px;margin:0 auto 14px;text-align:left">
-          <label for="startNight" style="display:block;font-size:12px;color:var(--accent);margin-bottom:6px">
-            NOCHE DE INICIO (SELECTOR DE ESCENARIO):
-          </label>
-          <select id="startNight">
-            ${NIGHT_SCENARIO_LABELS.map((lbl, idx) => `<option value="${idx}" ${selectedStartNight === idx ? "selected" : ""}>${lbl}</option>`).join("")}
-          </select>
+        <div class="login-body">
+          <div class="user-avatar-frame" aria-label="Usuario">
+            <svg width="62" height="62" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="22" r="11" stroke="#22c55e" stroke-width="2.5" fill="#ffffff"/>
+              <path d="M12 54C12 42.9543 20.9543 36 32 36C43.0457 36 52 42.9543 52 54" stroke="#22c55e" stroke-width="2.5" fill="#ffffff"/>
+            </svg>
+          </div>
+          <div style="max-width:340px;margin:0 auto 18px;text-align:left">
+            <label for="playerName" style="display:block;font-size:13px;color:#ffffff;margin-bottom:8px">
+              Introduzca su nombre de usuario
+            </label>
+            <input type="text" id="playerName" maxlength="32" value="${playerNameInput}" autocomplete="off">
+          </div>
+          <div class="row" style="justify-content:center;gap:10px;margin-top:8px">
+            <button id="go" class="primary-os">Iniciar sistema</button>
+            <button id="openAdminBtn" class="alt">Iniciar Modo Admin</button>
+          </div>
         </div>
-        <div style="max-width:340px;margin:0 auto 18px;text-align:left;background:#0a120e;border:1px solid var(--border);border-radius:5px;padding:9px 11px">
-          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--fg)">
-            <input type="checkbox" id="freeModeChk" ${freeModeSelected ? "checked" : ""} style="margin-top:2px;accent-color:var(--accent);cursor:pointer">
-            <span>
-              <b style="color:var(--accent)">MODO LIBRE / SANDBOX</b><br>
-              <span class="mut" style="font-size:11px">Inicia con mejoras NV 5/5, 200 PWR con recarga activa, $9999 CR y todo el Atlas + anomalias desbloqueadas.</span>
-            </span>
-          </label>
+      </div>
+
+      ${adminModalOpen ? `
+        <div class="os-modal-backdrop" id="adminBackdrop">
+          <div class="os-modal-win" role="dialog" aria-modal="true" aria-label="Modo Admin">
+            <div class="os-win-bar">
+              <span>MODO ADMIN // CONFIGURACION DE INICIO</span>
+              <button class="alt" id="closeAdminBtn" style="padding:2px 8px;font-size:11px">X</button>
+            </div>
+            <div class="os-modal-body">
+              <div style="margin-bottom:14px">
+                <label for="adminPlayerName" style="display:block;font-size:12px;color:#ffffff;margin-bottom:6px">
+                  Introduzca su nombre de usuario
+                </label>
+                <input type="text" id="adminPlayerName" maxlength="32" value="${playerNameInput}" autocomplete="off" style="max-width:100%">
+              </div>
+              <div style="margin-bottom:14px">
+                <label for="startNight" style="display:block;font-size:12px;color:#ffffff;margin-bottom:6px">
+                  SELECTOR DE NOCHES:
+                </label>
+                <select id="startNight">
+                  ${NIGHT_SCENARIO_LABELS.map((lbl, idx) => `<option value="${idx}" ${selectedStartNight === idx ? "selected" : ""}>${lbl}</option>`).join("")}
+                </select>
+              </div>
+              <div class="card" style="margin:0 0 16px;padding:10px 12px">
+                <div style="font-size:12px;font-weight:700;color:#ffffff;margin-bottom:4px">MODO LIBRE / SANDBOX</div>
+                <div style="font-size:11px;color:#e4e4e7">
+                  Inicia con mejoras NV 5/5, 200 PWR con recarga activa, $9999 CR y todo el Atlas + anomalias desbloqueadas.
+                </div>
+              </div>
+              <div class="row" style="justify-content:flex-end;gap:8px;margin:0">
+                <button class="alt" id="cancelAdminBtn">Cancelar</button>
+                <button class="alt" id="adminNormalBtn">Iniciar Noche</button>
+                <button class="primary-os" id="adminFreeBtn">Iniciar Modo Libre / Sandbox</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="row" style="justify-content:center">
-          <button id="go">Iniciar sistema</button>
-          <button class="alt" id="goFreeBtn">Iniciar en Modo Libre</button>
-          <button class="alt" id="replayBootBtn" title="Repetir secuencia de arranque Cosmos 95">↻ Boot</button>
-        </div>
-      </div>`;
+      ` : ""}`;
   } else if (V === "mail") {
     const sm = mail.find(m => m.id === selMail) || mail[0];
     if (sm && !sm.read) { sm.read = 1; selMail = sm.id; }
@@ -2225,7 +2289,7 @@ function render() {
           ${nightAssigns.map((a, idx) => {
             const mod = a.modelId ? MODELS.find(m => m.id === a.modelId) : null;
             const reqTxt = `${CLASSES[a.cat]}${mod ? ` (${mod.name})` : ""}`;
-            return `<div class="between" style="padding:7px 0;border-bottom:1px solid #1b2e22">
+            return `<div class="between" style="padding:7px 0;border-bottom:1px solid #166534">
               <div>
                 <b>Encargo ${idx + 1}/3 · ${a.sciName}</b>
                 <div class="mut" style="font-size:12px">Solicita: ${reqTxt} · Pago: $${a.reward} CR</div>
@@ -2236,7 +2300,7 @@ function render() {
             </div>`;
           }).join("")}
 
-          <div class="between" style="padding:9px 0;border-bottom:1px solid #1b2e22">
+          <div class="between" style="padding:9px 0;border-bottom:1px solid #166534">
             <div>
               <b>Archivo Central (Envio Libre / Extra)</b>
               <div class="mut" style="font-size:12px">
@@ -2275,7 +2339,7 @@ function render() {
             }
             return `<div class="atlas-card">
               <div class="between">
-                <span style="font-size:11px;color:var(--accent)">${CLASSES[m.cat].toUpperCase()}</span>
+                <span style="font-size:11px;color:#ffffff">${CLASSES[m.cat].toUpperCase()}</span>
                 <button class="alt" style="padding:2px 7px;font-size:11px" data-atlas-au="${m.id}">🔊 Audio</button>
               </div>
               <b>${m.name}</b>
@@ -2380,8 +2444,8 @@ function render() {
     } else {
       h = `
         <div class="card" style="padding:22px">
-          <div style="font-size:12px;color:var(--accent);letter-spacing:1.5px">CAMPANA COMPLETADA // 15 NOCHES</div>
-          <h2 style="margin:8px 0;color:var(--accent)">GUARDIA FINALIZADA · OP. ${S.playerName.toUpperCase()}</h2>
+          <div style="font-size:12px;color:#ffffff;letter-spacing:1.5px">CAMPANA COMPLETADA // 15 NOCHES</div>
+          <h2 style="margin:8px 0;color:#ffffff">GUARDIA FINALIZADA · OP. ${S.playerName.toUpperCase()}</h2>
           <p>
             Has completado las 15 noches de vigilancia en la Estacion Erial-7.
           </p>
@@ -2414,27 +2478,21 @@ function bindEvents(w) {
     };
   }
 
-  on("#replayBootBtn", () => {
-    startBootSequence();
-  });
-
   const pn = w.querySelector("#playerName");
+  const apn = w.querySelector("#adminPlayerName");
   const sn = w.querySelector("#startNight");
-  const fm = w.querySelector("#freeModeChk");
+
   if (sn) {
     sn.onchange = e => { selectedStartNight = +e.target.value; };
   }
-  if (fm) {
-    fm.onchange = e => { freeModeSelected = e.target.checked; };
-  }
+
   if (pn) {
     pn.oninput = e => { playerNameInput = e.target.value; };
     pn.onkeydown = e => {
       if (e.key === "Enter") {
-        const nightVal = sn ? +sn.value : selectedStartNight;
-        const freeVal = fm ? fm.checked : freeModeSelected;
         beep(520, 0.1);
-        start(pn.value, nightVal, freeVal);
+        adminModalOpen = false;
+        start(pn.value, 0, false);
       }
     };
     pn.onfocus = () => {
@@ -2442,26 +2500,78 @@ function bindEvents(w) {
         playStartupSound(false);
       }
     };
-    setTimeout(() => pn.focus(), 30);
+    if (!adminModalOpen) {
+      setTimeout(() => pn.focus(), 30);
+    }
+  }
+
+  if (apn) {
+    apn.oninput = e => {
+      playerNameInput = e.target.value;
+      if (pn) pn.value = playerNameInput;
+    };
+    apn.onkeydown = e => {
+      if (e.key === "Enter") {
+        const nightVal = sn ? +sn.value : selectedStartNight;
+        beep(620, 0.12);
+        adminModalOpen = false;
+        start(apn.value, nightVal, true);
+      } else if (e.key === "Escape") {
+        adminModalOpen = false;
+        render();
+      }
+    };
+    setTimeout(() => apn.focus(), 30);
   }
 
   on("#go", () => {
     const val = w.querySelector("#playerName")?.value || playerNameInput;
-    const nightVal = sn ? +sn.value : selectedStartNight;
-    const freeVal = fm ? fm.checked : freeModeSelected;
     if (bootLoginChimePending && !bootSoundPlayed) {
       playStartupSound(false);
     } else {
       beep(520, 0.1);
     }
-    start(val, nightVal, freeVal);
+    adminModalOpen = false;
+    start(val, 0, false);
   });
 
-  on("#goFreeBtn", () => {
-    const val = w.querySelector("#playerName")?.value || playerNameInput;
+  on("#openAdminBtn", () => {
+    const val = w.querySelector("#playerName")?.value;
+    if (typeof val === "string") playerNameInput = val;
+    if (bootLoginChimePending && !bootSoundPlayed) {
+      playStartupSound(false);
+    } else {
+      beep(460, 0.08);
+    }
+    adminModalOpen = true;
+    render();
+  });
+
+  on("#closeAdminBtn", () => {
+    beep(380, 0.06);
+    adminModalOpen = false;
+    render();
+  });
+
+  on("#cancelAdminBtn", () => {
+    beep(380, 0.06);
+    adminModalOpen = false;
+    render();
+  });
+
+  on("#adminNormalBtn", () => {
+    const val = w.querySelector("#adminPlayerName")?.value || playerNameInput;
     const nightVal = sn ? +sn.value : selectedStartNight;
-    freeModeSelected = true;
+    beep(520, 0.1);
+    adminModalOpen = false;
+    start(val, nightVal, false);
+  });
+
+  on("#adminFreeBtn", () => {
+    const val = w.querySelector("#adminPlayerName")?.value || playerNameInput;
+    const nightVal = sn ? +sn.value : selectedStartNight;
     beep(620, 0.12);
+    adminModalOpen = false;
     start(val, nightVal, true);
   });
 
@@ -2856,7 +2966,7 @@ function bindEvents(w) {
     render();
   });
 
-  on("#rsBtn", () => { V = "intro"; updTop(); render(); });
+  on("#rsBtn", () => { adminModalOpen = false; V = "intro"; updTop(); render(); });
 }
 
 function unlockBootAudioOnGesture() {
