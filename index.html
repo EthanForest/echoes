@@ -350,10 +350,13 @@ function getSprite(src) {
   if (!src) return null;
   if (!IMG_CACHE[src]) {
     const im = new Image();
+    im._failed = false;
+    im.onerror = () => { im._failed = true; };
     im.src = src;
     IMG_CACHE[src] = im;
   }
   const im = IMG_CACHE[src];
+  if (im._failed) return null;
   return (im.complete && im.naturalWidth > 0) ? im : null;
 }
 
@@ -406,7 +409,12 @@ const NIGHT_SCENARIO_LABELS = [
 ];
 
 const LIVE_STORAGE_KEY = "erial7_live_sessions_v1";
-const bc = ("BroadcastChannel" in window) ? new BroadcastChannel("erial7_telemetry") : null;
+let bc = null;
+try {
+  if ("BroadcastChannel" in window) bc = new BroadcastChannel("erial7_telemetry");
+} catch (_) {
+  bc = null;
+}
 
 function normalizeDbUrl(raw) {
   const clean = String(raw || "").trim().replace(/\/+$/, "");
@@ -1322,7 +1330,7 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
   const spriteSrc = spec.img || (modObj && modObj.img);
   const sprite = getSprite(spriteSrc);
 
-  if (sprite) {
+  if (sprite && offCx) {
     offCv.width = w;
     offCv.height = h;
     offCx.imageSmoothingEnabled = false;
@@ -2583,10 +2591,25 @@ function bindEvents(w) {
   on("#rsBtn", () => { V = "intro"; updTop(); render(); });
 }
 
-preloadAllSprites();
-render();
-updTop();
-requestAnimationFrame(loop);
+function bootTerminal() {
+  try {
+    preloadAllSprites();
+    render();
+    updTop();
+    requestAnimationFrame(loop);
+  } catch (err) {
+    const w = document.querySelector("#win");
+    if (w) {
+      w.innerHTML = `<div class="card dangerbox"><b>ERROR DE INICIALIZACION</b><pre style="white-space:pre-wrap;font-size:12px">${err && err.stack ? err.stack : err}</pre></div>`;
+    }
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootTerminal);
+} else {
+  bootTerminal();
+}
 </script>
 </body>
 </html>
