@@ -18,14 +18,15 @@ html,body{
 body{
   display:flex;flex-direction:column;
   padding:env(safe-area-inset-top,6px) 8px env(safe-area-inset-bottom,8px);
+  overflow:hidden;
 }
 main{
-  width:100%;max-width:100%;flex:1;display:flex;flex-direction:column;margin:0;
+  width:100%;max-width:100%;flex:1;min-height:0;display:flex;flex-direction:column;margin:0;
 }
 .terminal{
   background:#000000;border:2px solid #22c55e;border-radius:4px;
   overflow:hidden;box-shadow:0 0 0 1px #000000, 0 12px 40px rgba(0,0,0,.92);
-  position:relative;flex:1;display:flex;flex-direction:column;width:100%;
+  position:relative;flex:1;min-height:0;display:flex;flex-direction:column;width:100%;
 }
 .terminal::after{
   content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
@@ -33,7 +34,8 @@ main{
 }
 .topbar{
   display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
-  padding:8px 12px;background:#000000;border-bottom:1px solid #22c55e;font-size:12px;color:#ffffff;
+  padding:7px 12px;background:#000000;border-bottom:1px solid #22c55e;font-size:12px;color:#ffffff;
+  flex:none;
 }
 .topbar b{color:#ffffff;letter-spacing:1px}
 .stats{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
@@ -43,12 +45,12 @@ main{
 .pill.norech{border-color:#f97316;color:#ffffff;background:#000000}
 #tabs{
   display:flex;overflow-x:auto;background:#000000;border-bottom:2px solid #22c55e;
-  gap:2px;padding:4px 6px;
+  gap:2px;padding:4px 6px;flex:none;
 }
 .tab{
   flex:none;background:#000000;color:#e4e4e7;
   border:1px solid #166534;border-radius:3px;
-  padding:8px 14px;font:inherit;font-size:13.5px;font-weight:700;letter-spacing:.4px;
+  padding:7px 14px;font:inherit;font-size:13.5px;font-weight:700;letter-spacing:.4px;
   cursor:pointer;transition:.12s;
 }
 .tab:hover{background:#061c0e;color:#ffffff;border-color:#22c55e}
@@ -58,12 +60,12 @@ main{
 }
 .bd{background:#22c55e;color:#000000;border-radius:3px;padding:0 5px;font-weight:800;font-size:11px;margin-left:6px}
 #win{
-  padding:12px 14px;flex:1;display:flex;flex-direction:column;
+  padding:10px 12px;flex:1;min-height:0;display:flex;flex-direction:column;
   background:#000000;color:#ffffff;position:relative;overflow-y:auto;
 }
 button{
   font:inherit;font-size:13px;background:#000000;color:#ffffff;
-  border:1px solid #22c55e;border-radius:3px;padding:8px 14px;cursor:pointer;
+  border:1px solid #22c55e;border-radius:3px;padding:7px 14px;cursor:pointer;
 }
 button:hover:not(:disabled){background:#072412;border-color:#4ade80;color:#ffffff}
 button.primary-os{
@@ -84,7 +86,7 @@ button.warn:hover:not(:disabled){background:#241b06}
 button.shadow{background:#000000;border:1px solid #a855f7;color:#ffffff}
 button.shadow:hover:not(:disabled){background:#1c0b2e}
 button:disabled{opacity:.35;cursor:not-allowed}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
 .between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin:8px 0}
 .card{background:#000000;border:1px solid #22c55e;border-radius:4px;padding:10px;margin:8px 0;color:#ffffff}
@@ -164,17 +166,65 @@ button:disabled{opacity:.35;cursor:not-allowed}
   .mail-footer-bar{grid-template-columns:1fr 1fr}
 }
 
+/* Mapa Estelar: área ampliada a pantalla completa con barra HUD compacta */
+.map-shell{
+  flex:1;display:flex;flex-direction:column;min-height:0;gap:6px;
+}
+.map-viewport{
+  flex:1;min-height:280px;position:relative;display:flex;
+  border:1px solid #22c55e;border-radius:4px;background:#03070d;overflow:hidden;
+}
 #cv{
-  width:100%;height:clamp(320px,56vh,640px);
-  border:1px solid #22c55e;border-radius:4px;background:#000000;display:block;touch-action:none;cursor:grab;
+  width:100%;height:100%;display:block;touch-action:none;cursor:grab;
 }
 #cv:active{cursor:grabbing}
+.map-hud-bar{
+  flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:4px 10px;background:#030a06;border:1px solid #166534;border-radius:4px;
+  font-size:12px;
+}
+.map-hud-bar button{
+  padding:4px 11px;font-size:12px;
+}
+
+/* Procesador: distribución en 2 columnas para aprovechar el ancho y evitar espacios vacíos */
+.proc-shell{
+  flex:1;display:flex;flex-direction:column;min-height:0;gap:8px;
+}
+.proc-buffer-bar{
+  flex:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  padding:5px 10px;background:#030a06;border:1px solid #166534;border-radius:4px;
+}
+.proc-buffer-bar button{
+  padding:4px 10px;font-size:12px;
+}
+.proc-grid{
+  flex:1;min-height:0;display:grid;grid-template-columns:1fr;gap:10px;
+}
+@media(min-width:840px){
+  .proc-grid{grid-template-columns:1.18fr 1fr}
+}
 .crt-wrap{
   background:#000000;border:2px solid #22c55e;border-radius:4px;padding:10px;
-  display:flex;flex-direction:column;align-items:center;position:relative;
+  display:flex;flex-direction:column;justify-content:space-between;align-items:center;
+  position:relative;min-height:240px;height:100%;
 }
 .crt-wrap.opt-fail{border-color:#ef4444;background:#000000}
-#crt{width:100%;max-width:480px;height:260px;image-rendering:pixelated;background:#000000;border:1px solid #22c55e;display:block}
+.crt-stage{
+  flex:1;width:100%;min-height:0;display:flex;align-items:center;justify-content:center;
+  background:#020503;border:1px solid #166534;border-radius:3px;padding:6px;overflow:hidden;
+}
+#crt{
+  width:100%;height:100%;object-fit:contain;image-rendering:pixelated;
+  background:#000000;display:block;
+}
+.proc-side{
+  display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;
+}
+.proc-side > .card{
+  margin:0;flex:1;display:flex;flex-direction:column;justify-content:space-between;
+}
+
 #spec{width:100%;height:clamp(200px,36vh,340px);background:#000000;border:1px solid #22c55e;border-radius:4px;display:block}
 .databox{
   background:#000000;border:1px solid #22c55e;border-radius:4px;padding:9px;
@@ -236,8 +286,8 @@ textarea{
 }
 .paper-btn:hover{background:#473319}
 #toast{
-  margin-top:6px;padding:7px 12px;border-radius:4px;background:#000000;
-  border:1px solid #22c55e;color:#ffffff;text-align:center;font-size:12px;min-height:32px;
+  margin-top:6px;padding:6px 12px;border-radius:4px;background:#000000;
+  border:1px solid #22c55e;color:#ffffff;text-align:center;font-size:12px;flex:none;
 }
 #toast.ok{border-color:#22c55e;background:#000000;color:#ffffff}
 #toast.bad{border-color:#ef4444;background:#000000;color:#ffffff}
@@ -334,7 +384,7 @@ textarea{
   <div id="tabs"></div>
   <div id="win"></div>
 </div>
-<div id="toast" style="visibility:hidden"></div>
+<div id="toast" style="display:none"></div>
 </main>
 <div id="nightFadeOverlay"></div>
 
@@ -348,8 +398,9 @@ const $ = s => document.querySelector(s);
 const CLASSES = ["Estrella", "Planeta", "Asteroide", "Satelite", "Pulsar"];
 const TOTAL_NIGHTS = 15;
 const EXTRA_SIGNALS_PER_NIGHT = 10;
-const W = 1400, H = 900;
-const stars = Array.from({length: 340}, () => [Math.random()*W, Math.random()*H, Math.random()*1.5 + 0.4]);
+const ECHO_LOCK_COST = 4;
+const W = 2600, H = 1650;
+const stars = Array.from({length: 720}, () => [Math.random()*W, Math.random()*H, Math.random()*1.6 + 0.5]);
 
 // Catálogo de 28 modelos normales vinculados a Signals/
 const MODELS = [
@@ -395,7 +446,7 @@ const VOYAGER_BINARY = VOYAGER_GREETINGS_TEXT
   .map(ch => ch.charCodeAt(0).toString(2).padStart(8, "0"))
   .join(" ");
 
-const SIN_IMAGEN_BINARY = "00101110 00101110 00101110 00101110 00101110 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 00100011 00100000 01000001 01010110 01001111 01001001 01000100 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 00100011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01100110 01101111 01101111 01100100 00100000 01000001 01010110 01001111 01001001 00100011 00100000 00100011 00100011 01001001 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 00100011 00100000 01000011 00100011 01010011 01010100 01010011 00100011 01000001 00100011 01001111 00100011 00100011 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100011 01000001 00100011 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100011 01000001 01010110 01001111 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01000001 01010110 00100011 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100000 01100110 01101111 01101111 01100100 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01000001 01010110 00100011 01001001 01000100 00100000 01010100 01001000 01001001 01010011 00100011 01001111 01000010 01001010 01000101 01000011 01010100 00100011 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 00100011 01010011 01010100 01010011 00100011 01000001 01010110 01001111 01001001 01000100 00100000 01100011 01101111 01101101 01100101 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 00100011 00100011 00100000 01000011 01001111 00101110 00101110 00101110 00101110 00101110";
+const SIN_IMAGEN_BINARY = "00101110 00101110 00101110 00101110 00101110 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 00100011 00100000 01000001 01010110 01001111 01001001 01000100 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 00100011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01100110 01101111 01101111 01100100 00100000 01000001 01010110 01001111 01001001 00100011 00100000 00100011 00100011 01001001 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 00100011 00100000 01000011 00100011 01010011 01010100 01010011 00100011 01000001 00100011 01001111 00100011 00100011 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100011 01000001 00100011 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100011 01000001 01010110 01001111 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01000001 01010110 00100011 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100000 01100110 01101111 01101111 01100100 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01000001 01010110 00100011 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100011 01001111 01000010 01001010 01000101 01000011 01010100 00100011 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 00100011 01010011 01010100 01010011 00100011 01000001 01010110 01001111 01001001 01000100 00100000 01100011 01101111 01101101 01100101 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 00100011 00100011 00100000 01000011 01001111 00101110 00101110 00101110 00101110 00101110";
 
 // Definición de las 13 anomalías del sector vinculadas a Signals/ (activas desde Noche 10)
 const ANOMALY_DEFS = [
@@ -618,7 +669,7 @@ let sessionStartPerf = 0;
 let liveSyncTimer = 0;
 let cloudSyncTimer = 0;
 
-let sigs = [], cam = {x: 380, y: 300};
+let sigs = [], cam = {x: 750, y: 480};
 let en = 100, cap = 100, rd = 0;
 let mail = [], selMail = null, notes = "";
 let shift = 0; // 0 = Noche 1 ... 14 = Noche 15
@@ -753,8 +804,6 @@ function syncLiveTelemetry(finalized = false, pushCloudNow = true) {
     pushSnapshotToCloud(snap);
   }
 }
-
-
 
 function msg(t, ok = 1) {
   flash = t; flashOk = ok; flashT = 3.4; updTop();
@@ -953,9 +1002,9 @@ function pickUniqueModelForCat(cat, forcedModelId = null) {
 function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId = null, assignRefId = null) {
   let x, y, tries = 0;
   do {
-    x = 110 + Math.random() * (W - 220);
-    y = 110 + Math.random() * (H - 220);
-  } while (tries++ < 60 && sigs.some(s => s.st !== "gone" && Math.hypot(s.x - x, s.y - y) < 195));
+    x = 140 + Math.random() * (W - 280);
+    y = 140 + Math.random() * (H - 280);
+  } while (tries++ < 70 && sigs.some(s => s.st !== "gone" && Math.hypot(s.x - x, s.y - y) < 260));
 
   // Las anomalías SOLO aparecen a partir de Noche 10 (isAnomEnabled()) y nunca reemplazan una señal de asignación
   const allowAnom = isAnomEnabled() && !assignRefId;
@@ -1137,13 +1186,9 @@ function initShift() {
 
     addMail(
       `Encargo ${i + 1}/3 · ${targetDesc}`,
-      `Remitente: ${sci.name} (${sci.inst})
-` +
-      `Solicitud para ${shiftLabel(shift)}: Registro espectral verificado de ${targetDesc}.
-` +
-      `Honorarios autorizados: $${reward} CR.
-
-` +
+      `Remitente: ${sci.name} (${sci.inst})\n` +
+      `Solicitud para ${shiftLabel(shift)}: Registro espectral verificado de ${targetDesc}.\n` +
+      `Honorarios autorizados: $${reward} CR.\n\n` +
       `Procesa la captura y enviala manualmente a esta asignacion desde la pestana Plataforma.`,
       {
         kind: "as",
@@ -1241,7 +1286,7 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
     en = 100;
   }
 
-  sigs = []; mail = []; selMail = null; notes = "";
+  sigs = []; cam = {x: 750, y: 480}; mail = []; selMail = null; notes = "";
   nightAssignments = []; nightAssignPool = []; nightExtraSpawned = 0; usedPlanetModelsThisNight = new Set(); isTransitioningNight = false;
   shift = clampedNight; srv = null; crashes = 0; cur = null; rd = 0;
   knobF = 50; knobP = 50; choiceCat = null; choiceMod = null;
@@ -1327,6 +1372,7 @@ function updBadges() {
 function updTop() {
   const st = $("#st");
   const topTitle = $("#topTitle");
+  const t = $("#toast");
   if (!G || V === "boot" || V === "intro" || V === "end") {
     if (topTitle) {
       topTitle.textContent = V === "boot"
@@ -1343,10 +1389,9 @@ function updTop() {
       : V === "intro"
         ? `<span class="pill">TERMINAL LOCAL</span>`
         : `<span class="pill">SESION FINALIZADA</span>`;
-    const t = $("#toast");
     t.textContent = flash;
     t.className = flash ? (flashOk ? "ok" : "bad") : "";
-    t.style.visibility = flash ? "visible" : "hidden";
+    t.style.display = flash ? "block" : "none";
     return;
   }
   if (topTitle) topTitle.textContent = "ERIAL-7 // TERMINAL DE ESCUCHA";
@@ -1374,10 +1419,9 @@ function updTop() {
     triggerNightFadeTransition();
   };
 
-  const t = $("#toast");
   t.textContent = flash;
   t.className = flash ? (flashOk ? "ok" : "bad") : "";
-  t.style.visibility = flash ? "visible" : "hidden";
+  t.style.display = flash ? "block" : "none";
   updBadges();
 }
 
@@ -1669,8 +1713,6 @@ function tick(dt) {
     return;
   }
   if (!G || V === "intro" || V === "end") return;
-
-
 
   // Recuperación de energía escalonada por tramos de noches:
   // Noches 1 a 5 (shift 0..4): rápida
@@ -2048,85 +2090,133 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
   cx.putImageData(img, 0, 0);
 }
 
+function getMapViewportMetrics(cv) {
+  const vw = Math.max(320, Math.round(cv.clientWidth || 960));
+  const vh = Math.max(240, Math.round(cv.clientHeight || 520));
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const pw = Math.round(vw * dpr);
+  const ph = Math.round(vh * dpr);
+  if (cv.width !== pw || cv.height !== ph) {
+    cv.width = pw;
+    cv.height = ph;
+  }
+  return {vw, vh, dpr};
+}
+
 function drawMap(t) {
   const cv = $("#cv");
   if (!cv) return;
+  const {vw, vh, dpr} = getMapViewportMetrics(cv);
+  cam.x = Math.max(0, Math.min(Math.max(0, W - vw), cam.x));
+  cam.y = Math.max(0, Math.min(Math.max(0, H - vh), cam.y));
+
   const cx = cv.getContext("2d");
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
   cx.fillStyle = "#03070d";
-  cx.fillRect(0, 0, 640, 310);
+  cx.fillRect(0, 0, vw, vh);
 
-  cx.strokeStyle = "rgba(52, 95, 68, 0.2)";
+  // Cuadrícula espacial de alta nitidez
+  cx.strokeStyle = "rgba(52, 95, 68, 0.22)";
   cx.lineWidth = 1;
-  const gx0 = -(cam.x % 80), gy0 = -(cam.y % 80);
-  for (let x = gx0; x < 640; x += 80) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, 310); cx.stroke(); }
-  for (let y = gy0; y < 310; y += 80) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(640, y); cx.stroke(); }
+  const step = 90;
+  const gx0 = -(cam.x % step), gy0 = -(cam.y % step);
+  for (let x = gx0; x < vw; x += step) {
+    const px = Math.round(x) + 0.5;
+    cx.beginPath(); cx.moveTo(px, 0); cx.lineTo(px, vh); cx.stroke();
+  }
+  for (let y = gy0; y < vh; y += step) {
+    const py = Math.round(y) + 0.5;
+    cx.beginPath(); cx.moveTo(0, py); cx.lineTo(vw, py); cx.stroke();
+  }
 
+  // Campo estelar nítido sin estiramiento
   cx.fillStyle = "#d1fae5";
   stars.forEach(([x, y, r]) => {
     const sx = x - cam.x, sy = y - cam.y;
-    if (sx < 0 || sx > 640 || sy < 0 || sy > 310) return;
-    cx.globalAlpha = 0.3 + 0.35 * Math.sin(t * 1.4 + x);
-    cx.fillRect(sx, sy, r, r);
+    if (sx < -2 || sx > vw + 2 || sy < -2 || sy > vh + 2) return;
+    cx.globalAlpha = 0.32 + 0.38 * Math.sin(t * 1.4 + x);
+    cx.beginPath();
+    cx.arc(sx, sy, r * 0.72, 0, Math.PI * 2);
+    cx.fill();
   });
   cx.globalAlpha = 1;
 
+  // Señales y ondas de eco en resolución nativa
   cx.save();
   cx.translate(-cam.x, -cam.y);
   sigs.forEach(s => {
     if (s.st === "gone" || s.st === "raw") return;
     const col = s.st === "echo" ? "96, 195, 255" : s.st === "align" ? "234, 179, 8" : "74, 222, 128";
     const pulse = (t * 0.45 + s.seed) % 1;
-    cx.strokeStyle = `rgba(${col}, ${(1 - pulse) * 0.65})`;
-    cx.beginPath(); cx.arc(s.x, s.y, 7 + pulse * 26, 0, Math.PI * 2); cx.stroke();
+    cx.strokeStyle = `rgba(${col}, ${(1 - pulse) * 0.7})`;
+    cx.lineWidth = 1.3;
+    cx.beginPath(); cx.arc(s.x, s.y, 7 + pulse * 30, 0, Math.PI * 2); cx.stroke();
 
     cx.fillStyle = `rgb(${col})`;
-    cx.beginPath(); cx.arc(s.x, s.y, 4.5, 0, Math.PI * 2); cx.fill();
+    cx.beginPath(); cx.arc(s.x, s.y, 5, 0, Math.PI * 2); cx.fill();
 
     if (s.st === "align") {
       cx.strokeStyle = "#eab308";
-      cx.lineWidth = 2.5;
-      cx.beginPath(); cx.arc(s.x, s.y, 16, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.align); cx.stroke();
-      cx.lineWidth = 1;
+      cx.lineWidth = 2.6;
+      cx.beginPath(); cx.arc(s.x, s.y, 17, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.align); cx.stroke();
     } else if (s.st === "dl") {
       cx.strokeStyle = srv ? "#ef4444" : "#4ade80";
-      cx.lineWidth = 2.5;
-      cx.beginPath(); cx.arc(s.x, s.y, 16, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.prog); cx.stroke();
-      cx.lineWidth = 1;
+      cx.lineWidth = 2.6;
+      cx.beginPath(); cx.arc(s.x, s.y, 17, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.prog); cx.stroke();
     }
+    cx.lineWidth = 1;
   });
   cx.restore();
 
+  // Indicadores direccionales del pulso de radar
   if (rd > 0) {
     cx.globalAlpha = Math.min(1, rd / 2);
+    const halfW = vw / 2, halfH = vh / 2;
     sigs.forEach(s => {
       if (s.st !== "echo") return;
       const sx = s.x - cam.x, sy = s.y - cam.y;
-      if (sx > 10 && sx < 630 && sy > 10 && sy < 300) return;
-      const a = Math.atan2(sy - 155, sx - 320);
-      const k = Math.min(295 / Math.abs(Math.cos(a) || 1e-5), 136 / Math.abs(Math.sin(a) || 1e-5));
+      if (sx > 14 && sx < vw - 14 && sy > 14 && sy < vh - 14) return;
+      const a = Math.atan2(sy - halfH, sx - halfW);
+      const k = Math.min((halfW - 22) / Math.abs(Math.cos(a) || 1e-5), (halfH - 22) / Math.abs(Math.sin(a) || 1e-5));
       cx.save();
-      cx.translate(320 + Math.cos(a)*k, 155 + Math.sin(a)*k);
+      cx.translate(halfW + Math.cos(a)*k, halfH + Math.sin(a)*k);
       cx.rotate(a);
       cx.fillStyle = "#4ade80";
-      cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(-14, -6); cx.lineTo(-14, 6); cx.fill();
+      cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(-15, -6.5); cx.lineTo(-15, 6.5); cx.fill();
       cx.restore();
     });
     cx.globalAlpha = 1;
   }
 
+  // Coordenadas del cuadrante activo (esquina superior derecha del mapa)
+  cx.fillStyle = "rgba(8, 14, 11, 0.72)";
+  cx.fillRect(vw - 178, 10, 168, 24);
+  cx.strokeStyle = "#166534";
+  cx.strokeRect(vw - 178, 10, 168, 24);
+  cx.fillStyle = "#86efac";
+  cx.font = "11px ui-monospace, Consolas, monospace";
+  cx.textAlign = "right";
+  cx.fillText(`SEC ${Math.round(cam.x + vw/2)} // ${Math.round(cam.y + vh/2)}`, vw - 18, 26);
+  cx.textAlign = "left";
+
+  // Matriz de 3 antenas parabólicas (esquina inferior izquierda, proporción 1:1 nítida)
   const aligning = sigs.find(s => s.st === "align");
   const targetAng = aligning ? Math.atan2(aligning.y - H/2, aligning.x - W/2) : -Math.PI/2;
-  cx.fillStyle = "rgba(8, 14, 11, 0.78)";
-  cx.fillRect(8, 268, 112, 34);
+  const hudY = vh - 46;
+  cx.fillStyle = "rgba(8, 14, 11, 0.84)";
+  cx.fillRect(10, hudY, 118, 36);
   cx.strokeStyle = "#243d2b";
-  cx.strokeRect(8, 268, 112, 34);
+  cx.strokeRect(10, hudY, 118, 36);
   for (let i = 0; i < 3; i++) {
-    const ax = 26 + i * 36, ay = 285;
+    const ax = 30 + i * 38, ay = hudY + 18;
     cx.strokeStyle = "#4ade80";
-    cx.beginPath(); cx.arc(ax, ay, 8, 0, Math.PI * 2); cx.stroke();
+    cx.lineWidth = 1.4;
+    cx.beginPath(); cx.arc(ax, ay, 9, 0, Math.PI * 2); cx.stroke();
     const curA = aligning ? (targetAng - (1 - aligning.align) * 2.2) : targetAng;
-    cx.beginPath(); cx.moveTo(ax, ay); cx.lineTo(ax + Math.cos(curA)*10, ay + Math.sin(curA)*10); cx.stroke();
+    cx.beginPath(); cx.moveTo(ax, ay); cx.lineTo(ax + Math.cos(curA)*11, ay + Math.sin(curA)*11); cx.stroke();
   }
+  cx.lineWidth = 1;
 }
 
 function drawCRT(t) {
@@ -2413,52 +2503,57 @@ function render() {
   } else if (V === "map") {
     const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
     h = `
-      ${srv ? `
-        <div class="card dangerbox between" style="margin-top:0">
-          <div>
-            <b>[!] ALERTA DE SERVIDOR // ENLACE DE RELES CAIDO (${srv.count} MODULOS)</b>
-            <div style="font-size:12px">La alineacion y descarga de antenas estan detenidas hasta restablecer el servidor.</div>
+      <div class="map-shell">
+        ${srv ? `
+          <div class="card dangerbox between" style="margin:0;padding:7px 10px;flex:none">
+            <div>
+              <b>[!] ALERTA DE SERVIDOR // ENLACE DE RELES CAIDO (${srv.count} MODULOS)</b>
+              <div style="font-size:11.5px">La alineacion y descarga de antenas estan detenidas hasta restablecer el servidor.</div>
+            </div>
+            <button class="bad" id="goSrvBtn" style="padding:4px 10px;font-size:12px">Ir a Servidor</button>
           </div>
-          <button class="bad" id="goSrvBtn">Ir a Servidor</button>
+        ` : ""}
+        <div class="map-viewport">
+          <canvas id="cv"></canvas>
         </div>
-      ` : ""}
-      <canvas id="cv" width="640" height="310"></canvas>
-      ${pendingOverrideSig ? `
-        <div class="card warnbox between">
-          <div>
-            <b>ANTENAS OCUPADAS // RASTREO EN CURSO (#${busySig ? busySig.id : ""})</b>
-            <div style="font-size:12px">Ya existe una busqueda activa. Si insistes, se borrara la investigacion en curso y comenzara con el eco #${pendingOverrideSig.id} (-8 PWR).</div>
+        ${pendingOverrideSig ? `
+          <div class="card warnbox between" style="margin:0;padding:7px 10px;flex:none">
+            <div>
+              <b>ANTENAS OCUPADAS // RASTREO EN CURSO (#${busySig ? busySig.id : ""})</b>
+              <div style="font-size:11.5px">Ya existe una busqueda activa. Si insistes, se borrara la investigacion en curso y comenzara con el eco #${pendingOverrideSig.id} (-${ECHO_LOCK_COST} PWR).</div>
+            </div>
+            <div class="row" style="margin:0">
+              <button class="warn" id="confirmOverrideBtn" style="padding:4px 10px;font-size:12px">Insistir y reemplazar</button>
+              <button class="alt" id="cancelOverrideBtn" style="padding:4px 10px;font-size:12px">Mantener actual</button>
+            </div>
           </div>
-          <div class="row" style="margin:0">
-            <button class="warn" id="confirmOverrideBtn">Insistir y reemplazar</button>
-            <button class="alt" id="cancelOverrideBtn">Mantener actual</button>
-          </div>
+        ` : ""}
+        <div class="map-hud-bar">
+          <span class="mut">${
+            busySig
+              ? `Antenas ocupadas rastreando senal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})...`
+              : sigs.filter(s => s.st === "echo").length === 0 && nightExtraSpawned >= EXTRA_SIGNALS_PER_NIGHT
+                ? "No quedan mas senales en el sector durante esta noche."
+                : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco).`
+          }</span>
+          <button class="alt" id="rd">Pulso Radar (-6 PWR)</button>
         </div>
-      ` : ""}
-      <div class="between" style="margin-top:8px">
-        <span class="mut" style="font-size:12px">${
-          busySig
-            ? `Antenas ocupadas rastreando senal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})...`
-            : sigs.filter(s => s.st === "echo").length === 0 && nightExtraSpawned >= EXTRA_SIGNALS_PER_NIGHT
-              ? "No quedan mas senales en el sector durante esta noche."
-              : "Antenas libres (-8 PWR por fijacion de eco)."
-        }</span>
-        <button class="alt" id="rd">Pulso Radar (-6 PWR)</button>
       </div>`;
   } else if (V === "proc") {
     const ready = sigs.filter(s => s.st === "raw");
     if (cur && !ready.includes(cur)) cur = null;
     if (!cur && ready[0]) { cur = ready[0]; knobF = 50; knobP = 50; choiceCat = null; choiceMod = null; }
 
-    h = `<div class="row">
-      <span class="mut" style="font-size:12px">BUFFER:</span>
-      ${ready.length ? ready.map(s => `<button class="${s === cur ? "" : "alt"}" data-s="${s.id}">TRAMA #${s.id}</button>`).join("") : `<span class="mut">Sin tramas descargadas</span>`}
-    </div>`;
+    h = `<div class="proc-shell">
+      <div class="proc-buffer-bar">
+        <span class="mut" style="font-size:12px">BUFFER:</span>
+        ${ready.length ? ready.map(s => `<button class="${s === cur ? "" : "alt"}" data-s="${s.id}">TRAMA #${s.id}</button>`).join("") : `<span class="mut">Sin tramas descargadas</span>`}
+      </div>`;
 
     if (cur) {
       if (cur.isCorruptSignal) {
         h += `
-          <div class="card dangerbox">
+          <div class="card dangerbox" style="margin:0">
             <b>ERROR DE TRAMA // SENAL CORRUPTA (#${cur.id})</b>
             <p class="mut" style="margin:6px 0">La interferencia magnetica destruyo la integridad de esta captura. No es posible sintonizarla ni catalogarla.</p>
             <button class="bad" id="dropBtn">Descartar trama danada y buscar otra</button>
@@ -2472,69 +2567,79 @@ function render() {
         const colF = pF >= 88 ? "#4ade80" : pF >= 55 ? "#eab308" : "#ef4444";
         const colP = pP >= 88 ? "#4ade80" : pP >= 55 ? "#eab308" : "#ef4444";
 
+        const needSub = isSubcatEnabled();
+        const catModels = choiceCat !== null ? MODELS.filter(m => m.cat === choiceCat) : [];
+        const canQueue = choiceCat !== null && (!needSub || choiceMod !== null);
+
         h += `
-          <div class="crt-wrap ${optFail ? "opt-fail" : ""}">
-            <canvas id="crt" width="${rw}" height="${rh}"></canvas>
-            <div class="between" style="width:100%;max-width:420px;margin-top:6px;font-size:11px">
-              <span class="mut" style="${optFail ? "color:#fca5a5" : ""}">${optFail ? "[ERROR OPTICO // MONITOR CRT AVERIADO]" : `CRT ${rw}x${rh}px // FILTRO NV.${G.f}/5`}</span>
-              <span class="mut">${cur.fixed ? "[CAPTURA FIJADA]" : "SENAL SIN FIJAR"}</span>
-            </div>
-          </div>
-          <div class="card">
-            <div>
-              <div class="row" style="margin-bottom:2px">
-                <span style="width:95px;font-size:12px">FRECUENCIA</span>
-                <input type="range" id="knF" min="0" max="100" value="${knobF}">
-                <span id="valF" style="width:32px;text-align:right">${knobF}</span>
+          <div class="proc-grid">
+            <div class="crt-wrap ${optFail ? "opt-fail" : ""}">
+              <div class="crt-stage">
+                <canvas id="crt" width="${rw}" height="${rh}"></canvas>
               </div>
-              <div class="prox-wrap">
-                <span class="mut" style="width:95px">PROXIMIDAD:</span>
-                <div class="prox-bar"><div class="prox-fill" id="barF" style="width:${pF}%;background:${colF}"></div></div>
-                <span id="txtF" style="width:82px;text-align:right;color:${colF}">${pF}%</span>
+              <div class="between" style="width:100%;margin-top:8px;font-size:11.5px;flex:none">
+                <span class="mut" style="${optFail ? "color:#fca5a5" : ""}">${optFail ? "[ERROR OPTICO // MONITOR CRT AVERIADO]" : `CRT ${rw}x${rh}px // FILTRO NV.${G.f}/5`}</span>
+                <span class="mut">${cur.fixed ? "[CAPTURA FIJADA]" : "SENAL SIN FIJAR"}</span>
               </div>
             </div>
-            <div style="margin-top:10px">
-              <div class="row" style="margin-bottom:2px">
-                <span style="width:95px;font-size:12px">POLARIDAD</span>
-                <input type="range" id="knP" min="0" max="100" value="${knobP}">
-                <span id="valP" style="width:32px;text-align:right">${knobP}</span>
+
+            <div class="proc-side">
+              <div class="card">
+                <div>
+                  <div class="row" style="margin-bottom:4px">
+                    <span style="width:95px;font-size:12px">FRECUENCIA</span>
+                    <input type="range" id="knF" min="0" max="100" value="${knobF}">
+                    <span id="valF" style="width:32px;text-align:right">${knobF}</span>
+                  </div>
+                  <div class="prox-wrap">
+                    <span class="mut" style="width:95px">PROXIMIDAD:</span>
+                    <div class="prox-bar"><div class="prox-fill" id="barF" style="width:${pF}%;background:${colF}"></div></div>
+                    <span id="txtF" style="width:52px;text-align:right;color:${colF}">${pF}%</span>
+                  </div>
+                </div>
+
+                <div style="margin-top:12px">
+                  <div class="row" style="margin-bottom:4px">
+                    <span style="width:95px;font-size:12px">POLARIDAD</span>
+                    <input type="range" id="knP" min="0" max="100" value="${knobP}">
+                    <span id="valP" style="width:32px;text-align:right">${knobP}</span>
+                  </div>
+                  <div class="prox-wrap">
+                    <span class="mut" style="width:95px">PROXIMIDAD:</span>
+                    <div class="prox-bar"><div class="prox-fill" id="barP" style="width:${pP}%;background:${colP}"></div></div>
+                    <span id="txtP" style="width:52px;text-align:right;color:${colP}">${pP}%</span>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-top:14px;padding-top:10px;border-top:1px solid #166534">
+                  <button class="alt" id="playAu">${activeVoice ? "Detener audio" : "Escuchar audio (-2 PWR)"}</button>
+                  <button id="fixBtn" ${tuned && !cur.fixed ? "" : "disabled"}>Fijar captura</button>
+                  <button class="bad" id="dropBtn">Descartar</button>
+                </div>
               </div>
-              <div class="prox-wrap">
-                <span class="mut" style="width:95px">PROXIMIDAD:</span>
-                <div class="prox-bar"><div class="prox-fill" id="barP" style="width:${pP}%;background:${colP}"></div></div>
-                <span id="txtP" style="width:82px;text-align:right;color:${colP}">${pP}%</span>
-              </div>
-            </div>
-            <div class="row" style="margin-top:12px">
-              <button class="alt" id="playAu">${activeVoice ? "Detener audio" : "Escuchar audio (-2 PWR)"}</button>
-              <button id="fixBtn" ${tuned && !cur.fixed ? "" : "disabled"}>Fijar captura</button>
-              <button class="bad" id="dropBtn">Descartar</button>
+
+              ${cur.fixed ? `
+                <div class="card" style="flex:none">
+                  <div class="mut" style="font-size:12px;margin-bottom:6px">1. SELECCIONA CATEGORIA PRINCIPAL:</div>
+                  <div class="grid">
+                    ${CLASSES.map((c, i) => `<button class="${choiceCat === i ? "" : "alt"}" data-k="${i}">${c}</button>`).join("")}
+                  </div>
+                  ${needSub && choiceCat !== null ? `
+                    <div class="mut" style="font-size:12px;margin:10px 0 6px">2. ESPECIFICA SUBCATEGORIA (HABILITADO DESDE NOCHE 10):</div>
+                    <div class="grid">
+                      ${catModels.map(m => `<button class="${choiceMod === m.id ? "" : "alt"}" data-mod="${m.id}">${m.name}</button>`).join("")}
+                    </div>
+                  ` : ""}
+                  <div class="row" style="justify-content:flex-end;margin-top:10px;margin-bottom:0">
+                    <button id="queueBtn" ${canQueue ? "" : "disabled"}>Preparar paquete para Plataforma</button>
+                  </div>
+                </div>
+              ` : ""}
             </div>
           </div>`;
-
-        if (cur.fixed) {
-          const needSub = isSubcatEnabled();
-          const catModels = choiceCat !== null ? MODELS.filter(m => m.cat === choiceCat) : [];
-          const canQueue = choiceCat !== null && (!needSub || choiceMod !== null);
-
-          h += `<div class="card">
-            <div class="mut" style="font-size:12px;margin-bottom:6px">1. SELECCIONA CATEGORIA PRINCIPAL:</div>
-            <div class="grid">
-              ${CLASSES.map((c, i) => `<button class="${choiceCat === i ? "" : "alt"}" data-k="${i}">${c}</button>`).join("")}
-            </div>
-            ${needSub && choiceCat !== null ? `
-              <div class="mut" style="font-size:12px;margin:10px 0 6px">2. ESPECIFICA SUBCATEGORIA (HABILITADO DESDE NOCHE 10):</div>
-              <div class="grid">
-                ${catModels.map(m => `<button class="${choiceMod === m.id ? "" : "alt"}" data-mod="${m.id}">${m.name}</button>`).join("")}
-              </div>
-            ` : ""}
-            <div class="row" style="justify-content:flex-end;margin-top:10px">
-              <button id="queueBtn" ${canQueue ? "" : "disabled"}>Preparar paquete para Plataforma</button>
-            </div>
-          </div>`;
-        }
       }
     }
+    h += `</div>`;
   } else if (V === "plat") {
     const selPkg = outbox.find(p => p.id === selPkgId) || outbox[0] || null;
     if (selPkg) selPkgId = selPkg.id;
@@ -2886,8 +2991,6 @@ function bindEvents(w) {
     render();
   });
 
-
-
   on("#goSrvBtn", () => {
     beep(420, 0.05);
     V = "srv";
@@ -2904,12 +3007,14 @@ function bindEvents(w) {
     cv.onpointermove = e => {
       if (!drag) return;
       const r = cv.getBoundingClientRect();
-      const dx = (e.clientX - drag.x) * 640 / r.width;
-      const dy = (e.clientY - drag.y) * 310 / r.height;
+      const vw = cv.clientWidth || r.width || 640;
+      const vh = cv.clientHeight || r.height || 310;
+      const dx = (e.clientX - drag.x) * vw / (r.width || vw);
+      const dy = (e.clientY - drag.y) * vh / (r.height || vh);
       if (Math.hypot(dx, dy) > 6) moved = 1;
       if (moved) {
-        cam.x = Math.max(0, Math.min(W - 640, drag.cx - dx));
-        cam.y = Math.max(0, Math.min(H - 310, drag.cy - dy));
+        cam.x = Math.max(0, Math.min(Math.max(0, W - vw), drag.cx - dx));
+        cam.y = Math.max(0, Math.min(Math.max(0, H - vh), drag.cy - dy));
       }
     };
     cv.onpointerup = cv.onpointercancel = () => { drag = null; };
@@ -2917,19 +3022,21 @@ function bindEvents(w) {
       if (moved) return;
       markFirst();
       const r = cv.getBoundingClientRect();
-      const x = (e.clientX - r.left) * 640 / r.width + cam.x;
-      const y = (e.clientY - r.top) * 310 / r.height + cam.y;
-      const hit = sigs.find(s => (s.st === "echo" || s.st === "align" || s.st === "dl") && Math.hypot(s.x - x, s.y - y) < 32);
+      const vw = cv.clientWidth || r.width || 640;
+      const vh = cv.clientHeight || r.height || 310;
+      const x = (e.clientX - r.left) * vw / (r.width || vw) + cam.x;
+      const y = (e.clientY - r.top) * vh / (r.height || vh) + cam.y;
+      const hit = sigs.find(s => (s.st === "echo" || s.st === "align" || s.st === "dl") && Math.hypot(s.x - x, s.y - y) < 34);
       if (!hit) { if (R) R.invalid++; syncLiveTelemetry(false, false); return; }
 
       if (hit.st === "echo") {
         const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
         if (busySig) {
           if (pendingOverrideSig && pendingOverrideSig.id === hit.id) {
-            if (en < 8) { beep(180, 0.15, "sawtooth"); return msg("[ERR] Energia insuficiente (8 PWR)", 0); }
+            if (en < ECHO_LOCK_COST) { beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
             busySig.st = "gone";
             pendingOverrideSig = null;
-            en -= 8;
+            en -= ECHO_LOCK_COST;
             hit.st = "align";
             ensureSectorDiversity();
             beep(340, 0.12, "triangle");
@@ -2945,8 +3052,8 @@ function bindEvents(w) {
           return;
         }
 
-        if (en < 8) { if (R) R.invalid++; beep(180, 0.15, "sawtooth"); return msg("[ERR] Energia insuficiente (8 PWR)", 0); }
-        en -= 8;
+        if (en < ECHO_LOCK_COST) { if (R) R.invalid++; beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
+        en -= ECHO_LOCK_COST;
         hit.st = "align";
         pendingOverrideSig = null;
         beep(320, 0.12, "triangle");
@@ -2960,9 +3067,9 @@ function bindEvents(w) {
   on("#confirmOverrideBtn", () => {
     if (!pendingOverrideSig) return;
     const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
-    if (en < 8) { beep(180, 0.15, "sawtooth"); return msg("[ERR] Energia insuficiente (8 PWR)", 0); }
+    if (en < ECHO_LOCK_COST) { beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
     if (busySig) busySig.st = "gone";
-    en -= 8;
+    en -= ECHO_LOCK_COST;
     pendingOverrideSig.st = "align";
     const newId = pendingOverrideSig.id;
     pendingOverrideSig = null;
