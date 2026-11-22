@@ -839,20 +839,22 @@ body.paper-theme #toast.bad{
 const CLOUD_DB_URL = "https://signal-finder-5e191-default-rtdb.firebaseio.com";
 
 const $ = s => document.querySelector(s);
-const CLASSES = ["Estrella", "Planeta", "Asteroide", "Satelite", "Pulsar"];
+const CLASSES = ["Estrella", "Planeta", "Asteroide", "Satelite", "Pulsar", "Singularidad"];
 const TOTAL_NIGHTS = 15;
 const EXTRA_SIGNALS_PER_NIGHT = 10;
 const MAX_NIGHT_SIGNALS_AFTER_CATALOG = 13;
 const MAX_MEMORY_SIGNALS = 5;
+const MAX_FLOPPY_ANOMALIES = 5;
 const ECHO_LOCK_COST = 4;
 const W = 4800, H = 3200;
 const stars = Array.from({length: 2400}, () => [Math.random()*W, Math.random()*H, Math.random()*1.6 + 0.5]);
 
-// Catálogo de 28 modelos normales vinculados a Signals/
+// Catálogo de modelos normales vinculados a Signals/
 const MODELS = [
-  // 0: Estrella (5 modelos)
+  // 0: Estrella (6 modelos)
   {id:"est_enana", cat:0, name:"Enana Amarilla", img:"Signals/yellow_dwarf.png", freq:210, wave:"sine", pattern:"band3", desc:"Estrella de secuencia principal con 3 bandas horizontales anchas y estables."},
   {id:"est_enana_roja", cat:0, name:"Enana Roja", img:"Signals/red_dwarf.png", freq:188, wave:"sine", pattern:"band3", desc:"Emision termica tenue de baja masa y larga vida orbital."},
+  {id:"est_enana_marron", cat:0, name:"Enana Marron", img:"Signals/brown_dwarf.png", minShift:6, freq:145, wave:"triangle", pattern:"band3", desc:"Objeto subestelar frio de baja luminosidad termica."},
   {id:"est_gigante", cat:0, name:"Gigante Roja", img:"Signals/red_giant.png", freq:175, wave:"sine", pattern:"band3", desc:"3 bandas anchas de baja frecuencia y corona extensa."},
   {id:"est_binaria", cat:0, name:"Estrella Binaria", img:"Signals/binary_star.png", freq:255, wave:"triangle", pattern:"band3", desc:"Doble pico orbital con modulacion en 3 bandas."},
   {id:"est_trinaria", cat:0, name:"Sistema Trinario", img:"Signals/trinary_star.png", freq:295, wave:"triangle", pattern:"band3", desc:"Tres focos gravitacionales sincronizados."},
@@ -879,10 +881,14 @@ const MODELS = [
   {id:"sat_sonda", cat:3, name:"Sonda Orbital", img:"Signals/space_probe.png", freq:810, wave:"sawtooth", pattern:"blocks", desc:"Paquetes telemetricos espaciados + subportadora."},
   {id:"sat_telescopio", cat:3, name:"Telescopio Espacial", img:"Signals/space_telescope.png", freq:720, wave:"square", pattern:"blocks", desc:"Bloques regulares de observacion profunda."},
   {id:"sat_estacion", cat:3, name:"Estacion Modular", img:"Signals/station.png", freq:850, wave:"sawtooth", pattern:"blocks", desc:"Tramas continuas de alta densidad telemetrica."},
-  // 4: Pulsar (3 modelos, aparece a partir de Noche 3 -> shift >= 2)
-  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", freq:480, wave:"square", pattern:"pulses", desc:"Columnas verticales periodicas de cadencia rapida."},
-  {id:"pul_magnetar", cat:4, name:"Magnetar", img:"Signals/magnetar.png", freq:430, wave:"square", pattern:"pulses", desc:"Pulsos verticales de altisima intensidad magnetica."},
-  {id:"pul_binario", cat:4, name:"Pulsar Binario", img:"Signals/binary_pulsar.png", freq:515, wave:"square", pattern:"pulses", desc:"Doble tren de pulsos verticales con deriva de fase."}
+  // 4: Pulsar (4 modelos, aparece a partir de Noche 3 -> shift >= 2)
+  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", minShift:2, freq:480, wave:"square", pattern:"pulses", desc:"Columnas verticales periodicas de cadencia rapida."},
+  {id:"pul_magnetar", cat:4, name:"Magnetar", img:"Signals/magnetar.png", minShift:2, freq:430, wave:"square", pattern:"pulses", desc:"Pulsos verticales de altisima intensidad magnetica."},
+  {id:"pul_binario", cat:4, name:"Pulsar Binario", img:"Signals/binary_pulsar.png", minShift:2, freq:515, wave:"square", pattern:"pulses", desc:"Doble tren de pulsos verticales con deriva de fase."},
+  {id:"pul_frb", cat:4, name:"FRB", img:"Signals/frb.png", minShift:2, freq:585, wave:"square", pattern:"pulses", desc:"Rafaga rapida de radio transitoria de altisima dispersion energetica."},
+  // 5: Singularidad (2 modelos: Cuasar desde Noche 5 -> shift >= 4; Agujero Negro desde Noche 9 -> shift >= 8)
+  {id:"sin_cuasar", cat:5, name:"Cuasar", img:"Signals/noimage_anomaly.png", minShift:4, freq:690, wave:"sawtooth", pattern:"singularity", desc:"Nucleo galactico activo extremadamente luminoso alimentado por acrecion relativista."},
+  {id:"sin_agujero_negro", cat:5, name:"Agujero Negro", img:"Signals/noimage_anomaly.png", minShift:8, freq:64, wave:"sawtooth", pattern:"singularity", desc:"Region del espacio-tiempo con curvatura gravitacional extrema y horizonte de sucesos."}
 ];
 
 // Saludos en diferentes idiomas codificados únicamente en binario ASCII de 8 bits
@@ -1077,12 +1083,12 @@ const NIGHT_SCENARIO_LABELS = [
   "Noche 2 — Guardia estándar (Recarga rápida)",
   "Noche 3 — Pulsares + Espectrograma integrado",
   "Noche 4 — Guardia intermedia (Recarga rápida)",
-  "Noche 5 — Archivos visuales dañados (Solo espectrograma)",
+  "Noche 5 — Singularidad (Cuasar) + Archivos dañados",
   "Noche 6 — Desgaste térmico (Recarga lenta)",
-  "Noche 7 — Guardia profunda (Recarga lenta)",
+  "Noche 7 — Enana Marrón + Guardia profunda (Recarga lenta)",
   "Noche 8 — Víspera de tormenta (Recarga lenta)",
-  "Noche 9 — Evento: Fallo óptico CRT (Sin imagen)",
-  "Noche 10 — Subcategorías y Anomalías activas",
+  "Noche 9 — Agujero Negro + Fallo óptico CRT (Sin imagen)",
+  "Noche 10 — Subcategorías y Anomalías únicas activas",
   "Noche 11 — Corte de generador (Sin recarga)",
   "Noche 12 — Vigilancia crítica (Sin recarga)",
   "Noche 13 — Sector profundo (Sin recarga)",
@@ -1143,7 +1149,8 @@ let discoveredModels = new Set(); // Modelos normales verificados en Central
 let discoveredAnomalies = []; // Lista privada de anomalías encontradas (aparece en papel dentro de Atlas)
 let atlasSpecMode = new Set(); // Entradas del Atlas mostradas como espectrograma en lugar de imagen
 let firstAnomalyFound = false;
-let shadowBuyerUnlocked = false;
+let hasFloppyDisk = false;
+let floppyStoredAnomalies = []; // Anomalías respaldadas en Disco Floppy (máx. 5)
 let gameOverReason = ""; // "ARREST" | "COMPLETED"
 let R = null, sid = 0, last = performance.now();
 let flash = "", flashOk = 1, flashT = 0;
@@ -1158,11 +1165,21 @@ let lastProcSpecSigId = null;
 
 const uid = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 const shiftLabel = idx => isFreeMode ? `MODO LIBRE · N${idx + 1}` : `NOCHE ${idx + 1}`;
-const isSubcatEnabled = () => shift >= 9;      // Noche 10 en adelante (0-based >= 9)
-const isPulsarEnabled = () => shift >= 2;      // Noche 3 en adelante (0-based >= 2)
-const isSpectrogramEnabled = () => shift >= 2; // Noche 3 en adelante (0-based >= 2)
-const isAnomEnabled = () => shift >= 9;        // Todas las anomalías solo desde Noche 10 (0-based >= 9)
-const isOpticalFailed = () => shift === 8;     // Noche 9 (0-based === 8): fallo óptico/imagen CRT
+const isSubcatEnabled = () => shift >= 9;        // Noche 10 en adelante (0-based >= 9)
+const isPulsarEnabled = () => shift >= 2;        // Noche 3 en adelante (0-based >= 2)
+const isSingularityEnabled = () => shift >= 4;   // Noche 5 en adelante (0-based >= 4)
+const isSpectrogramEnabled = () => shift >= 2;   // Noche 3 en adelante (0-based >= 2)
+const isAnomEnabled = () => shift >= 9;          // Todas las anomalías solo desde Noche 10 (0-based >= 9)
+const isOpticalFailed = () => shift === 8;       // Noche 9 (0-based === 8): fallo óptico/imagen CRT
+function getAvailableCategories() {
+  const cats = [0, 1, 2, 3];
+  if (isPulsarEnabled()) cats.push(4);
+  if (isSingularityEnabled()) cats.push(5);
+  return cats;
+}
+function getAvailableModelsForShift() {
+  return MODELS.filter(m => (m.minShift || 0) <= shift);
+}
 const isPaperTheme = () => V !== "boot";
 function syncThemeClass() {
   if (document.body) {
@@ -1532,22 +1549,33 @@ function addMail(subj, body, extra = {}) {
 }
 
 function pickUniqueModelForCat(cat, forcedModelId = null) {
-  const catModels = MODELS.filter(m => m.cat === cat);
+  const catModels = MODELS.filter(m => m.cat === cat && (m.minShift || 0) <= shift);
+  const fallbackModels = catModels.length ? catModels : MODELS.filter(m => m.cat === cat);
   if (forcedModelId) {
-    const found = catModels.find(m => m.id === forcedModelId);
+    const found = fallbackModels.find(m => m.id === forcedModelId) || MODELS.find(m => m.id === forcedModelId);
     if (found) {
       if (cat === 1) usedPlanetModelsThisNight.add(found.id);
       return found;
     }
   }
   if (cat === 1) {
-    const unusedPlanets = catModels.filter(m => !usedPlanetModelsThisNight.has(m.id));
-    const pool = unusedPlanets.length ? unusedPlanets : catModels;
+    const unusedPlanets = fallbackModels.filter(m => !usedPlanetModelsThisNight.has(m.id));
+    const pool = unusedPlanets.length ? unusedPlanets : fallbackModels;
     const chosen = pool[Math.floor(Math.random() * pool.length)];
     usedPlanetModelsThisNight.add(chosen.id);
     return chosen;
   }
-  return catModels[Math.floor(Math.random() * catModels.length)];
+  return fallbackModels[Math.floor(Math.random() * fallbackModels.length)];
+}
+
+function getAvailableUniqueAnomalies() {
+  const claimedTypes = new Set([
+    ...discoveredAnomalies.map(d => d.anomType),
+    ...floppyStoredAnomalies.map(d => d.anomType),
+    ...sigs.filter(s => s.anom && s.st !== "gone").map(s => s.anomType),
+    ...outbox.filter(p => p.anom).map(p => p.anomType)
+  ]);
+  return ANOMALY_DEFS.filter(a => !claimedTypes.has(a.type));
 }
 
 function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId = null, assignRefId = null) {
@@ -1557,19 +1585,20 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId
     y = 240 + Math.random() * (H - 480);
   } while (tries++ < 160 && sigs.some(s => s.st !== "gone" && Math.hypot(s.x - x, s.y - y) < 760));
 
-  // Las anomalías SOLO aparecen a partir de Noche 10 (isAnomEnabled()) y nunca reemplazan una señal de asignación
-  const allowAnom = isAnomEnabled() && !assignRefId;
-  const anom = allowAnom ? (forcedAnom !== null ? forcedAnom : (Math.random() < 0.22)) : false;
+  // Las anomalías SOLO aparecen a partir de Noche 10 (isAnomEnabled()), con ratio considerablemente menor (6%)
+  // y cada anomalía es estrictamente única (si ya fue encontrada o está activa, nunca vuelve a aparecer)
+  const availableAnoms = getAvailableUniqueAnomalies();
+  const allowAnom = isAnomEnabled() && !assignRefId && availableAnoms.length > 0;
+  let anom = allowAnom ? (forcedAnom !== null ? forcedAnom : (Math.random() < 0.06)) : false;
 
   let anomDef = null;
   if (anom) {
     if (forcedAnomType) {
-      anomDef = ANOMALY_DEFS.find(a => a.type === forcedAnomType) || ANOMALY_DEFS[0];
+      anomDef = availableAnoms.find(a => a.type === forcedAnomType) || null;
     } else {
-      const undiscovered = ANOMALY_DEFS.filter(a => !discoveredAnomalies.some(d => d.anomType === a.type));
-      const pool = undiscovered.length ? undiscovered : ANOMALY_DEFS;
-      anomDef = pool[Math.floor(Math.random() * pool.length)];
+      anomDef = availableAnoms[Math.floor(Math.random() * availableAnoms.length)] || null;
     }
+    if (!anomDef) anom = false;
   }
 
   let actualCat = anomDef ? anomDef.cat : cat;
@@ -1577,12 +1606,24 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId
   if (!anomDef && !forcedModelId && actualCat === 1) {
     const allPlanets = MODELS.filter(m => m.cat === 1);
     if (usedPlanetModelsThisNight.size >= allPlanets.length) {
-      const altCats = (isPulsarEnabled() ? [0, 2, 3, 4] : [0, 2, 3]);
+      const altCats = getAvailableCategories().filter(c => c !== 1);
       actualCat = altCats[Math.floor(Math.random() * altCats.length)];
     }
   }
 
   const chosenModel = pickUniqueModelForCat(actualCat, forcedModelId);
+
+  // Imágenes de señuelo/confusión en el CRT:
+  // - Cuasar (Noche 5+): elige aleatoriamente entre enana amarilla y enana roja, pero en Atlas usa noimage_anomaly.png
+  // - Enana Marrón (Noche 7+): usa red_dwarf.png en CRT, pero en Atlas usa brown_dwarf.png
+  let signalImg = anomDef ? anomDef.img : chosenModel.img;
+  if (!anomDef) {
+    if (chosenModel.id === "sin_cuasar") {
+      signalImg = Math.random() < 0.5 ? "Signals/yellow_dwarf.png" : "Signals/red_dwarf.png";
+    } else if (chosenModel.id === "est_enana_marron") {
+      signalImg = "Signals/red_dwarf.png";
+    }
+  }
 
   // A partir de la Noche 5 (shift >= 4), algunos archivos sufren daño visual con un ratio bajo (12% - 20%),
   // dejando visible únicamente el espectrograma y el audio para identificarlos (nunca en anomalías ni encargos)
@@ -1606,14 +1647,12 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId
     const satNum = 100 + Math.floor(Math.random() * 899);
     const alt = 420 + Math.floor(Math.random() * 380);
     const hex = uid();
-    textData = `TLM-SAT-${satNum} // ${chosenModel.name.toUpperCase()} // ALT:${alt}KM // PWR:88% // HASH:${hex}`;
-  } else {
-    textData = `ESPECTRO-${chosenModel.id.toUpperCase()} // INTENSIDAD:${62 + Math.floor(Math.random()*35)}%`;
+    textData = `TLM-SAT-${satNum} // ALT:${alt}KM // PWR:88% // HASH:${hex}`;
   }
 
   return {
     id: ++sid, x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
-    cat: actualCat, modelId: chosenModel.id, img: anomDef ? anomDef.img : chosenModel.img,
+    cat: actualCat, modelId: chosenModel.id, img: signalImg,
     anom, anomType, anomTitle, assignRefId,
     isCorruptSignal, st: "echo", align: 0, prog: 0,
     tot: 0, bad: 0, acc: 0, seed: Math.random() * 100,
@@ -1623,12 +1662,40 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId
   };
 }
 
+function getNormalStoredCount() {
+  return sigs.filter(s => s.st === "raw" && !s.anom).length + outbox.filter(p => !p.anom).length;
+}
+
+function getAnomalyBufferCount() {
+  return sigs.filter(s => s.st === "raw" && s.anom).length + outbox.filter(p => p.anom).length;
+}
+
 function getStoredMemoryCount() {
   return sigs.filter(s => s.st === "raw").length + outbox.length;
 }
 
-function getReservedMemoryCount() {
-  return getStoredMemoryCount() + sigs.filter(s => s.st === "align" || s.st === "dl").length;
+function canAcceptSignalInBuffer(isAnomSignal = false) {
+  if (!hasFloppyDisk) {
+    const reservedTotal = getStoredMemoryCount() + sigs.filter(s => s.st === "align" || s.st === "dl").length;
+    return reservedTotal < MAX_MEMORY_SIGNALS;
+  }
+  const activeNormal = sigs.filter(s => (s.st === "align" || s.st === "dl") && !s.anom).length;
+  const activeAnom = sigs.filter(s => (s.st === "align" || s.st === "dl") && s.anom).length;
+  if (isAnomSignal) {
+    return (getAnomalyBufferCount() + activeAnom) < MAX_FLOPPY_ANOMALIES;
+  }
+  return (getNormalStoredCount() + activeNormal) < MAX_MEMORY_SIGNALS;
+}
+
+function isBufferFullForLock() {
+  if (!hasFloppyDisk) {
+    const reservedTotal = getStoredMemoryCount() + sigs.filter(s => s.st === "align" || s.st === "dl").length;
+    return reservedTotal >= MAX_MEMORY_SIGNALS;
+  }
+  const activeNormal = sigs.filter(s => (s.st === "align" || s.st === "dl") && !s.anom).length;
+  const activeAnom = sigs.filter(s => (s.st === "align" || s.st === "dl") && s.anom).length;
+  return (getNormalStoredCount() + activeNormal) >= MAX_MEMORY_SIGNALS &&
+         (getAnomalyBufferCount() + activeAnom) >= MAX_FLOPPY_ANOMALIES;
 }
 
 function getUncatalogedNightAssignments() {
@@ -1659,6 +1726,9 @@ function areNightAssignmentsCataloged() {
 function ensureSectorDiversity() {
   if (!isPulsarEnabled()) {
     sigs.forEach(s => { if (s.cat === 4 && s.st === "echo") s.st = "gone"; });
+  }
+  if (!isSingularityEnabled()) {
+    sigs.forEach(s => { if (s.cat === 5 && s.st === "echo") s.st = "gone"; });
   }
   if (!isAnomEnabled()) {
     sigs.forEach(s => { if (s.anom && s.st === "echo") s.st = "gone"; });
@@ -1692,8 +1762,19 @@ function ensureSectorDiversity() {
     }
   }
 
+  // En Noche 9 (shift === 8), asegurar al menos una aparición del Agujero Negro en el sector
+  if (shift === 8 && !discoveredModels.has("sin_agujero_negro") && !sigs.some(s => s.modelId === "sin_agujero_negro" && s.st !== "gone")) {
+    if (inSector().length >= 5) {
+      const idleExtra = sigs.find(s => s.st === "echo" && !s.assignRefId);
+      if (idleExtra) idleExtra.st = "gone";
+    }
+    sigs.push(makeSignal(5, false, null, "sin_agujero_negro", null));
+    nightExtraSpawned++;
+    nightTotalSpawned++;
+  }
+
   // 2. Completar ecos en sector
-  const allowedCats = isPulsarEnabled() ? [0, 1, 2, 3, 4] : [0, 1, 2, 3];
+  const allowedCats = getAvailableCategories();
   while (inSector().length < 5 && (!areNightAssignmentsCataloged() || nightTotalSpawned < MAX_NIGHT_SIGNALS_AFTER_CATALOG)) {
     const curSector = inSector();
     const missingCats = allowedCats.filter(c => !curSector.some(s => s.cat === c && !s.anom));
@@ -1706,8 +1787,7 @@ function ensureSectorDiversity() {
       chosenCat = weightedPool[Math.floor(Math.random() * weightedPool.length)];
     }
 
-    const forceAnom = isAnomEnabled() && !curSector.some(s => s.anom) && nightExtraSpawned === 2 ? true : null;
-    sigs.push(makeSignal(chosenCat, forceAnom, null, null, null));
+    sigs.push(makeSignal(chosenCat, null, null, null, null));
     nightExtraSpawned++;
     nightTotalSpawned++;
   }
@@ -1730,7 +1810,7 @@ function initShift() {
   };
 
   // Generar exactamente 3 encargos científicos diarios (pagos: $45-$65 CR)
-  const allowedCats = isPulsarEnabled() ? [0, 1, 2, 3, 4] : [0, 1, 2, 3];
+  const allowedCats = getAvailableCategories();
   const usedSci = new Set();
 
   for (let i = 0; i < 3; i++) {
@@ -1743,12 +1823,12 @@ function initShift() {
     const cat = allowedCats[(shift + i) % allowedCats.length];
     let mod;
     if (cat === 1) {
-      const unusedPlanets = MODELS.filter(m => m.cat === 1 && !usedPlanetModelsThisNight.has(m.id));
-      const pool = unusedPlanets.length ? unusedPlanets : MODELS.filter(m => m.cat === 1);
+      const unusedPlanets = MODELS.filter(m => m.cat === 1 && (m.minShift || 0) <= shift && !usedPlanetModelsThisNight.has(m.id));
+      const pool = unusedPlanets.length ? unusedPlanets : MODELS.filter(m => m.cat === 1 && (m.minShift || 0) <= shift);
       mod = pool[Math.floor(Math.random() * pool.length)];
       usedPlanetModelsThisNight.add(mod.id);
     } else {
-      const catModels = MODELS.filter(m => m.cat === cat);
+      const catModels = MODELS.filter(m => m.cat === cat && (m.minShift || 0) <= shift);
       mod = catModels[Math.floor(Math.random() * catModels.length)];
     }
 
@@ -1804,22 +1884,32 @@ function initShift() {
   // Avisos narrativos y técnicos por noche
   if (shift === 2) {
     addMail(
-      "Actualizacion de Sistema // Espectrograma Integrado",
+      "Actualizacion // Categoria Pulsar y Espectrograma",
       "AVISO DE ACTUALIZACION DE FIRMWARE:\n\n" +
-      "Se ha completado una actualizacion de sistema en la terminal de Erial-7 y ahora fue integrado el Espectrograma en tiempo real directamente dentro del Procesador, junto al monitor CRT.\n\n" +
-      "Ademas, se habilito un boton dentro del Atlas para alternar la vista de cualquier registro entre su imagen y su espectrograma. Reproduce el audio de una senal para analizar sus niveles y espectro en vivo.",
+      "Se ha habilitado la categoria Pulsar en la consola del Procesador (incluyendo Pulsares y FRB) junto con el Espectrograma FFT en tiempo real.\n\n" +
+      "USO DEL ESPECTROGRAMA: Reproduce el audio de la senal capturada para observar su cadencia de pulsos y bandas de frecuencia en el espectrograma. Esta herramienta te permitira distinguir los Pulsares y otras emisiones energeticas con precision.",
       {sender: "SISTEMA", tag: `N${shift + 1} · UPD`}
     );
-    addMail(
-      "Boletin Tecnico // Pulsares",
-      "Se han detectado emisiones de Pulsares en el cuadrante. El catalogo de clasificacion ya incluye su firma espectral.",
-      {sender: "SISTEMA", tag: `N${shift + 1} · SYS`}
-    );
   } else if (shift === 4) {
+    addMail(
+      "Nueva Categoria // Singularidad (Cuasar)",
+      "BOLETIN ASTROFISICO:\n\n" +
+      "Se ha incorporado la nueva categoria Singularidad al Procesador tras detectarse emisiones de Cuasares en el sector.\n\n" +
+      "PRECAUCION OPTICA: Debido a la saturacion de los sensores opticos, los Cuasares pueden proyectar la silueta de una Enana Amarilla o una Enana Roja en el monitor CRT. Verifica siempre su firma de audio y espectrograma antes de catalogar.",
+      {sender: "CENTRAL", tag: `N${shift + 1} · CAT`}
+    );
     addMail(
       "Aviso de Interferencia Solar // Archivos Danados",
       "Tormentas magneticas estan danando la capa de imagen de algunos archivos entrantes. En esos casos el monitor CRT no mostrara imagen y solo sera visible el espectrograma; usa el audio y sus niveles para identificarlos y catalogarlos.",
       {sender: "SISTEMA", tag: `N${shift + 1} · SYS`}
+    );
+  } else if (shift === 6) {
+    addMail(
+      "Actualizacion de Catalogo // Enana Marron",
+      "BOLETIN ASTROFISICO:\n\n" +
+      "Se ha anadido la Enana Marron a la categoria Estrella. Por su baja temperatura superficial, los sensores opticos del CRT la representan con la misma imagen que una Enana Roja.\n\n" +
+      "Analiza su frecuencia en el espectrograma y audio para diferenciar ambas subcategorias.",
+      {sender: "CENTRAL", tag: `N${shift + 1} · CAT`}
     );
   } else if (shift === 5) {
     addMail(
@@ -1909,12 +1999,14 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
       textData: a.textData
     }));
     firstAnomalyFound = true;
-    shadowBuyerUnlocked = true;
+    hasFloppyDisk = true;
+    floppyStoredAnomalies = [];
   } else {
     discoveredModels = new Set();
     discoveredAnomalies = [];
     firstAnomalyFound = false;
-    shadowBuyerUnlocked = false;
+    hasFloppyDisk = false;
+    floppyStoredAnomalies = [];
   }
 
   gameOverReason = "";
@@ -2012,7 +2104,7 @@ function updTop() {
     <span class="pill ${shift >= 8 ? "night" : ""}">${shiftLabel(shift)}/${TOTAL_NIGHTS}</span>
     <span class="pill ${pwrClass}">PWR ${Math.round(en)}/${cap}${pwrTag}</span>
     <span class="pill">CR $${G.money}</span>
-    <span class="pill ${getStoredMemoryCount() >= MAX_MEMORY_SIGNALS ? "slowrech" : ""}">MEM ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}</span>
+    <span class="pill ${isBufferFullForLock() ? "slowrech" : ""}">MEM ${hasFloppyDisk ? `${getNormalStoredCount()}/${MAX_MEMORY_SIGNALS} · FLOPPY +${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES}` : `${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}`}</span>
     <span class="pill">ENCARGOS: ${3 - remAssigns}/3</span>
     <button class="alt" id="muteBtn" style="padding:3px 8px;font-size:11px">${muted ? "SONIDO: OFF" : "SONIDO: ON"}</button>
     <button class="logout-btn" id="logoutShiftBtn" ${canLogout ? "" : "disabled"}>Cerrar sesión</button>
@@ -2073,27 +2165,13 @@ function onFirstAnomalyDiscovered() {
   );
 
   addMail(
-    "NO LA ENVIES POR LA RED",
+    "NO LA ENVIES POR LA RED // DISCO FLOPPY",
     "Detectamos que acabas de fijar una lectura anomala en tu terminal.\n\n" +
     "ADVERTENCIA: No transmitas esa senal a los cientificos ni al Archivo Central. Si la subes a la red oficial, activaras los protocolos de seguridad de la Division del Espacio de Naciones Unidas: clausuraran la estacion y te arrestaran para interrogatorio.\n\n" +
-    "Guardala en tus apuntes personales. Alguien mas se pondra en contacto contigo pronto.",
-    {kind: "anon_warn", sender: "OCULTO", tag: `N${shift + 1} · ???`}
+    "He dejado un Disco Floppy disponible para su compra en tu Taller. Adquierelo para poder guardar las anomalias directamente en el disco sin usar la red y ampliar tu buffer con capacidad para 5 anomalias extra.",
+    {kind: "anon_warn", sender: "OCULTO", tag: `N${shift + 1} · FLOPPY`}
   );
-
-  setTimeout(() => {
-    if (V === "end") return;
-    shadowBuyerUnlocked = true;
-    addMail(
-      "Oferta Privada ($240 CR)",
-      "Sabemos lo que tienes en el buffer de Erial-7. Nos interesan las lecturas anomalas que las agencias oficiales intentan ocultar.\n\n" +
-      "Hemos habilitado un Canal Cifrado en tu Plataforma de Envio. Transmite alli cualquier senal anomala y te transferiremos $240 CR sin dejar rastro en los servidores de Naciones Unidas.",
-      {kind: "buyer", sender: "SOMBRA", tag: `N${shift + 1} · $240`}
-    );
-    beep(610, 0.14, "triangle", 0.07);
-    msg("[CORREO CIFRADO] Nuevo mensaje en bandeja", 1);
-    if (V === "mail" || V === "plat") render();
-    else updBadges();
-  }, 4200);
+  if (V === "shop") render();
 }
 
 function triggerGovernmentArrestEnding() {
@@ -2117,30 +2195,9 @@ function triggerGovernmentArrestEnding() {
 function evaluatePlatformDispatch(ev) {
   const {pkg, targetType, assignId} = ev;
 
-  if (pkg.anom && targetType !== "shadow") {
+  if (pkg.anom) {
     if (R) R.anomSent++;
     triggerGovernmentArrestEnding();
-    return;
-  }
-
-  if (targetType === "shadow") {
-    if (!pkg.anom) {
-      addMail(
-        "INTERMEDIARIO SOMBRA // PAQUETE RECHAZADO",
-        "Esto es telemetria convencional. Solo pagamos por anomalias reales fuera de catalogo. Pago: $0 CR."
-      );
-    } else {
-      if (R) R.anomSent++;
-      G.money += 240;
-      addMail(
-        "INTERMEDIARIO SOMBRA // TRANSFERENCIA COMPLETADA",
-        `Paquete anomalo (${pkg.anomTitle}) recibido en el nodo cifrado. Fondos acreditados: +$240 CR.`
-      );
-      msg("[OK] Venta cifrada completada (+$240 CR)", 1);
-    }
-    syncLiveTelemetry(false, true);
-    updTop();
-    if (V === "mail" || V === "shop") render();
     return;
   }
 
@@ -2416,6 +2473,7 @@ function tick(dt) {
       activeVoice.audio.volume = Math.max(0.08, Math.min(baseVol, baseVol * clarity));
     } else if (activeVoice.g) {
       const pulse = s.cat === 4 ? ((activeVoice.t * 7 % 1) < 0.22 ? 1 : 0.05)
+                  : s.cat === 5 ? (0.55 + 0.45 * Math.sin(activeVoice.t * (s.modelId === "sin_agujero_negro" ? 1.8 : 11)))
                   : s.cat === 3 ? ((activeVoice.t * 2.5 % 1) < 0.45 ? 0.9 : 0.1)
                   : (0.65 + 0.35 * Math.sin(activeVoice.t * 3));
       activeVoice.g.gain.value = 0.08 * clarity * pulse;
@@ -3304,13 +3362,13 @@ function render() {
         ` : ""}
         <div class="map-hud-bar">
           <span class="mut">${
-            getReservedMemoryCount() >= MAX_MEMORY_SIGNALS && !busySig
-              ? `Memoria llena (${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}): envia en Plataforma o descarta en Procesador.`
+            isBufferFullForLock() && !busySig
+              ? `Memoria llena (${getStoredMemoryCount()}/${hasFloppyDisk ? MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES : MAX_MEMORY_SIGNALS}): envia en Plataforma o descarta en Procesador.`
               : busySig
-                ? `Antenas ocupadas rastreando senal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}]`
+                ? `Antenas ocupadas rastreando senal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${hasFloppyDisk ? MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES : MAX_MEMORY_SIGNALS}]`
                 : sigs.filter(s => s.st === "echo").length === 0 && areNightAssignmentsCataloged() && nightTotalSpawned >= MAX_NIGHT_SIGNALS_AFTER_CATALOG
                   ? "No quedan mas senales en el sector durante esta noche."
-                  : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco) · Memoria: ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}.`
+                  : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco) · Memoria: ${hasFloppyDisk ? `${getNormalStoredCount()}/${MAX_MEMORY_SIGNALS} + ${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES} ANOM` : `${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}`}.`
           }</span>
           <button class="alt" id="rd">Pulso Radar (-6 PWR)</button>
         </div>
@@ -3339,7 +3397,8 @@ function render() {
       const colP = pP >= 88 ? "#15803d" : pP >= 55 ? "#b45309" : "#b91c1c";
 
       const needSub = isSubcatEnabled();
-      const catModels = choiceCat !== null ? MODELS.filter(m => m.cat === choiceCat) : [];
+      const availCats = getAvailableCategories();
+      const catModels = choiceCat !== null ? MODELS.filter(m => m.cat === choiceCat && (m.minShift || 0) <= shift) : [];
       const canQueue = choiceCat !== null && (!needSub || choiceMod !== null);
 
       const crtFooterMsg = optFail
@@ -3425,9 +3484,17 @@ function render() {
                 <span class="mut">${cur.fixed ? (canQueue ? "LISTO" : "PENDIENTE") : "BLOQUEADO"}</span>
               </div>
               ${cur.fixed ? `
+                ${cur.anom ? `
+                  <div style="padding:6px 8px;border:1px solid #a855f7;border-radius:3px;font-size:11px;margin-bottom:4px">
+                    <b>[LECTURA ANOMALA]</b> No la transmitas por la red oficial.
+                    ${hasFloppyDisk
+                      ? `<button class="shadow" id="saveFloppyProcBtn" style="width:100%;margin-top:6px" ${floppyStoredAnomalies.length >= MAX_FLOPPY_ANOMALIES ? "disabled" : ""}>Guardar en Disco Floppy (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})</button>`
+                      : `<div class="mut" style="margin-top:4px">Compra el <b>Disco Floppy</b> en el Taller para respaldarla.</div>`}
+                  </div>
+                ` : ""}
                 <div class="mut" style="font-size:11px">1. CATEGORIA PRINCIPAL:</div>
                 <div class="proc-cat-grid">
-                  ${CLASSES.map((c, i) => `<button class="${choiceCat === i ? "" : "alt"}" data-k="${i}">${c}</button>`).join("")}
+                  ${availCats.map(i => `<button class="${choiceCat === i ? "" : "alt"}" data-k="${i}">${CLASSES[i]}</button>`).join("")}
                 </div>
                 ${needSub && choiceCat !== null ? `
                   <div class="mut" style="font-size:11px;margin-top:2px">2. SUBCATEGORIA (DESDE NOCHE 10):</div>
@@ -3489,7 +3556,7 @@ function render() {
           </div>`;
         }).join("")}
 
-        <div class="between" style="padding:9px 0;${shadowBuyerUnlocked ? "border-bottom:1px dashed #a89068" : ""}">
+        <div class="between" style="padding:9px 0;${hasFloppyDisk ? "border-bottom:1px dashed #a89068" : ""}">
           <div>
             <b>Archivo Central (Envio Libre / Extra)</b>
             <div class="mut" style="font-size:12px">
@@ -3499,23 +3566,24 @@ function render() {
           <button class="alt" id="sendCentralBtn" ${!selPkg ? "disabled" : ""}>Enviar a Central</button>
         </div>
 
-        ${shadowBuyerUnlocked ? `
+        ${hasFloppyDisk ? `
           <div class="between" style="padding:9px 0">
             <div>
-              <b style="color:#581c87">Canal Cifrado // Intermediario Sombra</b>
-              <div class="mut" style="font-size:12px">Compra directa de lecturas anomalas fuera de la red oficial ($240 CR).</div>
+              <b style="color:#581c87">Disco Floppy // Respaldo Local (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})</b>
+              <div class="mut" style="font-size:12px">Guarda lecturas anomalas en el Disco Floppy sin transmitirlas por la red oficial.</div>
             </div>
-            <button class="shadow" id="sendShadowBtn" ${!selPkg ? "disabled" : ""}>Transmitir por Canal Cifrado</button>
+            <button class="shadow" id="saveFloppyPlatBtn" ${!selPkg || !selPkg.anom || floppyStoredAnomalies.length >= MAX_FLOPPY_ANOMALIES ? "disabled" : ""}>Guardar en Disco Floppy</button>
           </div>
         ` : ""}
       </div>`;
   } else if (V === "atlas") {
     const specAvail = isSpectrogramEnabled();
+    const visibleModels = isFreeMode ? MODELS : MODELS.filter(m => (m.minShift || 0) <= shift || discoveredModels.has(m.id));
     h = `
       <div class="card">
-        <b>ATLAS DE CUERPOS CELESTES (${discoveredModels.size}/${MODELS.length} DESCUBIERTOS)</b>
+        <b>ATLAS DE CUERPOS CELESTES (${discoveredModels.size}/${visibleModels.length} DESCUBIERTOS)</b>
         <div class="atlas-grid">
-          ${MODELS.map(m => {
+          ${visibleModels.map(m => {
             const unlocked = discoveredModels.has(m.id);
             if (!unlocked) {
               return `<div class="atlas-card locked">
@@ -3554,7 +3622,7 @@ function render() {
               return `
                 <div class="paper-entry">
                   <div class="between">
-                    <b>${a.anomTitle}</b>
+                    <b>${a.anomTitle}${floppyStoredAnomalies.some(f => f.anomType === a.anomType) ? " [FLOPPY]" : ""}</b>
                     <div class="row" style="margin:0;gap:4px">
                       ${specAvail ? `<button class="paper-btn" data-anom-view="${idx}">${showSpec ? "Imagen" : "Espectrograma"}</button>` : ""}
                       <button class="paper-btn" data-anom-au="${idx}">Audio</button>
@@ -3604,7 +3672,14 @@ function render() {
         <div class="mut" style="font-size:12px">Suministro de emergencia indispensable cuando la recarga es lenta o nula.</div>
       </div>
       <button id="buyCellBtn" ${G.money < 30 || en >= cap ? "disabled" : ""}>$30 CR</button>
-    </div>`;
+    </div>` + (firstAnomalyFound ? `
+    <div class="card shadowbox between">
+      <div>
+        <b>Disco Floppy (Almacenamiento Anomalo +5)</b> <span class="mut">[VENDEDOR: OCULTO]</span>
+        <div class="mut" style="font-size:12px">Permite guardar lecturas anomalas en disco fuera de la red oficial y habilita +5 espacios extra para anomalias en el buffer.</div>
+      </div>
+      <button class="shadow" id="buyFloppyBtn" ${hasFloppyDisk || G.money < 50 ? "disabled" : ""}>${hasFloppyDisk ? "INSTALADO" : "$50 CR"}</button>
+    </div>` : "");
   } else if (V === "end") {
     if (gameOverReason === "ARREST") {
       h = `
@@ -3831,10 +3906,11 @@ function bindEvents(w) {
           return;
         }
 
-        if (getReservedMemoryCount() >= MAX_MEMORY_SIGNALS) {
+        if (!canAcceptSignalInBuffer(hit.anom)) {
           if (R) R.invalid++;
           beep(180, 0.15, "sawtooth");
-          return msg(`[ERR] Memoria llena (${MAX_MEMORY_SIGNALS}/${MAX_MEMORY_SIGNALS}) // Envia o descarta senales antes de capturar mas`, 0);
+          const maxCap = hasFloppyDisk ? (MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES) : MAX_MEMORY_SIGNALS;
+          return msg(`[ERR] Memoria llena (${getStoredMemoryCount()}/${maxCap}) // Envia, guarda en Floppy o descarta senales antes de capturar mas`, 0);
         }
         if (en < ECHO_LOCK_COST) { if (R) R.invalid++; beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
         en -= ECHO_LOCK_COST;
@@ -4000,7 +4076,11 @@ function bindEvents(w) {
       trueCat: cur.cat,
       trueMod: cur.modelId,
       anom: cur.anom,
+      anomType: cur.anomType,
       anomTitle: cur.anomTitle,
+      img: cur.img,
+      seed: cur.seed,
+      textData: cur.textData,
       chosenCat: choiceCat,
       chosenMod: choiceMod
     });
@@ -4058,18 +4138,66 @@ function bindEvents(w) {
     render();
   });
 
-  on("#sendShadowBtn", () => {
+  on("#saveFloppyProcBtn", () => {
+    if (!cur || !cur.anom || !cur.fixed || !hasFloppyDisk) return;
+    if (floppyStoredAnomalies.length >= MAX_FLOPPY_ANOMALIES) {
+      return msg(`[ERR] Disco Floppy lleno (${MAX_FLOPPY_ANOMALIES}/${MAX_FLOPPY_ANOMALIES})`, 0);
+    }
+    stopVoice();
+    if (!floppyStoredAnomalies.some(f => f.anomType === cur.anomType)) {
+      floppyStoredAnomalies.push({
+        anomTitle: cur.anomTitle,
+        anomType: cur.anomType,
+        modelId: cur.modelId,
+        img: cur.img,
+        seed: cur.seed,
+        anom: true,
+        textData: cur.textData
+      });
+    }
+    cur.st = "gone";
+    cur = null;
+    knobF = 50;
+    knobP = 50;
+    choiceCat = null;
+    choiceMod = null;
+    delete SPEC_BUFFERS["proc"];
+    ensureSectorDiversity();
+    beep(620, 0.12);
+    msg(`[OK] Anomalia guardada en Disco Floppy (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})`, 1);
+    syncLiveTelemetry(false, true);
+    updTop();
+    render();
+  });
+
+  on("#saveFloppyPlatBtn", () => {
+    if (!hasFloppyDisk) return;
     const pkgIdx = outbox.findIndex(p => p.id === selPkgId);
     if (pkgIdx < 0) return;
-    const pkg = outbox.splice(pkgIdx, 1)[0];
+    const pkg = outbox[pkgIdx];
+    if (!pkg.anom) {
+      return msg("[ERR] El Disco Floppy solo almacena lecturas anomalas", 0);
+    }
+    if (floppyStoredAnomalies.length >= MAX_FLOPPY_ANOMALIES) {
+      return msg(`[ERR] Disco Floppy lleno (${MAX_FLOPPY_ANOMALIES}/${MAX_FLOPPY_ANOMALIES})`, 0);
+    }
+    outbox.splice(pkgIdx, 1);
     selPkgId = outbox[0]?.id || null;
+    if (!floppyStoredAnomalies.some(f => f.anomType === pkg.anomType)) {
+      floppyStoredAnomalies.push({
+        anomTitle: pkg.anomTitle,
+        anomType: pkg.anomType,
+        modelId: pkg.trueMod,
+        img: pkg.img,
+        seed: pkg.seed || 2.1,
+        anom: true,
+        textData: pkg.textData || ""
+      });
+    }
+    ensureSectorDiversity();
     beep(620, 0.12);
-    msg("[OK] Paquete enviado por Canal Cifrado", 1);
-    pendingEvals.push({
-      at: performance.now() + 1800,
-      pkg,
-      targetType: "shadow"
-    });
+    msg(`[OK] Anomalia guardada en Disco Floppy (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})`, 1);
+    syncLiveTelemetry(false, true);
     updTop();
     render();
   });
@@ -4183,6 +4311,17 @@ function bindEvents(w) {
     en = Math.min(cap, en + 45);
     beep(680, 0.1);
     msg("[OK] Celda auxiliar conectada (+45 PWR)", 1);
+    updTop();
+    render();
+  });
+
+  on("#buyFloppyBtn", () => {
+    if (hasFloppyDisk || G.money < 50) return;
+    G.money -= 50;
+    hasFloppyDisk = true;
+    beep(680, 0.12);
+    msg("[OK] Disco Floppy instalado (+5 espacios para anomalias en buffer)", 1);
+    syncLiveTelemetry(false, true);
     updTop();
     render();
   });
