@@ -3097,7 +3097,7 @@ function render() {
           ${nightAssigns.map((a, idx) => {
             const mod = a.modelId ? MODELS.find(m => m.id === a.modelId) : null;
             const reqTxt = `${CLASSES[a.cat]}${mod ? ` (${mod.name})` : ""}`;
-            return `<div class="between" style="padding:7px 0;border-bottom:1px dashed #a89068">`
+            return `<div class="between" style="padding:7px 0;border-bottom:1px dashed #a89068">
               <div>
                 <b>Encargo ${idx + 1}/3 · ${a.sciName}</b>
                 <div class="mut" style="font-size:12px">Solicita: ${reqTxt} · Pago: $${a.reward} CR</div>
@@ -3108,7 +3108,7 @@ function render() {
             </div>`;
           }).join("")}
 
-          <div class="between" style="padding:9px 0;border-bottom:1px dashed #a89068">`
+          <div class="between" style="padding:9px 0;border-bottom:1px dashed #a89068">
             <div>
               <b>Archivo Central (Envio Libre / Extra)</b>
               <div class="mut" style="font-size:12px">
