@@ -874,21 +874,21 @@ const MODELS = [
   {id:"pla_makemake", cat:1, name:"Makemake", img:"Signals/makemake.png", audioSrc:"assets/audio/makemake.mp3", audioVol:0.48, freq:86, wave:"sine", pattern:"band4", desc:"Cuerpo transneptuniano brillante de superficie metanica."},
   // 2: Asteroide (3 modelos)
   {id:"ast_metalico", cat:2, name:"Asteroide Metalico", img:"Signals/metallic_asteroid.png", audioSrc:"assets/audio/metallic_asteroid.mp3", audioVol:0.48, freq:320, wave:"triangle", pattern:"diag", desc:"Trazas diagonales definidas de alta reflectividad."},
-  {id:"ast_condrita", cat:2, name:"Condrita Carbonacea", img:"Signals/chondrite_asteroid.png", audioSrc:"assets/audio/chondrite_asteroid.mp3", audioVol:0.48, freq:285, wave:"sine", pattern:"diag", desc:"Trazas diagonales suaves con deriva constante."},
+  {id:"ast_condrita", cat:2, name:"Condrita Carbonacea", img:"Signals/chondrite_asteroid.png", audioSrc:"assets/audio/chondrite.mp3", audioVol:0.48, freq:285, wave:"sine", pattern:"diag", desc:"Trazas diagonales suaves con deriva constante."},
   {id:"ast_cometa", cat:2, name:"Cometa de Nucleo Activo", img:"Signals/comet.png", audioSrc:"assets/audio/comet.mp3", audioVol:0.48, freq:355, wave:"sawtooth", pattern:"diag", desc:"Trazas diagonales alargadas por estela volatil."},
   // 3: Satelite (4 modelos)
-  {id:"sat_com", cat:3, name:"Satelite de Comunicaciones", img:"Signals/comms_satellite.png", audioSrc:"assets/audio/comms_satellite.mp3", audioVol:0.48, freq:760, wave:"sawtooth", pattern:"blocks", desc:"Columnas de bloques digitales + subportadora TLM."},
-  {id:"sat_sonda", cat:3, name:"Sonda Orbital", img:"Signals/space_probe.png", audioSrc:"assets/audio/space_probe.mp3", audioVol:0.48, freq:810, wave:"sawtooth", pattern:"blocks", desc:"Paquetes telemetricos espaciados + subportadora."},
-  {id:"sat_telescopio", cat:3, name:"Telescopio Espacial", img:"Signals/space_telescope.png", audioSrc:"assets/audio/space_telescope.mp3", audioVol:0.48, freq:720, wave:"square", pattern:"blocks", desc:"Bloques regulares de observacion profunda."},
+  {id:"sat_com", cat:3, name:"Satelite de Comunicaciones", img:"Signals/comms_satellite.png", audioSrc:"assets/audio/satellite.mp3", audioVol:0.48, freq:760, wave:"sawtooth", pattern:"blocks", desc:"Columnas de bloques digitales + subportadora TLM."},
+  {id:"sat_sonda", cat:3, name:"Sonda Orbital", img:"Signals/space_probe.png", audioSrc:"assets/audio/probe.mp3", audioVol:0.48, freq:810, wave:"sawtooth", pattern:"blocks", desc:"Paquetes telemetricos espaciados + subportadora."},
+  {id:"sat_telescopio", cat:3, name:"Telescopio Espacial", img:"Signals/space_telescope.png", audioSrc:"assets/audio/telescope.mp3", audioVol:0.48, freq:720, wave:"square", pattern:"blocks", desc:"Bloques regulares de observacion profunda."},
   {id:"sat_estacion", cat:3, name:"Estacion Modular", img:"Signals/station.png", audioSrc:"assets/audio/station.mp3", audioVol:0.48, freq:850, wave:"sawtooth", pattern:"blocks", desc:"Tramas continuas de alta densidad telemetrica."},
   // 4: Pulsar (4 modelos, aparece a partir de Noche 3 -> shift >= 2)
-  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", audioSrc:"assets/audio/millisecond_pulsar.mp3", audioVol:0.48, minShift:2, freq:480, wave:"square", pattern:"pulses", desc:"Columnas verticales periodicas de cadencia rapida."},
+  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", audioSrc:"assets/audio/neutron.mp3", audioVol:0.48, minShift:2, freq:480, wave:"square", pattern:"pulses", desc:"Columnas verticales periodicas de cadencia rapida."},
   {id:"pul_magnetar", cat:4, name:"Magnetar", img:"Signals/magnetar.png", audioSrc:"assets/audio/magnetar.mp3", audioVol:0.48, minShift:2, freq:430, wave:"square", pattern:"pulses", desc:"Pulsos verticales de altisima intensidad magnetica."},
   {id:"pul_binario", cat:4, name:"Pulsar Binario", img:"Signals/binary_pulsar.png", audioSrc:"assets/audio/binary_pulsar.mp3", audioVol:0.48, minShift:2, freq:515, wave:"square", pattern:"pulses", desc:"Doble tren de pulsos verticales con deriva de fase."},
-  {id:"pul_frb", cat:4, name:"FRB", img:"Signals/frb.png", audioSrc:"assets/audio/frb.mp3", audioVol:0.48, minShift:2, freq:585, wave:"square", pattern:"pulses", desc:"Rafaga rapida de radio transitoria de altisima dispersion energetica."},
+  {id:"pul_frb", cat:4, name:"FRB", img:"Signals/frb.png", audioSrc:"assets/audio/FRB.mp3", audioVol:0.48, minShift:2, freq:585, wave:"square", pattern:"pulses", desc:"Rafaga rapida de radio transitoria de altisima dispersion energetica."},
   // 5: Singularidad (2 modelos: Cuasar desde Noche 5 -> shift >= 4; Agujero Negro desde Noche 9 -> shift >= 8)
   {id:"sin_cuasar", cat:5, name:"Cuasar", img:"Signals/noimage_anomaly.png", audioSrc:"assets/audio/quasar.mp3", audioVol:0.48, minShift:4, freq:690, wave:"sawtooth", pattern:"singularity", desc:"Nucleo galactico activo extremadamente luminoso alimentado por acrecion relativista."},
-  {id:"sin_agujero_negro", cat:5, name:"Agujero Negro", img:"Signals/noimage_anomaly.png", audioSrc:"assets/audio/black_hole.mp3", audioVol:0.48, minShift:8, freq:64, wave:"sawtooth", pattern:"singularity", desc:"Region del espacio-tiempo con curvatura gravitacional extrema y horizonte de sucesos."}
+  {id:"sin_agujero_negro", cat:5, name:"Agujero Negro", img:"Signals/noimage_anomaly.png", audioSrc:"assets/audio/blackhole.mp3", audioVol:0.48, minShift:8, freq:64, wave:"sawtooth", pattern:"singularity", desc:"Region del espacio-tiempo con curvatura gravitacional extrema y horizonte de sucesos."}
 ];
 
 // Saludos en diferentes idiomas codificados únicamente en binario ASCII de 8 bits
@@ -928,6 +928,7 @@ const ANOMALY_DEFS = [
     type: "dyson",
     title: "Esfera de Dyson",
     img: "Signals/dyson_anomaly.png",
+    audioSrc: "assets/audio/dyson.mp3",
     cat: 0,
     freq: 92,
     wave: "sawtooth",
@@ -991,6 +992,7 @@ const ANOMALY_DEFS = [
     type: "astronaut",
     title: "Astronauta",
     img: "Signals/astronaut_anomaly.png",
+    audioSrc: "assets/audio/astronaut.mp3",
     cat: 3,
     freq: 158,
     wave: "triangle",
