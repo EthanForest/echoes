@@ -366,6 +366,49 @@ select:focus{border-color:#4ade80;box-shadow:0 0 0 2px rgba(34,197,94,.28)}
 /* ============================================================================
    ENTORNO GRAFICO UNIFICADO ESTILO ARCHIVO / ANOMALIAS (A PARTIR DEL LOGIN)
    ============================================================================ */
+body.boot-mode{
+  background:#000000;
+  padding:0;
+}
+body.boot-mode .terminal{
+  background:#000000;
+  border:none;
+  border-radius:0;
+  box-shadow:none;
+}
+body.boot-mode .terminal::after,
+body.boot-mode .topbar,
+body.boot-mode #tabs{
+  display:none !important;
+}
+body.boot-mode #win{
+  background:#000000;
+  padding:0;
+  overflow:hidden;
+}
+body.boot-mode .boot-screen{
+  background:#000000;
+  border:none;
+  border-radius:0;
+  max-width:none;
+  width:100%;
+  height:100%;
+  padding:20px;
+}
+body.login-mode .terminal{
+  background:transparent;
+  border:none;
+  box-shadow:none;
+}
+body.login-mode .terminal::after,
+body.login-mode .topbar,
+body.login-mode #tabs{
+  display:none !important;
+}
+body.login-mode #win{
+  background:transparent;
+  padding:16px;
+}
 body.paper-theme{
   background:#1e1912;
   color:#2b2116;
@@ -871,6 +914,7 @@ const ANOMALY_DEFS = [
     img: "Signals/flock_anomaly.png",
     spectrogramImg: "assets/spectrograms/flock_spectrogram.png",
     audioSrc: "assets/audio/flock.mp3",
+    audioVol: 0.48,
     cat: 2,
     freq: 266,
     wave: "triangle",
@@ -1026,6 +1070,8 @@ const isPaperTheme = () => V !== "boot";
 function syncThemeClass() {
   if (document.body) {
     document.body.classList.toggle("paper-theme", isPaperTheme());
+    document.body.classList.toggle("boot-mode", V === "boot");
+    document.body.classList.toggle("login-mode", V === "intro");
   }
 }
 
@@ -1261,8 +1307,9 @@ function playSignalAudio(sigObj) {
   if (anomDef && anomDef.audioSrc) {
     try {
       const audio = new Audio(anomDef.audioSrc);
+      const baseVol = (typeof anomDef.audioVol === "number") ? anomDef.audioVol : 0.48;
       const clarity = sigObj.fixed ? 1 : (sigObj.tgF !== undefined ? Math.max(0.25, 1 - (offF(sigObj) + offP(sigObj)) * 0.55) : 1);
-      audio.volume = Math.max(0.15, Math.min(1, 0.9 * clarity));
+      audio.volume = Math.max(0.08, Math.min(baseVol, baseVol * clarity));
       audio.onended = () => {
         if (activeVoice && activeVoice.audio === audio) {
           activeVoice = null;
@@ -1275,7 +1322,7 @@ function playSignalAudio(sigObj) {
           if (V === "proc") render();
         }
       };
-      activeVoice = {audio, sig: sigObj, t: 0};
+      activeVoice = {audio, baseVol, sig: sigObj, t: 0};
       const p = audio.play();
       if (p && typeof p.catch === "function") {
         p.catch(() => {
@@ -2081,40 +2128,27 @@ function triggerNightFadeTransition() {
 }
 
 function computeBootProgress(sec) {
-  if (sec <= 0.6) return Math.round((sec / 0.6) * 18);
-  if (sec <= 1.5) return Math.round(18 + ((sec - 0.6) / 0.9) * 34);
-  if (sec <= 2.3) return Math.round(52 + ((sec - 1.5) / 0.8) * 14);
-  if (sec <= 3.5) return Math.round(66 + ((sec - 2.3) / 1.2) * 30);
-  if (sec <= 4.0) return Math.round(96 + ((sec - 3.5) / 0.5) * 4);
+  if (sec <= 0.8) return Math.round((sec / 0.8) * 18);
+  if (sec <= 2.0) return Math.round(18 + ((sec - 0.8) / 1.2) * 34);
+  if (sec <= 3.1) return Math.round(52 + ((sec - 2.0) / 1.1) * 16);
+  if (sec <= 4.4) return Math.round(68 + ((sec - 3.1) / 1.3) * 28);
+  if (sec <= 4.9) return Math.round(96 + ((sec - 4.4) / 0.5) * 4);
   return 100;
-}
-
-function getBootStatusText(pct) {
-  if (pct < 20) return "AVALANCHE COSMOS 95 (R) · INICIANDO NUCLEO DEL SISTEMA...";
-  if (pct < 48) return "VERIFICANDO MEMORIA EXTENDIDA: 65536 KB OK";
-  if (pct < 72) return "CARGANDO CONTROLADORES DE TELEMETRIA ERIAL-7...";
-  if (pct < 96) return "SINCRONIZANDO MATRIZ DE RADIOASTRONOMIA...";
-  return "SISTEMA OPERATIVO LISTO · CARGANDO INICIO DE SESION...";
 }
 
 function drawBoot() {
   const fill = document.querySelector("#bootBarFill");
-  const st = document.querySelector("#bootStatus");
-  const pctEl = document.querySelector("#bootPct");
   if (fill) fill.style.width = `${bootProgress}%`;
-  if (pctEl) pctEl.textContent = `${bootProgress}%`;
-  if (st) st.textContent = getBootStatusText(bootProgress);
 }
 
 function tick(dt) {
   if (V === "boot") {
     bootElapsed += dt;
     bootProgress = computeBootProgress(bootElapsed);
-    if (!bootSoundPlayed && playStartupSound(false)) {
-      const hint = document.querySelector("#bootAudioHint");
-      if (hint) hint.style.display = "none";
+    if (!bootSoundPlayed) {
+      playStartupSound(false);
     }
-    if (bootElapsed >= 4.45) {
+    if (bootElapsed >= 5.0) {
       V = "intro";
       updTop();
       render();
@@ -2192,7 +2226,8 @@ function tick(dt) {
     const s = activeVoice.sig;
     const clarity = s.fixed ? 1 : (s.tgF !== undefined ? Math.max(0.18, 1 - (offF(s) + offP(s)) * 0.6) : 1);
     if (activeVoice.audio) {
-      activeVoice.audio.volume = Math.max(0.15, Math.min(1, 0.9 * clarity));
+      const baseVol = typeof activeVoice.baseVol === "number" ? activeVoice.baseVol : 0.48;
+      activeVoice.audio.volume = Math.max(0.08, Math.min(baseVol, baseVol * clarity));
     } else if (activeVoice.g) {
       const pulse = s.cat === 4 ? ((activeVoice.t * 7 % 1) < 0.22 ? 1 : 0.05)
                   : s.cat === 3 ? ((activeVoice.t * 2.5 % 1) < 0.45 ? 0.9 : 0.1)
@@ -2799,20 +2834,12 @@ function render() {
             <div class="boot-bar-fill" id="bootBarFill" style="width:${bootProgress}%"></div>
           </div>
         </div>
-        <div style="width:100%;max-width:360px;display:flex;justify-content:space-between;font-size:11px;color:#ffffff;margin-bottom:4px">
-          <span>CARGANDO SISTEMA...</span>
-          <span id="bootPct">${bootProgress}%</span>
-        </div>
-        <div class="boot-status" id="bootStatus">${getBootStatusText(bootProgress)}</div>
-        <div class="boot-audio-hint" id="bootAudioHint" style="display:${bootSoundPlayed ? "none" : "block"}">
-          [ HAZ CLIC O PULSA UNA TECLA PARA ACTIVAR SONIDO DE INICIO ]
-        </div>
       </div>`;
   } else if (V === "intro") {
     h = `
       <div class="login-win">
         <div class="os-win-bar">
-          <span>CONTROL DE ACCESO</span>
+          <span>BIENVENIDO</span>
           <span>[USR]</span>
         </div>
         <div class="login-body">
@@ -3161,7 +3188,7 @@ function render() {
     if (discoveredAnomalies.length > 0) {
       h += `
         <div class="paper-sheet">
-          <h3>REGISTRO EN PAPEL // ANOMALIAS</h3>
+          <h3>ANOMALÍAS</h3>
           <div class="paper-grid">
             ${discoveredAnomalies.map((a, idx) => `
               <div class="paper-entry">
