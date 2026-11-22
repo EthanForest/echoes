@@ -181,7 +181,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
   padding:4px 11px;font-size:12px;
 }
 
-/* Procesador: distribución en columnas para CRT + Espectrograma al lado y controles */
+/* Procesador: monitores amplios y simétricos + panel lateral compacto y ordenado */
 .proc-shell{
   flex:1;display:flex;flex-direction:column;min-height:0;gap:8px;
 }
@@ -195,11 +195,14 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .proc-grid{
   flex:1;min-height:0;display:grid;grid-template-columns:1fr;gap:10px;
 }
-@media(min-width:940px){
-  .proc-grid{grid-template-columns:1.38fr 1fr}
+@media(min-width:900px){
+  .proc-grid{grid-template-columns:minmax(0,1fr) 315px}
+}
+@media(min-width:1280px){
+  .proc-grid{grid-template-columns:minmax(0,1fr) 335px}
 }
 .proc-monitors{
-  display:grid;grid-template-columns:1fr;gap:8px;min-height:240px;height:100%;
+  display:grid;grid-template-columns:1fr;gap:10px;min-height:250px;height:100%;
 }
 .proc-monitors.dual{
   grid-template-columns:1fr;
@@ -208,14 +211,30 @@ button:disabled{opacity:.35;cursor:not-allowed}
   .proc-monitors.dual{grid-template-columns:1fr 1fr}
 }
 .crt-wrap{
-  background:#000000;border:2px solid #22c55e;border-radius:4px;padding:10px;
-  display:flex;flex-direction:column;justify-content:space-between;align-items:center;
-  position:relative;min-height:220px;height:100%;
+  background:#000000;border:2px solid #22c55e;border-radius:4px;padding:8px 10px;
+  display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;
+  gap:6px;position:relative;min-height:230px;height:100%;min-width:0;
 }
 .crt-wrap.opt-fail{border-color:#ef4444;background:#000000}
+.monitor-head{
+  flex:none;display:flex;justify-content:space-between;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.4px;padding-bottom:4px;
+  border-bottom:1px dashed #166534;
+}
+body.paper-theme .monitor-head{
+  border-bottom-color:#a89068;color:#3d2814;
+}
+.monitor-foot{
+  flex:none;display:flex;justify-content:space-between;align-items:center;gap:6px;
+  min-height:38px;font-size:11px;padding:4px 6px;border-radius:3px;
+  border:1px solid #166534;background:#030a06;
+}
+body.paper-theme .monitor-foot{
+  border-color:#a89068;background:#f5eedc;
+}
 .crt-stage{
-  flex:1;width:100%;min-height:150px;display:flex;align-items:center;justify-content:center;
-  background:#020503;border:1px solid #166534;border-radius:3px;padding:6px;overflow:hidden;
+  flex:1;width:100%;min-height:175px;display:flex;align-items:center;justify-content:center;
+  background:#020503;border:1px solid #166534;border-radius:3px;padding:5px;overflow:hidden;
 }
 #crt{
   width:100%;height:100%;object-fit:contain;image-rendering:pixelated;
@@ -228,12 +247,55 @@ button:disabled{opacity:.35;cursor:not-allowed}
   display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;
 }
 .proc-side > .card{
-  margin:0;flex:1;display:flex;flex-direction:column;justify-content:space-between;
+  margin:0;flex:none;display:flex;flex-direction:column;gap:8px;padding:9px 10px;
+}
+.proc-sec-head{
+  display:flex;justify-content:space-between;align-items:center;gap:6px;
+  font-size:11.5px;font-weight:700;letter-spacing:.4px;padding-bottom:5px;
+  border-bottom:1px dashed #166534;
+}
+body.paper-theme .proc-sec-head{
+  border-bottom-color:#a89068;color:#3d2814;
+}
+.tuner-box{
+  display:flex;flex-direction:column;gap:4px;padding:6px 8px;
+  border:1px solid #166534;border-radius:3px;background:rgba(3,10,6,.55);
+}
+body.paper-theme .tuner-box{
+  border-color:#b8a078;background:rgba(245,238,220,.7);
+}
+.tuner-row{
+  display:flex;align-items:center;gap:6px;
+}
+.tuner-lbl{
+  width:74px;flex:none;font-size:11.5px;font-weight:700;
+}
+.tuner-row input[type=range]{
+  flex:1;min-width:0;margin:0;height:16px;
+}
+.tuner-val{
+  width:28px;flex:none;text-align:right;font-size:12px;font-weight:700;
+}
+.tuner-box .prox-wrap{
+  margin-top:0;gap:6px;font-size:10.5px;
+}
+.proc-actions{
+  display:grid;grid-template-columns:1fr 1fr auto;gap:5px;padding-top:4px;
+}
+.proc-actions button{
+  padding:6px 7px;font-size:11.5px;white-space:nowrap;
+}
+.proc-cat-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:5px;
+}
+.proc-cat-grid button{
+  padding:5px 6px;font-size:11.5px;
 }
 
 .databox{
-  background:#000000;border:1px solid #22c55e;border-radius:4px;padding:6px 8px;
-  font-size:11px;color:#ffffff;white-space:pre-wrap;word-break:break-all;margin-top:6px;width:100%;
+  flex:none;height:38px;overflow-y:auto;
+  background:#000000;border:1px solid #22c55e;border-radius:3px;padding:4px 7px;
+  font-size:10.5px;line-height:1.35;color:#ffffff;white-space:pre-wrap;word-break:break-all;width:100%;
 }
 .databox.anom{border-color:#ef4444;color:#ffffff;background:#000000}
 input[type=range]{flex:1;accent-color:#22c55e;cursor:pointer}
@@ -783,8 +845,8 @@ const EXTRA_SIGNALS_PER_NIGHT = 10;
 const MAX_NIGHT_SIGNALS_AFTER_CATALOG = 13;
 const MAX_MEMORY_SIGNALS = 5;
 const ECHO_LOCK_COST = 4;
-const W = 2600, H = 1650;
-const stars = Array.from({length: 720}, () => [Math.random()*W, Math.random()*H, Math.random()*1.6 + 0.5]);
+const W = 4800, H = 3200;
+const stars = Array.from({length: 2400}, () => [Math.random()*W, Math.random()*H, Math.random()*1.6 + 0.5]);
 
 // Catálogo de 28 modelos normales vinculados a Signals/
 const MODELS = [
@@ -1061,7 +1123,7 @@ let sessionStartPerf = 0;
 let liveSyncTimer = 0;
 let cloudSyncTimer = 0;
 
-let sigs = [], cam = {x: 750, y: 480};
+let sigs = [], cam = {x: 1900, y: 1250};
 let en = 100, cap = 100, rd = 0;
 let mail = [], selMail = null;
 let shift = 0; // 0 = Noche 1 ... 14 = Noche 15
@@ -1491,9 +1553,9 @@ function pickUniqueModelForCat(cat, forcedModelId = null) {
 function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId = null, assignRefId = null) {
   let x, y, tries = 0;
   do {
-    x = 140 + Math.random() * (W - 280);
-    y = 140 + Math.random() * (H - 280);
-  } while (tries++ < 70 && sigs.some(s => s.st !== "gone" && Math.hypot(s.x - x, s.y - y) < 260));
+    x = 240 + Math.random() * (W - 480);
+    y = 240 + Math.random() * (H - 480);
+  } while (tries++ < 160 && sigs.some(s => s.st !== "gone" && Math.hypot(s.x - x, s.y - y) < 760));
 
   // Las anomalías SOLO aparecen a partir de Noche 10 (isAnomEnabled()) y nunca reemplazan una señal de asignación
   const allowAnom = isAnomEnabled() && !assignRefId;
@@ -1826,7 +1888,7 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
     en = 100;
   }
 
-  sigs = []; cam = {x: 750, y: 480}; mail = []; selMail = null;
+  sigs = []; cam = {x: 1900, y: 1250}; mail = []; selMail = null;
   nightAssignments = []; nightAssignPool = []; nightExtraSpawned = 0; nightTotalSpawned = 0; usedPlanetModelsThisNight = new Set(); isTransitioningNight = false;
   shift = clampedNight; srv = null; crashes = 0; cur = null; rd = 0;
   knobF = 50; knobP = 50; choiceCat = null; choiceMod = null;
@@ -2282,12 +2344,29 @@ function tick(dt) {
   const noiseProb = Math.max(0.02, 0.24 - G.f * 0.04);
   let activeDl = false;
 
-  sigs.forEach(s => {
+  sigs.forEach((s, idx) => {
     if ((s.st === "echo" || s.st === "align" || s.st === "dl") && (s.vx || s.vy)) {
       s.x += s.vx * dt;
       s.y += s.vy * dt;
-      if (s.x < 90 || s.x > W - 90) { s.vx *= -1; s.x = Math.max(90, Math.min(W - 90, s.x)); }
-      if (s.y < 90 || s.y > H - 90) { s.vy *= -1; s.y = Math.max(90, Math.min(H - 90, s.y)); }
+      if (s.x < 160 || s.x > W - 160) { s.vx *= -1; s.x = Math.max(160, Math.min(W - 160, s.x)); }
+      if (s.y < 160 || s.y > H - 160) { s.vy *= -1; s.y = Math.max(160, Math.min(H - 160, s.y)); }
+      for (let j = 0; j < sigs.length; j++) {
+        if (j === idx) continue;
+        const other = sigs[j];
+        if (other.st === "gone" || other.st === "raw") continue;
+        const dx = s.x - other.x, dy = s.y - other.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 0.1 && dist < 420) {
+          const nx = dx / dist, ny = dy / dist;
+          s.x += nx * 18 * dt;
+          s.y += ny * 18 * dt;
+          if (s.vx * nx + s.vy * ny < 0) {
+            const dot = s.vx * nx + s.vy * ny;
+            s.vx -= 2 * dot * nx;
+            s.vy -= 2 * dot * ny;
+          }
+        }
+      }
     }
 
     if (srv) return;
@@ -2681,6 +2760,10 @@ function drawMap(t) {
 
   cx.save();
   cx.translate(-cam.x, -cam.y);
+  cx.strokeStyle = paper ? "rgba(168, 144, 104, 0.36)" : "rgba(34, 197, 94, 0.28)";
+  cx.setLineDash([8, 6]);
+  cx.strokeRect(12, 12, W - 24, H - 24);
+  cx.setLineDash([]);
   sigs.forEach(s => {
     if (s.st === "gone" || s.st === "raw") return;
     const col = paper
@@ -2815,10 +2898,21 @@ function getSpecBuffer(key, w = 280, h = 150) {
     cv.width = w;
     cv.height = h;
     const ctx = cv.getContext("2d");
-    ctx.fillStyle = "#16120c";
+    ctx.fillStyle = isPaperTheme() ? "#18130d" : "#030805";
     ctx.fillRect(0, 0, w, h);
     buf = {cv, ctx, peakHold: 0, rmsSmooth: 0};
     SPEC_BUFFERS[key] = buf;
+  } else if (buf.cv.width !== w || buf.cv.height !== h) {
+    const oldCv = buf.cv;
+    const newCv = document.createElement("canvas");
+    newCv.width = w;
+    newCv.height = h;
+    const newCtx = newCv.getContext("2d");
+    newCtx.fillStyle = isPaperTheme() ? "#18130d" : "#030805";
+    newCtx.fillRect(0, 0, w, h);
+    newCtx.drawImage(oldCv, 0, 0, w, h);
+    buf.cv = newCv;
+    buf.ctx = newCtx;
   }
   return buf;
 }
@@ -2830,8 +2924,8 @@ function drawSpectrogram(t, targetCv = null, opts = {}) {
   if (!targetCv && !cur) return;
 
   const isCompact = Boolean(opts.compact);
-  const targetW = isCompact ? 260 : 340;
-  const targetH = isCompact ? 110 : 185;
+  const targetW = isCompact ? 260 : Math.max(280, Math.round(cv.clientWidth || 380));
+  const targetH = isCompact ? 110 : Math.max(170, Math.round(cv.clientHeight || 220));
   if (cv.width !== targetW || cv.height !== targetH) {
     cv.width = targetW;
     cv.height = targetH;
@@ -3258,81 +3352,96 @@ function render() {
         <div class="proc-grid">
           <div class="proc-monitors ${specEnabled ? "dual" : ""}">
             <div class="crt-wrap ${crtBlocked ? "opt-fail" : ""}">
+              <div class="monitor-head">
+                <span>MONITOR OPTICO CRT</span>
+                <span class="mut">${cur.fixed ? "[CAPTURA FIJADA]" : "SIN FIJAR"}</span>
+              </div>
               <div class="crt-stage">
                 <canvas id="crt" width="${rw}" height="${rh}"></canvas>
               </div>
-              <div class="between" style="width:100%;margin-top:8px;font-size:11px;flex:none">
+              <div class="monitor-foot">
                 <span class="mut" style="${crtBlocked ? "color:#991b1b;font-weight:700" : ""}">${crtFooterMsg}</span>
-                <span class="mut">${cur.fixed ? "[CAPTURA FIJADA]" : "SIN FIJAR"}</span>
+                <span class="mut">#${cur.id}</span>
               </div>
             </div>
 
             ${specEnabled ? `
               <div class="crt-wrap">
+                <div class="monitor-head">
+                  <span>ESPECTROGRAMA FFT + NIVELES</span>
+                  <span class="mut">${activeVoice ? "[AUDIO ACTIVO]" : "EN ESPERA"}</span>
+                </div>
                 <div class="crt-stage" style="padding:4px">
-                  <canvas id="spec" width="340" height="185"></canvas>
+                  <canvas id="spec"></canvas>
                 </div>
-                <div class="databox ${cur.anom ? "anom" : ""}" style="margin-top:6px">${cur.textData}</div>
-                <div class="between" style="width:100%;margin-top:6px;font-size:11px;flex:none">
-                  <span class="mut">ESPECTROGRAMA FFT + NIVELES</span>
-                  <span class="mut">${activeVoice ? "[AUDIO ACTIVO]" : "REPRODUCE AUDIO"}</span>
-                </div>
+                <div class="databox ${cur.anom ? "anom" : ""}">${cur.textData}</div>
               </div>
             ` : ""}
           </div>
 
           <div class="proc-side">
             <div class="card">
-              <div>
-                <div class="row" style="margin-bottom:4px">
-                  <span style="width:95px;font-size:12px">FRECUENCIA</span>
+              <div class="proc-sec-head">
+                <span>SINTONIZACION DE SENAL</span>
+                <span class="mut">${cur.fixed ? "FIJADA" : tuned ? "LISTA" : "AJUSTANDO"}</span>
+              </div>
+
+              <div class="tuner-box">
+                <div class="tuner-row">
+                  <span class="tuner-lbl">FRECUENCIA</span>
                   <input type="range" id="knF" min="0" max="100" value="${knobF}">
-                  <span id="valF" style="width:32px;text-align:right">${knobF}</span>
+                  <span id="valF" class="tuner-val">${knobF}</span>
                 </div>
                 <div class="prox-wrap">
-                  <span class="mut" style="width:95px">PROXIMIDAD:</span>
+                  <span class="mut" style="width:74px">PROXIMIDAD</span>
                   <div class="prox-bar"><div class="prox-fill" id="barF" style="width:${pF}%;background:${colF}"></div></div>
-                  <span id="txtF" style="width:52px;text-align:right;color:${colF}">${pF}%</span>
+                  <span id="txtF" style="width:38px;text-align:right;font-weight:700;color:${colF}">${pF}%</span>
                 </div>
               </div>
 
-              <div style="margin-top:12px">
-                <div class="row" style="margin-bottom:4px">
-                  <span style="width:95px;font-size:12px">POLARIDAD</span>
+              <div class="tuner-box">
+                <div class="tuner-row">
+                  <span class="tuner-lbl">POLARIDAD</span>
                   <input type="range" id="knP" min="0" max="100" value="${knobP}">
-                  <span id="valP" style="width:32px;text-align:right">${knobP}</span>
+                  <span id="valP" class="tuner-val">${knobP}</span>
                 </div>
                 <div class="prox-wrap">
-                  <span class="mut" style="width:95px">PROXIMIDAD:</span>
+                  <span class="mut" style="width:74px">PROXIMIDAD</span>
                   <div class="prox-bar"><div class="prox-fill" id="barP" style="width:${pP}%;background:${colP}"></div></div>
-                  <span id="txtP" style="width:52px;text-align:right;color:${colP}">${pP}%</span>
+                  <span id="txtP" style="width:38px;text-align:right;font-weight:700;color:${colP}">${pP}%</span>
                 </div>
               </div>
 
-              <div class="row" style="margin-top:14px;padding-top:10px;border-top:1px dashed #8c734b">
-                <button class="alt" id="playAu">${activeVoice ? "Detener audio" : "Escuchar audio (-2 PWR)"}</button>
+              <div class="proc-actions">
+                <button class="alt" id="playAu">${activeVoice ? "Detener" : "Audio (-2 PWR)"}</button>
                 <button id="fixBtn" ${tuned && !cur.fixed ? "" : "disabled"}>Fijar captura</button>
                 <button class="bad" id="dropBtn">Descartar</button>
               </div>
             </div>
 
-            ${cur.fixed ? `
-              <div class="card" style="flex:none">
-                <div class="mut" style="font-size:12px;margin-bottom:6px">1. SELECCIONA CATEGORIA PRINCIPAL:</div>
-                <div class="grid">
+            <div class="card">
+              <div class="proc-sec-head">
+                <span>CLASIFICACION DE REGISTRO</span>
+                <span class="mut">${cur.fixed ? (canQueue ? "LISTO" : "PENDIENTE") : "BLOQUEADO"}</span>
+              </div>
+              ${cur.fixed ? `
+                <div class="mut" style="font-size:11px">1. CATEGORIA PRINCIPAL:</div>
+                <div class="proc-cat-grid">
                   ${CLASSES.map((c, i) => `<button class="${choiceCat === i ? "" : "alt"}" data-k="${i}">${c}</button>`).join("")}
                 </div>
                 ${needSub && choiceCat !== null ? `
-                  <div class="mut" style="font-size:12px;margin:10px 0 6px">2. ESPECIFICA SUBCATEGORIA (HABILITADO DESDE NOCHE 10):</div>
-                  <div class="grid">
+                  <div class="mut" style="font-size:11px;margin-top:2px">2. SUBCATEGORIA (DESDE NOCHE 10):</div>
+                  <div class="proc-cat-grid">
                     ${catModels.map(m => `<button class="${choiceMod === m.id ? "" : "alt"}" data-mod="${m.id}">${m.name}</button>`).join("")}
                   </div>
                 ` : ""}
-                <div class="row" style="justify-content:flex-end;margin-top:10px;margin-bottom:0">
-                  <button id="queueBtn" ${canQueue ? "" : "disabled"}>Preparar paquete para Plataforma</button>
+                <button id="queueBtn" style="width:100%;margin-top:2px" ${canQueue ? "" : "disabled"}>Preparar paquete para Plataforma</button>
+              ` : `
+                <div class="mut" style="font-size:11.5px;line-height:1.45">
+                  Sintoniza Frecuencia y Polaridad y pulsa <b>Fijar captura</b> para habilitar la clasificacion.
                 </div>
-              </div>
-            ` : ""}
+              `}
+            </div>
           </div>
         </div>`;
     }
