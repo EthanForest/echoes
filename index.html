@@ -849,46 +849,46 @@ const ECHO_LOCK_COST = 4;
 const W = 4800, H = 3200;
 const stars = Array.from({length: 2400}, () => [Math.random()*W, Math.random()*H, Math.random()*1.6 + 0.5]);
 
-// Catálogo de modelos normales vinculados a Signals/
+// Catálogo de modelos normales vinculados a Signals/ y assets/audio/
 const MODELS = [
   // 0: Estrella (6 modelos)
-  {id:"est_enana", cat:0, name:"Enana Amarilla", img:"Signals/yellow_dwarf.png",freq:210, wave:"sine", pattern:"band3", desc:"Estrella de secuencia principal con 3 bandas horizontales anchas y estables."},
-  {id:"est_enana_roja", cat:0, name:"Enana Roja", img:"Signals/red_dwarf.png", freq:188, wave:"sine", pattern:"band3", desc:"Emision termica tenue de baja masa y larga vida orbital."},
-  {id:"est_enana_marron", cat:0, name:"Enana Marron", img:"Signals/brown_dwarf.png", minShift:6, freq:145, wave:"triangle", pattern:"band3", desc:"Objeto subestelar frio de baja luminosidad termica."},
-  {id:"est_gigante", cat:0, name:"Gigante Roja", img:"Signals/red_giant.png", freq:175, wave:"sine", pattern:"band3", desc:"3 bandas anchas de baja frecuencia y corona extensa."},
-  {id:"est_binaria", cat:0, name:"Estrella Binaria", img:"Signals/binary_star.png", freq:255, wave:"triangle", pattern:"band3", desc:"Doble pico orbital con modulacion en 3 bandas."},
-  {id:"est_trinaria", cat:0, name:"Sistema Trinario", img:"Signals/trinary_star.png", freq:295, wave:"triangle", pattern:"band3", desc:"Tres focos gravitacionales sincronizados."},
+  {id:"est_enana", cat:0, name:"Enana Amarilla", img:"Signals/yellow_dwarf.png", audioSrc:"assets/audio/yellow_dwarf.mp3", audioVol:0.48, freq:210, wave:"sine", pattern:"band3", desc:"Estrella de secuencia principal con 3 bandas horizontales anchas y estables."},
+  {id:"est_enana_roja", cat:0, name:"Enana Roja", img:"Signals/red_dwarf.png", audioSrc:"assets/audio/red_dwarf.mp3", audioVol:0.48, freq:188, wave:"sine", pattern:"band3", desc:"Emision termica tenue de baja masa y larga vida orbital."},
+  {id:"est_enana_marron", cat:0, name:"Enana Marron", img:"Signals/brown_dwarf.png", audioSrc:"assets/audio/brown_dwarf.mp3", audioVol:0.48, minShift:6, freq:145, wave:"triangle", pattern:"band3", desc:"Objeto subestelar frio de baja luminosidad termica."},
+  {id:"est_gigante", cat:0, name:"Gigante Roja", img:"Signals/red_giant.png", audioSrc:"assets/audio/red_giant.mp3", audioVol:0.48, freq:175, wave:"sine", pattern:"band3", desc:"3 bandas anchas de baja frecuencia y corona extensa."},
+  {id:"est_binaria", cat:0, name:"Estrella Binaria", img:"Signals/binary_star.png", audioSrc:"assets/audio/binary_star.mp3", audioVol:0.48, freq:255, wave:"triangle", pattern:"band3", desc:"Doble pico orbital con modulacion en 3 bandas."},
+  {id:"est_trinaria", cat:0, name:"Sistema Trinario", img:"Signals/trinary_star.png", audioSrc:"assets/audio/trinary_star.mp3", audioVol:0.48, freq:295, wave:"triangle", pattern:"band3", desc:"Tres focos gravitacionales sincronizados."},
   // 1: Planeta y Lunas/Enanos (13 modelos)
-  {id:"pla_venus", cat:1, name:"Venus", img:"Signals/venus.png", freq:106, wave:"sine", pattern:"band4", desc:"Planeta rocoso con cobertura nubosa densa de alto albedo."},
-  {id:"pla_marte", cat:1, name:"Marte", img:"Signals/mars.png", freq:112, wave:"sine", pattern:"band4", desc:"Planeta rocoso con casquetes polares y superficie ferrosa."},
-  {id:"pla_jupiter", cat:1, name:"Jupiter", img:"Signals/jupiter.png", freq:132, wave:"sine", pattern:"band4", desc:"Gigante gaseoso con franjas atmosfericas densas."},
-  {id:"pla_saturno", cat:1, name:"Saturno", img:"Signals/saturn.png", freq:148, wave:"triangle", pattern:"band4", desc:"Gigante gaseoso con sistema de anillos de alta densidad."},
-  {id:"pla_urano", cat:1, name:"Urano", img:"Signals/uranus.png", freq:138, wave:"sine", pattern:"band4", desc:"Gigante helado con eje de rotacion fuertemente inclinado."},
-  {id:"pla_neptuno", cat:1, name:"Neptuno", img:"Signals/neptune.png", freq:144, wave:"sine", pattern:"band4", desc:"Gigante helado profundo con vientos supersonicos."},
-  {id:"pla_exoplaneta", cat:1, name:"Exoplaneta", img:"Signals/exoplanet.png", freq:124, wave:"sine", pattern:"band4", desc:"Mundo extrasolar detectado por transito espectral."},
-  {id:"pla_luna", cat:1, name:"Luna", img:"Signals/moon.png", freq:94, wave:"sine", pattern:"band4", desc:"Satelite natural rocoso marcado por cuencas de impacto."},
-  {id:"pla_io", cat:1, name:"Io", img:"Signals/io.png", freq:98, wave:"triangle", pattern:"band4", desc:"Satelite volcanico activo con flujo de plasma orbital."},
-  {id:"pla_europa", cat:1, name:"Europa", img:"Signals/europa.png", freq:102, wave:"sine", pattern:"band4", desc:"Corteza de hielo fracturada sobre oceano subsuperficial."},
-  {id:"pla_ceres", cat:1, name:"Ceres", img:"Signals/ceres.png", freq:88, wave:"sine", pattern:"band4", desc:"Planeta enano del cinturon principal de asteroides."},
-  {id:"pla_pluton", cat:1, name:"Pluton", img:"Signals/pluto.png", freq:84, wave:"sine", pattern:"band4", desc:"Planeta enano helado del cinturon de Kuiper."},
-  {id:"pla_makemake", cat:1, name:"Makemake", img:"Signals/makemake.png", freq:86, wave:"sine", pattern:"band4", desc:"Cuerpo transneptuniano brillante de superficie metanica."},
+  {id:"pla_venus", cat:1, name:"Venus", img:"Signals/venus.png", audioSrc:"assets/audio/venus.mp3", audioVol:0.48, freq:106, wave:"sine", pattern:"band4", desc:"Planeta rocoso con cobertura nubosa densa de alto albedo."},
+  {id:"pla_marte", cat:1, name:"Marte", img:"Signals/mars.png", audioSrc:"assets/audio/mars.mp3", audioVol:0.48, freq:112, wave:"sine", pattern:"band4", desc:"Planeta rocoso con casquetes polares y superficie ferrosa."},
+  {id:"pla_jupiter", cat:1, name:"Jupiter", img:"Signals/jupiter.png", audioSrc:"assets/audio/jupiter.mp3", audioVol:0.48, freq:132, wave:"sine", pattern:"band4", desc:"Gigante gaseoso con franjas atmosfericas densas."},
+  {id:"pla_saturno", cat:1, name:"Saturno", img:"Signals/saturn.png", audioSrc:"assets/audio/saturn.mp3", audioVol:0.48, freq:148, wave:"triangle", pattern:"band4", desc:"Gigante gaseoso con sistema de anillos de alta densidad."},
+  {id:"pla_urano", cat:1, name:"Urano", img:"Signals/uranus.png", audioSrc:"assets/audio/uranus.mp3", audioVol:0.48, freq:138, wave:"sine", pattern:"band4", desc:"Gigante helado con eje de rotacion fuertemente inclinado."},
+  {id:"pla_neptuno", cat:1, name:"Neptuno", img:"Signals/neptune.png", audioSrc:"assets/audio/neptune.mp3", audioVol:0.48, freq:144, wave:"sine", pattern:"band4", desc:"Gigante helado profundo con vientos supersonicos."},
+  {id:"pla_exoplaneta", cat:1, name:"Exoplaneta", img:"Signals/exoplanet.png", audioSrc:"assets/audio/exoplanet.mp3", audioVol:0.48, freq:124, wave:"sine", pattern:"band4", desc:"Mundo extrasolar detectado por transito espectral."},
+  {id:"pla_luna", cat:1, name:"Luna", img:"Signals/moon.png", audioSrc:"assets/audio/moon.mp3", audioVol:0.48, freq:94, wave:"sine", pattern:"band4", desc:"Satelite natural rocoso marcado por cuencas de impacto."},
+  {id:"pla_io", cat:1, name:"Io", img:"Signals/io.png", audioSrc:"assets/audio/io.mp3", audioVol:0.48, freq:98, wave:"triangle", pattern:"band4", desc:"Satelite volcanico activo con flujo de plasma orbital."},
+  {id:"pla_europa", cat:1, name:"Europa", img:"Signals/europa.png", audioSrc:"assets/audio/europa.mp3", audioVol:0.48, freq:102, wave:"sine", pattern:"band4", desc:"Corteza de hielo fracturada sobre oceano subsuperficial."},
+  {id:"pla_ceres", cat:1, name:"Ceres", img:"Signals/ceres.png", audioSrc:"assets/audio/ceres.mp3", audioVol:0.48, freq:88, wave:"sine", pattern:"band4", desc:"Planeta enano del cinturon principal de asteroides."},
+  {id:"pla_pluton", cat:1, name:"Pluton", img:"Signals/pluto.png", audioSrc:"assets/audio/pluto.mp3", audioVol:0.48, freq:84, wave:"sine", pattern:"band4", desc:"Planeta enano helado del cinturon de Kuiper."},
+  {id:"pla_makemake", cat:1, name:"Makemake", img:"Signals/makemake.png", audioSrc:"assets/audio/makemake.mp3", audioVol:0.48, freq:86, wave:"sine", pattern:"band4", desc:"Cuerpo transneptuniano brillante de superficie metanica."},
   // 2: Asteroide (3 modelos)
-  {id:"ast_metalico", cat:2, name:"Asteroide Metalico", img:"Signals/metallic_asteroid.png", freq:320, wave:"triangle", pattern:"diag", desc:"Trazas diagonales definidas de alta reflectividad."},
-  {id:"ast_condrita", cat:2, name:"Condrita Carbonacea", img:"Signals/chondrite_asteroid.png", freq:285, wave:"sine", pattern:"diag", desc:"Trazas diagonales suaves con deriva constante."},
-  {id:"ast_cometa", cat:2, name:"Cometa de Nucleo Activo", img:"Signals/comet.png", freq:355, wave:"sawtooth", pattern:"diag", desc:"Trazas diagonales alargadas por estela volatil."},
+  {id:"ast_metalico", cat:2, name:"Asteroide Metalico", img:"Signals/metallic_asteroid.png", audioSrc:"assets/audio/metallic_asteroid.mp3", audioVol:0.48, freq:320, wave:"triangle", pattern:"diag", desc:"Trazas diagonales definidas de alta reflectividad."},
+  {id:"ast_condrita", cat:2, name:"Condrita Carbonacea", img:"Signals/chondrite_asteroid.png", audioSrc:"assets/audio/chondrite_asteroid.mp3", audioVol:0.48, freq:285, wave:"sine", pattern:"diag", desc:"Trazas diagonales suaves con deriva constante."},
+  {id:"ast_cometa", cat:2, name:"Cometa de Nucleo Activo", img:"Signals/comet.png", audioSrc:"assets/audio/comet.mp3", audioVol:0.48, freq:355, wave:"sawtooth", pattern:"diag", desc:"Trazas diagonales alargadas por estela volatil."},
   // 3: Satelite (4 modelos)
-  {id:"sat_com", cat:3, name:"Satelite de Comunicaciones", img:"Signals/comms_satellite.png", freq:760, wave:"sawtooth", pattern:"blocks", desc:"Columnas de bloques digitales + subportadora TLM."},
-  {id:"sat_sonda", cat:3, name:"Sonda Orbital", img:"Signals/space_probe.png", freq:810, wave:"sawtooth", pattern:"blocks", desc:"Paquetes telemetricos espaciados + subportadora."},
-  {id:"sat_telescopio", cat:3, name:"Telescopio Espacial", img:"Signals/space_telescope.png", freq:720, wave:"square", pattern:"blocks", desc:"Bloques regulares de observacion profunda."},
-  {id:"sat_estacion", cat:3, name:"Estacion Modular", img:"Signals/station.png", freq:850, wave:"sawtooth", pattern:"blocks", desc:"Tramas continuas de alta densidad telemetrica."},
+  {id:"sat_com", cat:3, name:"Satelite de Comunicaciones", img:"Signals/comms_satellite.png", audioSrc:"assets/audio/comms_satellite.mp3", audioVol:0.48, freq:760, wave:"sawtooth", pattern:"blocks", desc:"Columnas de bloques digitales + subportadora TLM."},
+  {id:"sat_sonda", cat:3, name:"Sonda Orbital", img:"Signals/space_probe.png", audioSrc:"assets/audio/space_probe.mp3", audioVol:0.48, freq:810, wave:"sawtooth", pattern:"blocks", desc:"Paquetes telemetricos espaciados + subportadora."},
+  {id:"sat_telescopio", cat:3, name:"Telescopio Espacial", img:"Signals/space_telescope.png", audioSrc:"assets/audio/space_telescope.mp3", audioVol:0.48, freq:720, wave:"square", pattern:"blocks", desc:"Bloques regulares de observacion profunda."},
+  {id:"sat_estacion", cat:3, name:"Estacion Modular", img:"Signals/station.png", audioSrc:"assets/audio/station.mp3", audioVol:0.48, freq:850, wave:"sawtooth", pattern:"blocks", desc:"Tramas continuas de alta densidad telemetrica."},
   // 4: Pulsar (4 modelos, aparece a partir de Noche 3 -> shift >= 2)
-  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", minShift:2, freq:480, wave:"square", pattern:"pulses", desc:"Columnas verticales periodicas de cadencia rapida."},
-  {id:"pul_magnetar", cat:4, name:"Magnetar", img:"Signals/magnetar.png", minShift:2, freq:430, wave:"square", pattern:"pulses", desc:"Pulsos verticales de altisima intensidad magnetica."},
-  {id:"pul_binario", cat:4, name:"Pulsar Binario", img:"Signals/binary_pulsar.png", minShift:2, freq:515, wave:"square", pattern:"pulses", desc:"Doble tren de pulsos verticales con deriva de fase."},
-  {id:"pul_frb", cat:4, name:"FRB", img:"Signals/frb.png", minShift:2, freq:585, wave:"square", pattern:"pulses", desc:"Rafaga rapida de radio transitoria de altisima dispersion energetica."},
+  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", audioSrc:"assets/audio/millisecond_pulsar.mp3", audioVol:0.48, minShift:2, freq:480, wave:"square", pattern:"pulses", desc:"Columnas verticales periodicas de cadencia rapida."},
+  {id:"pul_magnetar", cat:4, name:"Magnetar", img:"Signals/magnetar.png", audioSrc:"assets/audio/magnetar.mp3", audioVol:0.48, minShift:2, freq:430, wave:"square", pattern:"pulses", desc:"Pulsos verticales de altisima intensidad magnetica."},
+  {id:"pul_binario", cat:4, name:"Pulsar Binario", img:"Signals/binary_pulsar.png", audioSrc:"assets/audio/binary_pulsar.mp3", audioVol:0.48, minShift:2, freq:515, wave:"square", pattern:"pulses", desc:"Doble tren de pulsos verticales con deriva de fase."},
+  {id:"pul_frb", cat:4, name:"FRB", img:"Signals/frb.png", audioSrc:"assets/audio/frb.mp3", audioVol:0.48, minShift:2, freq:585, wave:"square", pattern:"pulses", desc:"Rafaga rapida de radio transitoria de altisima dispersion energetica."},
   // 5: Singularidad (2 modelos: Cuasar desde Noche 5 -> shift >= 4; Agujero Negro desde Noche 9 -> shift >= 8)
-  {id:"sin_cuasar", cat:5, name:"Cuasar", img:"Signals/noimage_anomaly.png", minShift:4, freq:690, wave:"sawtooth", pattern:"singularity", desc:"Nucleo galactico activo extremadamente luminoso alimentado por acrecion relativista."},
-  {id:"sin_agujero_negro", cat:5, name:"Agujero Negro", img:"Signals/noimage_anomaly.png", minShift:8, freq:64, wave:"sawtooth", pattern:"singularity", desc:"Region del espacio-tiempo con curvatura gravitacional extrema y horizonte de sucesos."}
+  {id:"sin_cuasar", cat:5, name:"Cuasar", img:"Signals/noimage_anomaly.png", audioSrc:"assets/audio/quasar.mp3", audioVol:0.48, minShift:4, freq:690, wave:"sawtooth", pattern:"singularity", desc:"Nucleo galactico activo extremadamente luminoso alimentado por acrecion relativista."},
+  {id:"sin_agujero_negro", cat:5, name:"Agujero Negro", img:"Signals/noimage_anomaly.png", audioSrc:"assets/audio/black_hole.mp3", audioVol:0.48, minShift:8, freq:64, wave:"sawtooth", pattern:"singularity", desc:"Region del espacio-tiempo con curvatura gravitacional extrema y horizonte de sucesos."}
 ];
 
 // Saludos en diferentes idiomas codificados únicamente en binario ASCII de 8 bits
@@ -1326,6 +1326,52 @@ function beep(freq, dur = 0.08, type = "sine", vol = 0.06) {
   } catch (_) {}
 }
 
+let staticNoiseBuffer = null;
+
+function createStaticNoiseNodes(initialGain = 0) {
+  ensureAudioContext();
+  if (!au) return null;
+
+  if (!staticNoiseBuffer) {
+    const bufferSize = au.sampleRate * 2;
+    staticNoiseBuffer = au.createBuffer(1, bufferSize, au.sampleRate);
+    const data = staticNoiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+  }
+
+  const noiseNode = au.createBufferSource();
+  noiseNode.buffer = staticNoiseBuffer;
+  noiseNode.loop = true;
+
+  const filter = au.createBiquadFilter();
+  filter.type = "bandpass";
+  filter.frequency.value = 1350;
+  filter.Q.value = 0.7;
+
+  const noiseGain = au.createGain();
+  noiseGain.gain.value = initialGain;
+
+  noiseNode.connect(filter);
+  filter.connect(noiseGain);
+  if (analyser) {
+    noiseGain.connect(analyser);
+  } else {
+    noiseGain.connect(au.destination);
+  }
+
+  noiseNode.start();
+  return { noiseNode, noiseGain };
+}
+
+function getSignalNoiseLevel(sigObj) {
+  if (!sigObj || sigObj.fixed || sigObj.tgF === undefined) return 0;
+  if (isTuned(sigObj)) return 0.015;
+  const err = Math.min(1, (offF(sigObj) + offP(sigObj)) * 0.65);
+  return Math.min(0.16, err * 0.16);
+}
+
 function stopVoice() {
   if (!activeVoice) return;
   if (activeVoice.o) {
@@ -1336,6 +1382,12 @@ function stopVoice() {
       activeVoice.audio.pause();
       activeVoice.audio.currentTime = 0;
     } catch (_) {}
+  }
+  if (activeVoice.noiseNode) {
+    try { activeVoice.noiseNode.stop(); } catch (_) {}
+  }
+  if (activeVoice.noiseGain) {
+    try { activeVoice.noiseGain.disconnect(); } catch (_) {}
   }
   activeVoice = null;
 }
@@ -1448,16 +1500,52 @@ function startBootSequence() {
   }
 }
 
+function startOscillatorFallback(sigObj, mod, anomDef, staticNodes) {
+  try {
+    ensureAudioContext();
+    const o = au.createOscillator(), g = au.createGain();
+    o.type = anomDef ? anomDef.wave : mod.wave;
+    o.frequency.value = anomDef ? anomDef.freq : mod.freq;
+    g.gain.value = 0.08;
+    // Conectar directamente el mismo oscilador al AnalyserNode de Web Audio
+    o.connect(g);
+    if (analyser) {
+      g.connect(analyser);
+    } else {
+      g.connect(au.destination);
+    }
+    o.start();
+    activeVoice = {
+      o,
+      g,
+      sig: sigObj,
+      t: 0,
+      max: 3.8,
+      noiseNode: staticNodes ? staticNodes.noiseNode : null,
+      noiseGain: staticNodes ? staticNodes.noiseGain : null
+    };
+  } catch (_) {}
+}
+
 function playSignalAudio(sigObj) {
   stopVoice();
   if (muted) return;
   ensureAudioContext();
   const anomDef = sigObj.anom ? ANOMALY_DEFS.find(a => a.type === sigObj.anomType) : null;
-  if (anomDef && anomDef.audioSrc) {
+  const mod = MODELS.find(m => m.id === sigObj.modelId) || MODELS[0];
+  const audioDef = (anomDef && anomDef.audioSrc)
+    ? anomDef
+    : (!sigObj.anom && mod && mod.audioSrc)
+      ? mod
+      : null;
+
+  const staticNodes = createStaticNoiseNodes(getSignalNoiseLevel(sigObj));
+
+  if (audioDef && audioDef.audioSrc) {
     try {
-      const audio = new Audio(anomDef.audioSrc);
+      const audio = new Audio(audioDef.audioSrc);
       audio.crossOrigin = "anonymous";
-      const baseVol = (typeof anomDef.audioVol === "number") ? anomDef.audioVol : 0.48;
+      const baseVol = (typeof audioDef.audioVol === "number") ? audioDef.audioVol : 0.48;
       const clarity = sigObj.fixed ? 1 : (sigObj.tgF !== undefined ? Math.max(0.25, 1 - (offF(sigObj) + offP(sigObj)) * 0.55) : 1);
       audio.volume = Math.max(0.08, Math.min(baseVol, baseVol * clarity));
 
@@ -1471,22 +1559,31 @@ function playSignalAudio(sigObj) {
 
       audio.onended = () => {
         if (activeVoice && activeVoice.audio === audio) {
-          activeVoice = null;
+          stopVoice();
           if (V === "proc") render();
         }
       };
       audio.onerror = () => {
         if (activeVoice && activeVoice.audio === audio) {
+          const savedNoise = { noiseNode: activeVoice.noiseNode, noiseGain: activeVoice.noiseGain };
           activeVoice = null;
+          startOscillatorFallback(sigObj, mod, anomDef, savedNoise);
           if (V === "proc") render();
         }
       };
-      activeVoice = {audio, baseVol, sig: sigObj, t: 0};
+      activeVoice = {
+        audio,
+        baseVol,
+        sig: sigObj,
+        t: 0,
+        noiseNode: staticNodes ? staticNodes.noiseNode : null,
+        noiseGain: staticNodes ? staticNodes.noiseGain : null
+      };
       const p = audio.play();
       if (p && typeof p.catch === "function") {
         p.catch(() => {
           if (activeVoice && activeVoice.audio === audio) {
-            activeVoice = null;
+            stopVoice();
             if (V === "proc") render();
           }
         });
@@ -1494,23 +1591,8 @@ function playSignalAudio(sigObj) {
       return;
     } catch (_) {}
   }
-  try {
-    ensureAudioContext();
-    const o = au.createOscillator(), g = au.createGain();
-    const mod = MODELS.find(m => m.id === sigObj.modelId) || MODELS[0];
-    o.type = anomDef ? anomDef.wave : mod.wave;
-    o.frequency.value = anomDef ? anomDef.freq : mod.freq;
-    g.gain.value = 0.08;
-    // Conectar directamente el mismo oscilador al AnalyserNode de Web Audio
-    o.connect(g);
-    if (analyser) {
-      g.connect(analyser);
-    } else {
-      g.connect(au.destination);
-    }
-    o.start();
-    activeVoice = {o, g, sig: sigObj, t: 0, max: 3.8};
-  } catch (_) {}
+
+  startOscillatorFallback(sigObj, mod, anomDef, staticNodes);
 }
 
 function playMailChime() {
@@ -2471,6 +2553,9 @@ function tick(dt) {
     activeVoice.t += dt;
     const s = activeVoice.sig;
     const clarity = s.fixed ? 1 : (s.tgF !== undefined ? Math.max(0.18, 1 - (offF(s) + offP(s)) * 0.6) : 1);
+    if (activeVoice.noiseGain) {
+      activeVoice.noiseGain.gain.value = getSignalNoiseLevel(s);
+    }
     if (activeVoice.audio) {
       const baseVol = typeof activeVoice.baseVol === "number" ? activeVoice.baseVol : 0.48;
       activeVoice.audio.volume = Math.max(0.08, Math.min(baseVol, baseVol * clarity));
@@ -4372,4 +4457,3 @@ if (document.readyState === "loading") {
 </script>
 </body>
 </html>
-Validating JavaScript syntax
