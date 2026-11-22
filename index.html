@@ -358,9 +358,24 @@ select:focus{border-color:#4ade80;box-shadow:0 0 0 2px rgba(34,197,94,.28)}
 #nightFadeOverlay{
   position:fixed;inset:0;background:#000000;opacity:0;pointer-events:none;
   z-index:999;transition:opacity 0.65s ease-in-out;
+  display:flex;align-items:center;justify-content:center;
 }
 #nightFadeOverlay.active{
   opacity:1;pointer-events:all;
+}
+#nightFadeText{
+  color:#ffffff;
+  font-family:"Courier New",Courier,ui-monospace,monospace;
+  font-size:clamp(26px,4.5vw,44px);
+  font-weight:700;
+  letter-spacing:4px;
+  text-transform:uppercase;
+  opacity:0;
+  transition:opacity 0.55s ease-in-out;
+  user-select:none;
+}
+#nightFadeText.visible{
+  opacity:1;
 }
 
 /* ============================================================================
@@ -743,7 +758,7 @@ body.paper-theme #toast.bad{
 </div>
 <div id="toast" style="display:none"></div>
 </main>
-<div id="nightFadeOverlay"></div>
+<div id="nightFadeOverlay"><div id="nightFadeText"></div></div>
 
 <script>
 // ============================================================================
@@ -1731,7 +1746,7 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
   };
 
   if (isFreeMode) {
-    G = {money: 9999, a: 5, f: 5, b: 5, spec: 5};
+    G = {money: 9999, a: 5, f: 5, b: 5, spec: 1};
     cap = 200;
     en = 200;
   } else {
@@ -1903,7 +1918,6 @@ function triggerCrash() {
   if (R) R.crash++;
   srv = makeServerChallenge();
   beep(140, 0.32, "sawtooth", 0.08);
-  // Sin correo de fallo de servidor: se notifica en pantalla dentro del Mapa Estelar
   msg("[ALERTA] Fallo de servidor // Revisa Mapa Estelar o Servidor", 0);
   syncLiveTelemetry(false, true);
   if (V === "srv" || V === "map") render();
@@ -2061,17 +2075,16 @@ function evaluatePlatformDispatch(ev) {
       return;
     }
 
+    const isNewDiscovery = !discoveredModels.has(pkg.trueMod);
     discoveredModels.add(pkg.trueMod);
-    const isSat = pkg.trueCat === 3;
-    const baseExtraPay = 48;
-    const pay = isSat ? 60 : Math.round(baseExtraPay * 0.75);
+    const pay = isNewDiscovery ? 20 : 10;
     G.money += pay;
 
     addMail(
       `CENTRAL // REGISTRO EXTRA #${pkg.sigId} [ACEPTADO]`,
-      isSat
-        ? `Telemetria satelital (${modObj ? modObj.name : "Satelite"}) archivada al 100% de tarifa orbital: +$${pay} CR.`
-        : `Registro adicional de ${CLASSES[pkg.trueCat]} archivado (tarifa extra -25%): +$${pay} CR.`
+      isNewDiscovery
+        ? `Nuevo cuerpo celeste (${modObj ? modObj.name : CLASSES[pkg.trueCat]}) catalogado en el Archivo Central: +$${pay} CR.`
+        : `Registro adicional de ${modObj ? modObj.name : CLASSES[pkg.trueCat]} (ya descubierto previamente): +$${pay} CR.`
     );
     msg(`[OK] Registro extra acreditado (+$${pay} CR)`, 1);
     syncLiveTelemetry(false, true);
@@ -2115,16 +2128,40 @@ function triggerNightFadeTransition() {
   stopVoice();
   beep(420, 0.14, "sine", 0.06);
   const overlay = document.querySelector("#nightFadeOverlay");
+  const textEl = document.querySelector("#nightFadeText");
+  const hasNextNight = shift < TOTAL_NIGHTS - 1;
+
+  if (textEl) {
+    textEl.classList.remove("visible");
+    textEl.textContent = hasNextNight ? `Noche ${shift + 2}` : "";
+  }
   if (overlay) {
     overlay.classList.add("active");
   }
-  setTimeout(() => {
-    advanceNight();
+
+  if (hasNextNight) {
     setTimeout(() => {
-      if (overlay) overlay.classList.remove("active");
-      isTransitioningNight = false;
-    }, 180);
-  }, 680);
+      if (textEl) textEl.classList.add("visible");
+      setTimeout(() => {
+        if (textEl) textEl.classList.remove("visible");
+        setTimeout(() => {
+          advanceNight();
+          setTimeout(() => {
+            if (overlay) overlay.classList.remove("active");
+            isTransitioningNight = false;
+          }, 160);
+        }, 600);
+      }, 1350);
+    }, 700);
+  } else {
+    setTimeout(() => {
+      advanceNight();
+      setTimeout(() => {
+        if (overlay) overlay.classList.remove("active");
+        isTransitioningNight = false;
+      }, 180);
+    }, 680);
+  }
 }
 
 function computeBootProgress(sec) {
@@ -2356,7 +2393,6 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
       cx.globalAlpha = Math.max(0.18, 1 - staticAmt * 0.85);
       cx.drawImage(sprite, ox, oy, dw, dh);
       cx.restore();
-      // Scanlines CRT y estatica sobre el fallback a color
       cx.fillStyle = "rgba(0, 0, 0, 0.18)";
       for (let y = 0; y < h; y += 2) {
         cx.fillRect(0, y, w, 1);
@@ -2389,7 +2425,6 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
       let lum = 10;
 
       if (anomType === "voyager") {
-        // Voyager 1: plato parabólico fracturado, bus decagonal y antena magnetómetro
         const dish = Math.hypot(dx + 6, dy + 2);
         const crack = Math.abs(dx - dy * 0.7 + 4) < 1.6;
         const bus = Math.abs(dx - 8) < 6 && Math.abs(dy - 5) < 5;
@@ -2402,7 +2437,6 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
         else if (boom) lum = 185;
         else if (frag1 || frag2) lum = 195;
       } else if (anomType === "dyson") {
-        // Esfera de Dyson: estrella central parcialmente eclipsada por anillos geodésicos orbitales
         const core = dist < 15;
         const shellOuter = dist >= 22 && dist <= 26;
         const latRing = Math.abs(dy - Math.sin(dx * 0.14 + t * 1.4) * 9) < 2.1 && dist <= 26;
@@ -2412,7 +2446,6 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
         else if ((latRing || lonRing) && !gap) lum = 215;
         else if (core) lum = 155 + Math.sin(t * 6) * 20;
       } else if (anomType === "failed_planet") {
-        // Planeta Fallido: cuerpo masivo agrietado con núcleo incandescente expuesto y fragmentos orbitales
         const ang = Math.atan2(dy, dx);
         const rad = 25 + Math.sin(ang * 5 + seed) * 3;
         const fissure = Math.abs(Math.sin(dx * 0.22 + dy * 0.18)) < 0.16 && dist < rad;
@@ -2424,7 +2457,6 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
           lum = 190;
         }
       } else if (anomType === "dark_eyes") {
-        // Silueta pálida ovalada con dos cuencas oculares negras profundas (sin boca)
         const oval = Math.hypot(dx * 1.15, dy * 0.85);
         const leftEye = Math.hypot(dx + 9, dy + 4) < 5.2;
         const rightEye = Math.hypot(dx - 9, dy + 4) < 5.2;
@@ -2887,7 +2919,7 @@ function render() {
               <div class="card" style="margin:0 0 16px;padding:10px 12px">
                 <div style="font-size:12px;font-weight:700;margin-bottom:4px">MODO LIBRE / SANDBOX</div>
                 <div class="mut" style="font-size:11px">
-                  Inicia con mejoras NV 5/5, 200 PWR con recarga activa, $9999 CR y todo el Atlas + anomalias desbloqueadas.
+                  Inicia con mejoras al maximo, 200 PWR con recarga activa, $9999 CR y todo el Atlas + anomalias desbloqueadas.
                 </div>
               </div>
               <div class="row" style="justify-content:flex-end;gap:8px;margin:0">
@@ -3097,7 +3129,6 @@ function render() {
     const selPkg = outbox.find(p => p.id === selPkgId) || outbox[0] || null;
     if (selPkg) selPkgId = selPkg.id;
     const nightAssigns = nightAssignments.filter(a => a.night === shift);
-    const extrasMode = allNightAssignsClosed();
 
     h = `
       <div class="card">
@@ -3115,49 +3146,48 @@ function render() {
               }).join("")
             : `<span class="mut">No hay paquetes preparados en cola. Procesa y fija una captura primero.</span>`}
         </div>
-      </div>`;
+      </div>
 
-    if (selPkg) {
-      h += `
-        <div class="card">
-          <div class="mut" style="font-size:12px;margin-bottom:8px">DESTINATARIOS DISPONIBLES PARA PAQUETE #${selPkg.sigId}:</div>
-          ${nightAssigns.map((a, idx) => {
-            const mod = a.modelId ? MODELS.find(m => m.id === a.modelId) : null;
-            const reqTxt = `${CLASSES[a.cat]}${mod ? ` (${mod.name})` : ""}`;
-            return `<div class="between" style="padding:7px 0;border-bottom:1px dashed #a89068">
-              <div>
-                <b>Encargo ${idx + 1}/3 · ${a.sciName}</b>
-                <div class="mut" style="font-size:12px">Solicita: ${reqTxt} · Pago: $${a.reward} CR</div>
-              </div>
-              <button data-send-as="${a.id}" ${a.done || a.failed ? "disabled" : ""}>
-                ${a.done ? "ENTREGADO" : a.failed ? "EXPIRADO" : "Enviar a encargo"}
-              </button>
-            </div>`;
-          }).join("")}
-
-          <div class="between" style="padding:9px 0;border-bottom:1px dashed #a89068">
+      <div class="card">
+        <div class="mut" style="font-size:12px;margin-bottom:8px">${
+          selPkg
+            ? `DESTINATARIOS DISPONIBLES PARA PAQUETE #${selPkg.sigId}:`
+            : "ASIGNACIONES DEL TURNO Y DESTINATARIOS (PREPARA UN PAQUETE PARA ENVIAR):"
+        }</div>
+        ${nightAssigns.map((a, idx) => {
+          const mod = a.modelId ? MODELS.find(m => m.id === a.modelId) : null;
+          const reqTxt = `${CLASSES[a.cat]}${mod ? ` (${mod.name})` : ""}`;
+          return `<div class="between" style="padding:7px 0;border-bottom:1px dashed #a89068">
             <div>
-              <b>Archivo Central (Envio Libre / Extra)</b>
-              <div class="mut" style="font-size:12px">
-                ${extrasMode
-                  ? "Asignaciones diarias completadas: tarifa extra -25% ($36 CR), Satelites conservan 100% ($60 CR)."
-                  : "Envio secundario fuera de asignacion (-25% = $36 CR; Satelites 100% = $60 CR)."}
-              </div>
+              <b>Encargo ${idx + 1}/3 · ${a.sciName}</b>
+              <div class="mut" style="font-size:12px">Solicita: ${reqTxt} · Pago: $${a.reward} CR</div>
             </div>
-            <button class="alt" id="sendCentralBtn">Enviar a Central</button>
-          </div>
+            <button data-send-as="${a.id}" ${a.done || a.failed || !selPkg ? "disabled" : ""}>
+              ${a.done ? "ENTREGADO" : a.failed ? "EXPIRADO" : "Enviar a encargo"}
+            </button>
+          </div>`;
+        }).join("")}
 
-          ${shadowBuyerUnlocked ? `
-            <div class="between" style="padding:9px 0">
-              <div>
-                <b style="color:#581c87">Canal Cifrado // Intermediario Sombra</b>
-                <div class="mut" style="font-size:12px">Compra directa de lecturas anomalas fuera de la red oficial ($240 CR).</div>
-              </div>
-              <button class="shadow" id="sendShadowBtn">Transmitir por Canal Cifrado</button>
+        <div class="between" style="padding:9px 0;${shadowBuyerUnlocked ? "border-bottom:1px dashed #a89068" : ""}">
+          <div>
+            <b>Archivo Central (Envio Libre / Extra)</b>
+            <div class="mut" style="font-size:12px">
+              Envio libre fuera de asignacion: $20 CR si es un descubrimiento nuevo, $10 CR si ya fue descubierto.
             </div>
-          ` : ""}
-        </div>`;
-    }
+          </div>
+          <button class="alt" id="sendCentralBtn" ${!selPkg ? "disabled" : ""}>Enviar a Central</button>
+        </div>
+
+        ${shadowBuyerUnlocked ? `
+          <div class="between" style="padding:9px 0">
+            <div>
+              <b style="color:#581c87">Canal Cifrado // Intermediario Sombra</b>
+              <div class="mut" style="font-size:12px">Compra directa de lecturas anomalas fuera de la red oficial ($240 CR).</div>
+            </div>
+            <button class="shadow" id="sendShadowBtn" ${!selPkg ? "disabled" : ""}>Transmitir por Canal Cifrado</button>
+          </div>
+        ` : ""}
+      </div>`;
   } else if (V === "atlas") {
     h = `
       <div class="card">
@@ -3240,7 +3270,7 @@ function render() {
       ["a", "Servomotores de Antena", "Acelera el giro de antenas y la descarga.", 5, 85 + 55 * G.a],
       ["f", "Filtro CRT Optico", "Aumenta la resolucion del CRT y reduce la estatica.", 5, 80 + 50 * G.f],
       ["b", "Banco de Baterias", "Aumenta la capacidad maxima de PWR (+20 por nivel).", 5, 75 + 45 * G.b],
-      ["spec", "Modulo Espectrograma", "Habilita Espectrograma y lectura de subportadoras.", 5, 65 + 40 * G.spec]
+      ["spec", "Modulo Espectrograma", "Habilita Espectrograma y lectura de subportadoras (compra unica).", 1, 65]
     ];
     h = upgrades.map(([k, name, desc, maxLv, cost]) => {
       const lv = G[k];
@@ -3249,7 +3279,7 @@ function render() {
           <b>${name}</b> <span class="mut">[NV ${lv}/${maxLv}]</span>
           <div class="mut" style="font-size:12px">${desc}</div>
         </div>
-        <button data-u="${k}" ${lv >= maxLv || G.money < cost ? "disabled" : ""}>${lv >= maxLv ? "MAXIMO" : `$${cost} CR`}</button>
+        <button data-u="${k}" ${lv >= maxLv || G.money < cost ? "disabled" : ""}>${lv >= maxLv ? (maxLv === 1 ? "INSTALADO" : "MAXIMO") : `$${cost} CR`}</button>
       </div>`;
     }).join("") + `
     <div class="card between">
@@ -3764,12 +3794,14 @@ function bindEvents(w) {
 
   w.querySelectorAll("[data-u]").forEach(el => el.onclick = () => {
     const k = el.dataset.u;
-    if (G[k] >= 5) return;
+    const maxLvs = {a: 5, f: 5, b: 5, spec: 1};
+    const maxLv = maxLvs[k] || 5;
+    if (G[k] >= maxLv) return;
     const costs = {
       a: 85 + 55 * G.a,
       f: 80 + 50 * G.f,
       b: 75 + 45 * G.b,
-      spec: 65 + 40 * G.spec
+      spec: 65
     };
     const cost = costs[k];
     if (G.money < cost) return;
@@ -3777,7 +3809,7 @@ function bindEvents(w) {
     G[k]++;
     if (k === "b") { cap = 100 + 20 * G.b; en = Math.min(cap, en + 20); }
     beep(660, 0.1);
-    msg(`[OK] Mejora instalada (NV ${G[k]}/5)`, 1);
+    msg(maxLv === 1 ? "[OK] Modulo Espectrograma instalado (NV 1/1)" : `[OK] Mejora instalada (NV ${G[k]}/${maxLv})`, 1);
     syncLiveTelemetry(false, true);
     updTop();
     render();
