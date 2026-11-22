@@ -1994,6 +1994,7 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
     discoveredAnomalies = ANOMALY_DEFS.map((a, idx) => ({
       anomTitle: a.title,
       anomType: a.type,
+      cat: a.cat,
       modelId: MODELS.find(m => m.cat === a.cat)?.id || "est_enana",
       img: a.img,
       seed: 1.7 + idx * 1.3,
@@ -2474,9 +2475,12 @@ function tick(dt) {
       const baseVol = typeof activeVoice.baseVol === "number" ? activeVoice.baseVol : 0.48;
       activeVoice.audio.volume = Math.max(0.08, Math.min(baseVol, baseVol * clarity));
     } else if (activeVoice.g) {
-      const pulse = s.cat === 4 ? ((activeVoice.t * 7 % 1) < 0.22 ? 1 : 0.05)
-                  : s.cat === 5 ? (0.55 + 0.45 * Math.sin(activeVoice.t * (s.modelId === "sin_agujero_negro" ? 1.8 : 11)))
-                  : s.cat === 3 ? ((activeVoice.t * 2.5 % 1) < 0.45 ? 0.9 : 0.1)
+      const mod = MODELS.find(m => m.id === s.modelId);
+      const anomDef = s.anom ? ANOMALY_DEFS.find(a => a.type === s.anomType) : null;
+      const cat = s.cat !== undefined ? s.cat : (anomDef ? anomDef.cat : (mod ? mod.cat : 0));
+      const pulse = cat === 4 ? ((activeVoice.t * 7 % 1) < 0.22 ? 1 : 0.05)
+                  : cat === 5 ? (0.55 + 0.45 * Math.sin(activeVoice.t * (s.modelId === "sin_agujero_negro" ? 1.8 : 11)))
+                  : cat === 3 ? ((activeVoice.t * 2.5 % 1) < 0.45 ? 0.9 : 0.1)
                   : (0.65 + 0.35 * Math.sin(activeVoice.t * 3));
       activeVoice.g.gain.value = 0.08 * clarity * pulse;
       if (activeVoice.t >= activeVoice.max) {
@@ -4024,6 +4028,7 @@ function bindEvents(w) {
         discoveredAnomalies.push({
           anomTitle: cur.anomTitle,
           anomType: cur.anomType,
+          cat: cur.cat,
           modelId: cur.modelId,
           img: cur.img,
           seed: cur.seed,
@@ -4150,6 +4155,7 @@ function bindEvents(w) {
       floppyStoredAnomalies.push({
         anomTitle: cur.anomTitle,
         anomType: cur.anomType,
+        cat: cur.cat,
         modelId: cur.modelId,
         img: cur.img,
         seed: cur.seed,
@@ -4189,6 +4195,7 @@ function bindEvents(w) {
       floppyStoredAnomalies.push({
         anomTitle: pkg.anomTitle,
         anomType: pkg.anomType,
+        cat: pkg.trueCat,
         modelId: pkg.trueMod,
         img: pkg.img,
         seed: pkg.seed || 2.1,
@@ -4207,6 +4214,7 @@ function bindEvents(w) {
   // Botón en Atlas para alternar entre imagen y espectrograma
   w.querySelectorAll("[data-atlas-view]").forEach(el => el.onclick = () => {
     const mid = el.dataset.atlasView;
+    const mod = MODELS.find(m => m.id === mid);
     if (atlasSpecMode.has(mid)) {
       atlasSpecMode.delete(mid);
     } else {
@@ -4214,7 +4222,7 @@ function bindEvents(w) {
       delete SPEC_BUFFERS[`atlas_${mid}`];
       const alreadyPlaying = activeVoice && activeVoice.sig && !activeVoice.sig.anom && activeVoice.sig.modelId === mid;
       if (!alreadyPlaying) {
-        playSignalAudio({modelId: mid, anom: false, anomType: ""});
+        playSignalAudio({modelId: mid, cat: mod ? mod.cat : 0, anom: false, anomType: ""});
       }
     }
     beep(470, 0.05);
@@ -4223,12 +4231,13 @@ function bindEvents(w) {
 
   w.querySelectorAll("[data-atlas-au]").forEach(el => el.onclick = () => {
     const mid = el.dataset.atlasAu;
+    const mod = MODELS.find(m => m.id === mid);
     const alreadyPlaying = activeVoice && activeVoice.sig && !activeVoice.sig.anom && activeVoice.sig.modelId === mid;
     if (alreadyPlaying) {
       stopVoice();
       return;
     }
-    playSignalAudio({modelId: mid, anom: false, anomType: ""});
+    playSignalAudio({modelId: mid, cat: mod ? mod.cat : 0, anom: false, anomType: ""});
   });
 
   // Botón en sección Anomalías del Atlas para alternar entre imagen y espectrograma
@@ -4363,3 +4372,4 @@ if (document.readyState === "loading") {
 </script>
 </body>
 </html>
+Validating JavaScript syntax
