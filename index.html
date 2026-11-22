@@ -1,0 +1,4115 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inicio de Sesion del Sistema</title>
+<style>
+:root{
+  --bg:#000000;--panel:#000000;--card:#000000;--border:#22c55e;
+  --fg:#ffffff;--mut:#d4d4d8;--accent:#22c55e;--warn:#eab308;--bad:#ef4444;--blue:#38bdf8;
+  box-sizing:border-box;
+}
+*{box-sizing:border-box}
+html,body{
+  height:100%;margin:0;padding:0;background:#000000;color:#ffffff;
+  font:14px/1.45 ui-monospace,"Cascadia Code","Fira Code",Consolas,monospace;
+}
+body{
+  display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top,6px) 8px env(safe-area-inset-bottom,8px);
+  overflow:hidden;
+}
+main{
+  width:100%;max-width:100%;flex:1;min-height:0;display:flex;flex-direction:column;margin:0;
+}
+.terminal{
+  background:#000000;border:2px solid #22c55e;border-radius:4px;
+  overflow:hidden;box-shadow:0 0 0 1px #000000, 0 12px 40px rgba(0,0,0,.92);
+  position:relative;flex:1;min-height:0;display:flex;flex-direction:column;width:100%;
+}
+.terminal::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0px,rgba(0,0,0,.14) 1px,transparent 1px,transparent 3px);
+}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:7px 12px;background:#000000;border-bottom:1px solid #22c55e;font-size:12px;color:#ffffff;
+  flex:none;
+}
+.topbar b{color:#ffffff;letter-spacing:1px}
+.stats{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pill{background:#000000;border:1px solid #22c55e;color:#ffffff;padding:3px 8px;border-radius:3px}
+.pill.night{border-color:#ef4444;color:#ffffff;background:#000000}
+.pill.slowrech{border-color:#eab308;color:#ffffff;background:#000000}
+.pill.norech{border-color:#f97316;color:#ffffff;background:#000000}
+#tabs{
+  display:flex;overflow-x:auto;background:#000000;border-bottom:2px solid #22c55e;
+  gap:2px;padding:4px 6px;flex:none;
+}
+.tab{
+  flex:none;background:#000000;color:#e4e4e7;
+  border:1px solid #166534;border-radius:3px;
+  padding:7px 14px;font:inherit;font-size:13.5px;font-weight:700;letter-spacing:.4px;
+  cursor:pointer;transition:.12s;
+}
+.tab:hover{background:#061c0e;color:#ffffff;border-color:#22c55e}
+.tab.on{
+  background:#072412;color:#ffffff;border:2px solid #22c55e;
+  box-shadow:inset 0 -2px #4ade80;
+}
+.bd{background:#22c55e;color:#000000;border-radius:3px;padding:0 5px;font-weight:800;font-size:11px;margin-left:6px}
+#win{
+  padding:10px 12px;flex:1;min-height:0;display:flex;flex-direction:column;
+  background:#000000;color:#ffffff;position:relative;overflow-y:auto;
+}
+button{
+  font:inherit;font-size:13px;background:#000000;color:#ffffff;
+  border:1px solid #22c55e;border-radius:3px;padding:7px 14px;cursor:pointer;
+}
+button:hover:not(:disabled){background:#072412;border-color:#4ade80;color:#ffffff}
+button.primary-os{
+  border-width:2px;font-weight:700;
+}
+button.logout-btn{
+  padding:3px 10px;font-size:12px;font-weight:700;border-width:1px;
+}
+button.logout-btn:not(:disabled){
+  border-color:#4ade80;background:#062110;color:#ffffff;
+}
+button.alt{background:#000000;color:#ffffff;border:1px solid #22c55e}
+button.alt:hover:not(:disabled){background:#072412;border-color:#4ade80}
+button.bad{background:#000000;border:1px solid #ef4444;color:#ffffff}
+button.bad:hover:not(:disabled){background:#240808}
+button.warn{background:#000000;border:1px solid #eab308;color:#ffffff}
+button.warn:hover:not(:disabled){background:#241b06}
+button.shadow{background:#000000;border:1px solid #a855f7;color:#ffffff}
+button.shadow:hover:not(:disabled){background:#1c0b2e}
+button:disabled{opacity:.35;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin:8px 0}
+.card{background:#000000;border:1px solid #22c55e;border-radius:4px;padding:10px;margin:8px 0;color:#ffffff}
+.card.warnbox{border-color:#eab308;background:#000000}
+.card.dangerbox{border-color:#ef4444;background:#000000}
+.card.shadowbox{border-color:#a855f7;background:#000000}
+.mut{color:#d4d4d8}
+
+/* Panel de Correo inspirado en terminal clásica de dos columnas */
+.mail-shell{
+  flex:1;display:flex;flex-direction:column;gap:8px;min-height:0;
+}
+.mail-layout{
+  flex:1;display:grid;grid-template-columns:1fr;gap:8px;min-height:360px;
+}
+@media(min-width:760px){
+  .mail-layout{grid-template-columns:minmax(310px,38%) 1fr}
+}
+.mail-pane{
+  border:2px solid #22c55e;border-radius:4px;background:#000000;
+  display:flex;flex-direction:column;min-height:320px;overflow:hidden;
+}
+.mail-pane-top{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:7px 10px;background:#000000;border-bottom:1px solid #22c55e;
+  font-size:12px;font-weight:700;
+}
+.mail-list{
+  flex:1;overflow-y:auto;background:#000000;
+}
+.mi{
+  display:grid;grid-template-columns:115px 1fr auto;gap:8px;align-items:center;
+  padding:8px 10px;border-bottom:1px solid #14532d;cursor:pointer;font-size:12.5px;color:#ffffff;
+}
+.mi:hover{background:#061c0e}
+.mi.un{font-weight:700;background:#031208}
+.mi.sel{background:#092b16;outline:1px solid #22c55e}
+.mi.anom-mail{border-left:3px solid #a855f7}
+.mi-sender{
+  color:#4ade80;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mi-subj{
+  color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mi-tag{
+  color:#38bdf8;font-size:11.5px;font-weight:700;white-space:nowrap;
+}
+.mail-reader-head{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:8px 12px;border-bottom:1px solid #22c55e;background:#000000;
+}
+.mail-sender-box{
+  display:flex;align-items:center;gap:10px;
+}
+.mail-sender-avatar{
+  width:30px;height:30px;border:1px solid #22c55e;border-radius:3px;
+  display:flex;align-items:center;justify-content:center;background:#000000;flex:none;
+}
+.mail-sender-name{
+  font-size:14px;font-weight:700;color:#fde047;letter-spacing:.3px;
+}
+.mail-reader-meta{
+  color:#38bdf8;font-size:12px;font-weight:700;
+}
+.mail-reader-subj{
+  padding:8px 14px;border-bottom:1px solid #14532d;
+  color:#4ade80;font-size:15px;font-weight:700;background:#000000;
+}
+.mail-body{
+  flex:1;padding:14px 16px;white-space:pre-line;font-size:14px;line-height:1.62;
+  color:#ffffff;overflow-y:auto;background:#000000;
+}
+
+/* Mapa Estelar: área ampliada a pantalla completa con barra HUD compacta */
+.map-shell{
+  flex:1;display:flex;flex-direction:column;min-height:0;gap:6px;
+}
+.map-viewport{
+  flex:1;min-height:280px;position:relative;display:flex;
+  border:1px solid #22c55e;border-radius:4px;background:#03070d;overflow:hidden;
+}
+#cv{
+  width:100%;height:100%;display:block;touch-action:none;cursor:grab;
+}
+#cv:active{cursor:grabbing}
+.map-hud-bar{
+  flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:4px 10px;background:#030a06;border:1px solid #166534;border-radius:4px;
+  font-size:12px;
+}
+.map-hud-bar button{
+  padding:4px 11px;font-size:12px;
+}
+
+/* Procesador: distribución en columnas para CRT + Espectrograma al lado y controles */
+.proc-shell{
+  flex:1;display:flex;flex-direction:column;min-height:0;gap:8px;
+}
+.proc-buffer-bar{
+  flex:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  padding:5px 10px;background:#030a06;border:1px solid #166534;border-radius:4px;
+}
+.proc-buffer-bar button{
+  padding:4px 10px;font-size:12px;
+}
+.proc-grid{
+  flex:1;min-height:0;display:grid;grid-template-columns:1fr;gap:10px;
+}
+@media(min-width:940px){
+  .proc-grid{grid-template-columns:1.38fr 1fr}
+}
+.proc-monitors{
+  display:grid;grid-template-columns:1fr;gap:8px;min-height:240px;height:100%;
+}
+.proc-monitors.dual{
+  grid-template-columns:1fr;
+}
+@media(min-width:640px){
+  .proc-monitors.dual{grid-template-columns:1fr 1fr}
+}
+.crt-wrap{
+  background:#000000;border:2px solid #22c55e;border-radius:4px;padding:10px;
+  display:flex;flex-direction:column;justify-content:space-between;align-items:center;
+  position:relative;min-height:220px;height:100%;
+}
+.crt-wrap.opt-fail{border-color:#ef4444;background:#000000}
+.crt-stage{
+  flex:1;width:100%;min-height:150px;display:flex;align-items:center;justify-content:center;
+  background:#020503;border:1px solid #166534;border-radius:3px;padding:6px;overflow:hidden;
+}
+#crt{
+  width:100%;height:100%;object-fit:contain;image-rendering:pixelated;
+  background:#000000;display:block;
+}
+#spec{
+  width:100%;height:100%;background:#000000;display:block;
+}
+.proc-side{
+  display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;
+}
+.proc-side > .card{
+  margin:0;flex:1;display:flex;flex-direction:column;justify-content:space-between;
+}
+
+.databox{
+  background:#000000;border:1px solid #22c55e;border-radius:4px;padding:6px 8px;
+  font-size:11px;color:#ffffff;white-space:pre-wrap;word-break:break-all;margin-top:6px;width:100%;
+}
+.databox.anom{border-color:#ef4444;color:#ffffff;background:#000000}
+input[type=range]{flex:1;accent-color:#22c55e;cursor:pointer}
+input[type=text]{
+  width:100%;max-width:340px;background:#000000;color:#ffffff;
+  border:1px solid #22c55e;border-radius:3px;padding:9px 12px;font:14px inherit;
+  outline:none;
+}
+input[type=text]:focus{border-color:#4ade80;box-shadow:0 0 0 2px rgba(34,197,94,.28)}
+select{
+  width:100%;max-width:100%;background:#000000;color:#ffffff;
+  border:1px solid #22c55e;border-radius:3px;padding:9px 12px;font:13px inherit;
+  outline:none;cursor:pointer;
+}
+select:focus{border-color:#4ade80;box-shadow:0 0 0 2px rgba(34,197,94,.28)}
+.prox-wrap{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:11px;color:#ffffff}
+.prox-bar{flex:1;height:7px;background:#000000;border:1px solid #22c55e;border-radius:3px;overflow:hidden}
+.prox-fill{height:100%;transition:width .08s,background .12s}
+.atlas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:10px;margin-top:10px}
+.atlas-card{
+  background:#000000;border:1px solid #22c55e;border-radius:4px;padding:9px;
+  display:flex;flex-direction:column;gap:6px;color:#ffffff;
+}
+.atlas-card.locked{opacity:.52;background:#000000;border-color:#15803d}
+.atlas-cv{width:100%;height:110px;image-rendering:pixelated;background:#000000;border:1px solid #22c55e;border-radius:3px;display:block}
+.atlas-cv.spec-mode{image-rendering:auto}
+.paper-sheet{
+  background:linear-gradient(180deg,#e9dec4 0%,#dfd0b0 100%);
+  color:#2b2116;border:2px solid #8c734b;border-radius:6px;padding:14px;
+  margin-top:16px;box-shadow:inset 0 0 24px rgba(92,68,36,.28),0 4px 14px rgba(0,0,0,.45);
+  font-family:"Courier New",Courier,monospace;
+}
+.paper-sheet h3{
+  margin:0 0 10px;color:#3d2814;border-bottom:1px dashed #7c623c;padding-bottom:6px;
+  font-size:15px;letter-spacing:.5px;
+}
+.paper-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.paper-entry{
+  background:rgba(255,250,238,.65);border:1px solid #9c8259;border-radius:4px;padding:9px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.paper-cv{
+  width:100%;height:110px;image-rendering:pixelated;background:#1e1912;
+  border:1px solid #6e5634;border-radius:3px;display:block;
+}
+.paper-cv.spec-mode{image-rendering:auto}
+.paper-bin{
+  background:#f5eedc;border:1px solid #a89068;padding:6px;border-radius:3px;
+  font-size:11px;color:#24190e;word-break:break-all;white-space:pre-wrap;
+}
+.paper-btn{
+  background:#5c4424;color:#fbf6ea;border:1px solid #3d2b14;font-size:11.5px;padding:4px 8px;
+}
+.paper-btn:hover{background:#473319}
+#toast{
+  margin-top:6px;padding:6px 12px;border-radius:4px;background:#000000;
+  border:1px solid #22c55e;color:#ffffff;text-align:center;font-size:12px;flex:none;
+}
+#toast.ok{border-color:#22c55e;background:#000000;color:#ffffff}
+#toast.bad{border-color:#ef4444;background:#000000;color:#ffffff}
+.boot-screen{
+  background:#000000;border:2px solid #22c55e;border-radius:4px;
+  padding:34px 20px 28px;margin:auto;width:100%;max-width:620px;min-height:420px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;position:relative;overflow:hidden;
+}
+.boot-logo{
+  width:234px;height:192px;image-rendering:pixelated;image-rendering:crisp-edges;
+  display:block;margin:0 auto 22px;object-fit:contain;
+  animation:bootFadeIn .65s ease-out;
+}
+@keyframes bootFadeIn{
+  from{opacity:0;transform:scale(.97)}
+  to{opacity:1;transform:scale(1)}
+}
+.boot-bar-frame{
+  width:100%;max-width:360px;height:22px;padding:3px;
+  background:#000000;border:1px solid #22c55e;
+  margin:0 auto 10px;
+}
+.boot-bar-track{
+  width:100%;height:100%;background:#000000;overflow:hidden;position:relative;
+}
+.boot-bar-fill{
+  height:100%;width:0%;
+  background:repeating-linear-gradient(
+    90deg,
+    #22c55e 0px,
+    #22c55e 10px,
+    #000000 10px,
+    #000000 13px
+  );
+  transition:width .12s linear;
+}
+.boot-status{
+  font-size:12px;color:#ffffff;letter-spacing:.6px;min-height:18px;margin-top:4px;
+}
+.boot-audio-hint{
+  margin-top:18px;font-size:11px;color:#ffffff;letter-spacing:.8px;
+  animation:blinkHint 1.3s steps(2,end) infinite;cursor:pointer;
+}
+@keyframes blinkHint{
+  0%,100%{opacity:1}
+  50%{opacity:.28}
+}
+.login-win{
+  background:#000000;border:2px solid #22c55e;border-radius:4px;
+  width:100%;max-width:460px;margin:auto;padding:0;overflow:hidden;
+}
+.os-win-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 12px;background:#000000;border-bottom:1px solid #22c55e;
+  font-size:12px;color:#ffffff;letter-spacing:.8px;
+}
+.login-body{
+  padding:28px 24px 26px;text-align:center;background:#000000;color:#ffffff;
+}
+.user-avatar-frame{
+  width:96px;height:96px;margin:0 auto 18px;
+  background:#000000;border:2px solid #22c55e;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+}
+.os-modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.86);
+  display:flex;align-items:center;justify-content:center;padding:14px;z-index:50;
+}
+.os-modal-win{
+  width:100%;max-width:460px;background:#000000;border:2px solid #22c55e;
+  border-radius:4px;color:#ffffff;overflow:hidden;
+  box-shadow:0 0 0 2px #000000, 0 0 28px rgba(34,197,94,.25);
+}
+.os-modal-body{
+  padding:18px 20px;background:#000000;color:#ffffff;text-align:left;
+}
+#nightFadeOverlay{
+  position:fixed;inset:0;background:#000000;opacity:0;pointer-events:none;
+  z-index:999;transition:opacity 0.65s ease-in-out;
+  display:flex;align-items:center;justify-content:center;
+}
+#nightFadeOverlay.active{
+  opacity:1;pointer-events:all;
+}
+#nightFadeText{
+  color:#ffffff;
+  font-family:"Courier New",Courier,ui-monospace,monospace;
+  font-size:clamp(26px,4.5vw,44px);
+  font-weight:700;
+  letter-spacing:4px;
+  text-transform:uppercase;
+  opacity:0;
+  transition:opacity 0.55s ease-in-out;
+  user-select:none;
+}
+#nightFadeText.visible{
+  opacity:1;
+}
+
+/* ============================================================================
+   ENTORNO GRAFICO UNIFICADO ESTILO ARCHIVO / ANOMALIAS (A PARTIR DEL LOGIN)
+   ============================================================================ */
+body.boot-mode{
+  background:#000000;
+  padding:0;
+}
+body.boot-mode .terminal{
+  background:#000000;
+  border:none;
+  border-radius:0;
+  box-shadow:none;
+}
+body.boot-mode .terminal::after,
+body.boot-mode .topbar,
+body.boot-mode #tabs{
+  display:none !important;
+}
+body.boot-mode #win{
+  background:#000000;
+  padding:0;
+  overflow:hidden;
+}
+body.boot-mode .boot-screen{
+  background:#000000;
+  border:none;
+  border-radius:0;
+  max-width:none;
+  width:100%;
+  height:100%;
+  padding:20px;
+}
+body.login-mode .terminal{
+  background:transparent;
+  border:none;
+  box-shadow:none;
+}
+body.login-mode .terminal::after,
+body.login-mode .topbar,
+body.login-mode #tabs{
+  display:none !important;
+}
+body.login-mode #win{
+  background:transparent;
+  padding:16px;
+}
+body.paper-theme{
+  background:#1e1912;
+  color:#2b2116;
+  font-family:"Courier New",Courier,ui-monospace,monospace;
+}
+body.paper-theme .terminal{
+  background:linear-gradient(180deg,#e9dec4 0%,#dfd0b0 100%);
+  border:2px solid #8c734b;
+  box-shadow:inset 0 0 28px rgba(92,68,36,.26),0 12px 36px rgba(0,0,0,.78);
+}
+body.paper-theme .terminal::after{
+  background:radial-gradient(circle at center,transparent 62%,rgba(92,68,36,.16) 100%);
+}
+body.paper-theme .topbar{
+  background:#d8c7a3;
+  border-bottom:2px solid #8c734b;
+  color:#2b2116;
+}
+body.paper-theme .topbar b{color:#3d2814}
+body.paper-theme .pill{
+  background:#f5eedc;
+  border:1px solid #8c734b;
+  color:#2b2116;
+  font-weight:700;
+}
+body.paper-theme .pill.night{
+  border-color:#991b1b;
+  background:#f3d8d2;
+  color:#7f1d1d;
+}
+body.paper-theme .pill.slowrech{
+  border-color:#a16207;
+  background:#f6e7c1;
+  color:#713f12;
+}
+body.paper-theme .pill.norech{
+  border-color:#9a3412;
+  background:#f5dcd0;
+  color:#7c2d12;
+}
+body.paper-theme #tabs{
+  background:#d5c39e;
+  border-bottom:2px solid #8c734b;
+}
+body.paper-theme .tab{
+  background:#e9dec4;
+  color:#3d2814;
+  border:1px solid #9c8259;
+}
+body.paper-theme .tab:hover{
+  background:#f5eedc;
+  color:#24190e;
+  border-color:#6e5634;
+}
+body.paper-theme .tab.on{
+  background:#5c4424;
+  color:#fbf6ea;
+  border:2px solid #3d2b14;
+  box-shadow:inset 0 -2px #a89068;
+}
+body.paper-theme .bd{
+  background:#5c4424;
+  color:#fbf6ea;
+  border:1px solid #3d2b14;
+}
+body.paper-theme .tab.on .bd{
+  background:#fbf6ea;
+  color:#3d2b14;
+}
+body.paper-theme #win{
+  background:transparent;
+  color:#2b2116;
+}
+body.paper-theme button{
+  background:#5c4424;
+  color:#fbf6ea;
+  border:1px solid #3d2b14;
+  font-weight:700;
+}
+body.paper-theme button:hover:not(:disabled){
+  background:#473319;
+  border-color:#2b1d0d;
+  color:#fffdf7;
+}
+body.paper-theme button.alt{
+  background:#f5eedc;
+  color:#2b2116;
+  border:1px solid #8c734b;
+  font-weight:600;
+}
+body.paper-theme button.alt:hover:not(:disabled){
+  background:#e6d7b8;
+  border-color:#5c4424;
+  color:#1e1912;
+}
+body.paper-theme button.logout-btn:not(:disabled){
+  background:#5c4424;
+  border-color:#3d2b14;
+  color:#fbf6ea;
+}
+body.paper-theme button.bad{
+  background:#7f1d1d;
+  border-color:#450a0a;
+  color:#fef2f2;
+}
+body.paper-theme button.bad:hover:not(:disabled){
+  background:#991b1b;
+  border-color:#450a0a;
+}
+body.paper-theme button.warn{
+  background:#92400e;
+  border-color:#451a03;
+  color:#fffbeb;
+}
+body.paper-theme button.warn:hover:not(:disabled){
+  background:#78350f;
+}
+body.paper-theme button.shadow{
+  background:#4c1d95;
+  border-color:#2e1065;
+  color:#f5f3ff;
+}
+body.paper-theme button.shadow:hover:not(:disabled){
+  background:#3b0764;
+}
+body.paper-theme .card{
+  background:rgba(255,250,238,.72);
+  border:1px solid #9c8259;
+  color:#2b2116;
+  box-shadow:0 1px 4px rgba(61,40,20,.08);
+}
+body.paper-theme .card.warnbox{
+  border-color:#b45309;
+  background:rgba(254,243,199,.82);
+}
+body.paper-theme .card.dangerbox{
+  border-color:#991b1b;
+  background:rgba(254,226,226,.82);
+}
+body.paper-theme .card.shadowbox{
+  border-color:#6b21a8;
+  background:rgba(243,232,255,.82);
+}
+body.paper-theme .mut{
+  color:#5c462e;
+}
+body.paper-theme .login-win,
+body.paper-theme .os-modal-win{
+  background:linear-gradient(180deg,#f5eedc 0%,#e9dec4 100%);
+  border:2px solid #8c734b;
+  color:#2b2116;
+  box-shadow:inset 0 0 18px rgba(92,68,36,.2),0 8px 26px rgba(30,25,18,.35);
+}
+body.paper-theme .os-win-bar{
+  background:#5c4424;
+  border-bottom:1px solid #3d2b14;
+  color:#fbf6ea;
+  font-weight:700;
+}
+body.paper-theme .login-body,
+body.paper-theme .os-modal-body{
+  background:transparent;
+  color:#2b2116;
+}
+body.paper-theme .user-avatar-frame{
+  background:#1e1912;
+  border:2px solid #6e5634;
+}
+body.paper-theme input[type=text],
+body.paper-theme select{
+  background:#fbf6ea;
+  color:#24190e;
+  border:1px solid #8c734b;
+}
+body.paper-theme input[type=text]:focus,
+body.paper-theme select:focus{
+  border-color:#5c4424;
+  box-shadow:0 0 0 2px rgba(92,68,36,.25);
+}
+body.paper-theme input[type=range]{
+  accent-color:#5c4424;
+}
+body.paper-theme .mail-pane{
+  border:2px solid #8c734b;
+  background:rgba(255,250,238,.68);
+}
+body.paper-theme .mail-pane-top,
+body.paper-theme .mail-reader-head{
+  background:#dfd0b0;
+  border-bottom:1px solid #8c734b;
+  color:#3d2814;
+}
+body.paper-theme .mail-list,
+body.paper-theme .mail-body{
+  background:transparent;
+  color:#2b2116;
+}
+body.paper-theme .mi{
+  border-bottom:1px dashed #b8a078;
+  color:#2b2116;
+}
+body.paper-theme .mi:hover{
+  background:rgba(223,208,176,.55);
+}
+body.paper-theme .mi.un{
+  background:rgba(245,238,220,.92);
+}
+body.paper-theme .mi.sel{
+  background:#d8c59e;
+  outline:1px solid #6e5634;
+}
+body.paper-theme .mi.anom-mail{
+  border-left:4px solid #6b21a8;
+}
+body.paper-theme .mi-sender{
+  color:#5c4424;
+}
+body.paper-theme .mi-subj{
+  color:#24190e;
+}
+body.paper-theme .mi-tag{
+  color:#7c2d12;
+}
+body.paper-theme .mail-sender-avatar{
+  background:#1e1912;
+  border:1px solid #6e5634;
+}
+body.paper-theme .mail-sender-name{
+  color:#3d2814;
+}
+body.paper-theme .mail-reader-meta{
+  color:#6e5634;
+}
+body.paper-theme .mail-reader-subj{
+  background:#ece1c6;
+  border-bottom:1px dashed #8c734b;
+  color:#3d2814;
+}
+body.paper-theme .map-viewport{
+  border:2px solid #6e5634;
+  background:#1e1912;
+}
+body.paper-theme .map-hud-bar,
+body.paper-theme .proc-buffer-bar{
+  background:#dfd0b0;
+  border:1px solid #8c734b;
+  color:#2b2116;
+}
+body.paper-theme .crt-wrap{
+  background:rgba(255,250,238,.72);
+  border:2px solid #8c734b;
+}
+body.paper-theme .crt-wrap.opt-fail{
+  border-color:#991b1b;
+  background:rgba(254,226,226,.78);
+}
+body.paper-theme .crt-stage,
+body.paper-theme #crt,
+body.paper-theme #spec{
+  background:#1e1912;
+  border-color:#6e5634;
+}
+body.paper-theme .databox{
+  background:#f5eedc;
+  border:1px solid #a89068;
+  color:#24190e;
+}
+body.paper-theme .databox.anom{
+  border-color:#991b1b;
+  background:#f8e3df;
+  color:#450a0a;
+}
+body.paper-theme .prox-wrap{
+  color:#2b2116;
+}
+body.paper-theme .prox-bar{
+  background:#f5eedc;
+  border:1px solid #8c734b;
+}
+body.paper-theme .atlas-card{
+  background:rgba(255,250,238,.72);
+  border:1px solid #9c8259;
+  color:#2b2116;
+}
+body.paper-theme .atlas-card.locked{
+  opacity:.64;
+  background:rgba(233,222,196,.5);
+  border:1px dashed #8c734b;
+}
+body.paper-theme .atlas-cv{
+  background:#1e1912;
+  border:1px solid #6e5634;
+}
+body.paper-theme .paper-sheet{
+  background:linear-gradient(180deg,#dfd0b0 0%,#d0bc92 100%);
+  border:2px dashed #7f1d1d;
+}
+body.paper-theme .paper-sheet h3{
+  color:#7f1d1d;
+  border-bottom:1px dashed #7f1d1d;
+}
+body.paper-theme #toast{
+  background:#f5eedc;
+  border:1px solid #8c734b;
+  color:#2b2116;
+  font-weight:700;
+}
+body.paper-theme #toast.ok{
+  border-color:#3d2b14;
+  background:#efe4c8;
+  color:#24190e;
+}
+body.paper-theme #toast.bad{
+  border-color:#991b1b;
+  background:#f8e3df;
+  color:#7f1d1d;
+}
+</style>
+</head>
+<body>
+<main>
+<div class="terminal">
+  <div class="topbar">
+    <b id="topTitle">INICIO DE SESION</b>
+    <div class="stats" id="st"></div>
+  </div>
+  <div id="tabs"></div>
+  <div id="win"></div>
+</div>
+<div id="toast" style="display:none"></div>
+</main>
+<div id="nightFadeOverlay"><div id="nightFadeText"></div></div>
+
+<script>
+// ============================================================================
+// TELEMETRÍA SILENCIOSA EN SEGUNDO PLANO (Firebase Realtime Database)
+// ============================================================================
+const CLOUD_DB_URL = "https://signal-finder-5e191-default-rtdb.firebaseio.com";
+
+const $ = s => document.querySelector(s);
+const CLASSES = ["Estrella", "Planeta", "Asteroide", "Satelite", "Pulsar"];
+const TOTAL_NIGHTS = 15;
+const EXTRA_SIGNALS_PER_NIGHT = 10;
+const MAX_NIGHT_SIGNALS_AFTER_CATALOG = 13;
+const MAX_MEMORY_SIGNALS = 5;
+const ECHO_LOCK_COST = 4;
+const W = 2600, H = 1650;
+const stars = Array.from({length: 720}, () => [Math.random()*W, Math.random()*H, Math.random()*1.6 + 0.5]);
+
+// Catálogo de 28 modelos normales vinculados a Signals/
+const MODELS = [
+  // 0: Estrella (5 modelos)
+  {id:"est_enana", cat:0, name:"Enana Amarilla", img:"Signals/yellow_dwarf.png", freq:210, wave:"sine", pattern:"band3", desc:"Estrella de secuencia principal con 3 bandas horizontales anchas y estables."},
+  {id:"est_enana_roja", cat:0, name:"Enana Roja", img:"Signals/red_dwarf.png", freq:188, wave:"sine", pattern:"band3", desc:"Emision termica tenue de baja masa y larga vida orbital."},
+  {id:"est_gigante", cat:0, name:"Gigante Roja", img:"Signals/red_giant.png", freq:175, wave:"sine", pattern:"band3", desc:"3 bandas anchas de baja frecuencia y corona extensa."},
+  {id:"est_binaria", cat:0, name:"Estrella Binaria", img:"Signals/binary_star.png", freq:255, wave:"triangle", pattern:"band3", desc:"Doble pico orbital con modulacion en 3 bandas."},
+  {id:"est_trinaria", cat:0, name:"Sistema Trinario", img:"Signals/trinary_star.png", freq:295, wave:"triangle", pattern:"band3", desc:"Tres focos gravitacionales sincronizados."},
+  // 1: Planeta y Lunas/Enanos (13 modelos)
+  {id:"pla_venus", cat:1, name:"Venus", img:"Signals/venus.png", freq:106, wave:"sine", pattern:"band4", desc:"Planeta rocoso con cobertura nubosa densa de alto albedo."},
+  {id:"pla_marte", cat:1, name:"Marte", img:"Signals/mars.png", freq:112, wave:"sine", pattern:"band4", desc:"Planeta rocoso con casquetes polares y superficie ferrosa."},
+  {id:"pla_jupiter", cat:1, name:"Jupiter", img:"Signals/jupiter.png", freq:132, wave:"sine", pattern:"band4", desc:"Gigante gaseoso con franjas atmosfericas densas."},
+  {id:"pla_saturno", cat:1, name:"Saturno", img:"Signals/saturn.png", freq:148, wave:"triangle", pattern:"band4", desc:"Gigante gaseoso con sistema de anillos de alta densidad."},
+  {id:"pla_urano", cat:1, name:"Urano", img:"Signals/uranus.png", freq:138, wave:"sine", pattern:"band4", desc:"Gigante helado con eje de rotacion fuertemente inclinado."},
+  {id:"pla_neptuno", cat:1, name:"Neptuno", img:"Signals/neptune.png", freq:144, wave:"sine", pattern:"band4", desc:"Gigante helado profundo con vientos supersonicos."},
+  {id:"pla_exoplaneta", cat:1, name:"Exoplaneta", img:"Signals/exoplanet.png", freq:124, wave:"sine", pattern:"band4", desc:"Mundo extrasolar detectado por transito espectral."},
+  {id:"pla_luna", cat:1, name:"Luna", img:"Signals/moon.png", freq:94, wave:"sine", pattern:"band4", desc:"Satelite natural rocoso marcado por cuencas de impacto."},
+  {id:"pla_io", cat:1, name:"Io", img:"Signals/io.png", freq:98, wave:"triangle", pattern:"band4", desc:"Satelite volcanico activo con flujo de plasma orbital."},
+  {id:"pla_europa", cat:1, name:"Europa", img:"Signals/europa.png", freq:102, wave:"sine", pattern:"band4", desc:"Corteza de hielo fracturada sobre oceano subsuperficial."},
+  {id:"pla_ceres", cat:1, name:"Ceres", img:"Signals/ceres.png", freq:88, wave:"sine", pattern:"band4", desc:"Planeta enano del cinturon principal de asteroides."},
+  {id:"pla_pluton", cat:1, name:"Pluton", img:"Signals/pluto.png", freq:84, wave:"sine", pattern:"band4", desc:"Planeta enano helado del cinturon de Kuiper."},
+  {id:"pla_makemake", cat:1, name:"Makemake", img:"Signals/makemake.png", freq:86, wave:"sine", pattern:"band4", desc:"Cuerpo transneptuniano brillante de superficie metanica."},
+  // 2: Asteroide (3 modelos)
+  {id:"ast_metalico", cat:2, name:"Asteroide Metalico", img:"Signals/metallic_asteroid.png", freq:320, wave:"triangle", pattern:"diag", desc:"Trazas diagonales definidas de alta reflectividad."},
+  {id:"ast_condrita", cat:2, name:"Condrita Carbonacea", img:"Signals/chondrite_asteroid.png", freq:285, wave:"sine", pattern:"diag", desc:"Trazas diagonales suaves con deriva constante."},
+  {id:"ast_cometa", cat:2, name:"Cometa de Nucleo Activo", img:"Signals/comet.png", freq:355, wave:"sawtooth", pattern:"diag", desc:"Trazas diagonales alargadas por estela volatil."},
+  // 3: Satelite (4 modelos)
+  {id:"sat_com", cat:3, name:"Satelite de Comunicaciones", img:"Signals/comms_satellite.png", freq:760, wave:"sawtooth", pattern:"blocks", desc:"Columnas de bloques digitales + subportadora TLM."},
+  {id:"sat_sonda", cat:3, name:"Sonda Orbital", img:"Signals/space_probe.png", freq:810, wave:"sawtooth", pattern:"blocks", desc:"Paquetes telemetricos espaciados + subportadora."},
+  {id:"sat_telescopio", cat:3, name:"Telescopio Espacial", img:"Signals/space_telescope.png", freq:720, wave:"square", pattern:"blocks", desc:"Bloques regulares de observacion profunda."},
+  {id:"sat_estacion", cat:3, name:"Estacion Modular", img:"Signals/station.png", freq:850, wave:"sawtooth", pattern:"blocks", desc:"Tramas continuas de alta densidad telemetrica."},
+  // 4: Pulsar (3 modelos, aparece a partir de Noche 3 -> shift >= 2)
+  {id:"pul_ms", cat:4, name:"Pulsar de Milisegundos", img:"Signals/millisecond_pulsar.png", freq:480, wave:"square", pattern:"pulses", desc:"Columnas verticales periodicas de cadencia rapida."},
+  {id:"pul_magnetar", cat:4, name:"Magnetar", img:"Signals/magnetar.png", freq:430, wave:"square", pattern:"pulses", desc:"Pulsos verticales de altisima intensidad magnetica."},
+  {id:"pul_binario", cat:4, name:"Pulsar Binario", img:"Signals/binary_pulsar.png", freq:515, wave:"square", pattern:"pulses", desc:"Doble tren de pulsos verticales con deriva de fase."}
+];
+
+// Saludos en diferentes idiomas codificados únicamente en binario ASCII de 8 bits
+const VOYAGER_GREETINGS_TEXT = "HELLO | HOLA | BONJOUR | NI HAO | PRIVET | KONNICHIWA";
+const VOYAGER_BINARY = VOYAGER_GREETINGS_TEXT
+  .split("")
+  .map(ch => ch.charCodeAt(0).toString(2).padStart(8, "0"))
+  .join(" ");
+
+const SIN_IMAGEN_BINARY = "00101110 00101110 00101110 00101110 00101110 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 00100011 00100000 01000001 01010110 01001111 01001001 01000100 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01100110 01101111 01101111 01100100 00100000 01000001 01010110 01001111 01001001 00100011 00100000 00100011 00100011 01001001 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 00100011 00100000 01000011 00100011 01010011 01010100 01010011 00100011 01000001 00100011 01001111 00100011 00100011 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100011 01000001 00100011 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100011 01000001 01010110 01001111 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01000001 01010110 00100011 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100000 01100110 01101111 01101111 01100100 00100000 01001111 01000010 01001010 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 01001111 01010011 01010100 01010011 00100000 01000001 01010110 00100011 01001001 01000100 00100011 01010100 01001000 01001001 01010011 00100011 01001111 01000010 01001010 01000101 01000011 01010100 00100011 01000001 01010100 00100000 01000001 01001100 01001100 00100000 01000011 00100011 01010011 01010100 01010011 00100011 01000001 01010110 01001111 01001001 01000100 00100000 01100011 01101111 01101101 01100101 00100000 01010100 01001000 01001001 01010011 00100000 01001111 01000010 00100011 01000101 01000011 01010100 00100000 01000001 01010100 00100000 01000001 00100011 00100011 00100000 01000011 01001111 00101110 00101110 00101110 00101110 00101110";
+
+// Definición de las 13 anomalías del sector vinculadas a Signals/ (activas desde Noche 10)
+const ANOMALY_DEFS = [
+  {
+    type: "voyager",
+    title: "Voyager 1",
+    img: "Signals/voyager_i.png",
+    audioSrc: "assets/audio/voyager_i.mp3",
+    audioVol: 0.48,
+    cat: 3,
+    freq: 164,
+    wave: "triangle",
+    textData: VOYAGER_BINARY
+  },
+  {
+    type: "earth_echo",
+    title: "Tierra",
+    img: "Signals/earth_anomaly.png",
+    cat: 1,
+    freq: 118,
+    wave: "sine",
+    textData: "... ¿Hola?"
+  },
+  {
+    type: "dyson",
+    title: "Esfera de Dyson",
+    img: "Signals/dyson_anomaly.png",
+    cat: 0,
+    freq: 92,
+    wave: "sawtooth",
+    textData: "..."
+  },
+  {
+    type: "spaceship",
+    title: "Nave Espacial",
+    img: "Signals/spaceship_anomaly.png",
+    cat: 3,
+    freq: 194,
+    wave: "sawtooth",
+    textData: "¿Quién está ahí?"
+  },
+  {
+    type: "dark_eyes",
+    title: "The Iris",
+    img: "Signals/iris_anomaly.png",
+    cat: 4,
+    freq: 54,
+    wave: "triangle",
+    textData: "Nos observa..."
+  },
+  {
+    type: "vitreous",
+    title: "Vitreous",
+    img: "Signals/vitreous_anomaly.png",
+    cat: 2,
+    freq: 215,
+    wave: "sine",
+    textData: "..."
+  },
+  {
+    type: "macula",
+    title: "Macula",
+    img: "Signals/macula_anomaly.png",
+    cat: 0,
+    freq: 81,
+    wave: "sawtooth",
+    textData: "..."
+  },
+  {
+    type: "cyst",
+    title: "Cyst",
+    img: "Signals/cyst_anomaly.png",
+    cat: 2,
+    freq: 96,
+    wave: "sawtooth",
+    textData: "..."
+  },
+  {
+    type: "moon_anomaly",
+    title: "¿Luna?",
+    img: "Signals/moon_anomaly.png",
+    cat: 1,
+    freq: 95,
+    wave: "square",
+    textData: "¿Qué pasó aquí?"
+  },
+  {
+    type: "astronaut",
+    title: "Astronauta",
+    img: "Signals/astronaut_anomaly.png",
+    cat: 3,
+    freq: 158,
+    wave: "triangle",
+    textData: "0...1....6...5...Está muy caliente aqui"
+  },
+  {
+    type: "failed_planet",
+    title: "Sin Imagen",
+    img: "Signals/noimage_anomaly.png",
+    cat: 1,
+    freq: 68,
+    wave: "sawtooth",
+    textData: SIN_IMAGEN_BINARY
+  },
+  {
+    type: "flock",
+    title: "Flock",
+    img: "Signals/flock_anomaly.png",
+    spectrogramImg: "assets/spectrograms/flock_spectrogram.png",
+    audioSrc: "assets/audio/flock.mp3",
+    audioVol: 0.48,
+    cat: 2,
+    freq: 266,
+    wave: "triangle",
+    textData: "..."
+  },
+  {
+    type: "virgo_dragon",
+    title: "Virgo Red Dragon",
+    img: "Signals/virgo_dragon_anomaly.png",
+    cat: 4,
+    freq: 128,
+    wave: "triangle",
+    textData: "..."
+  }
+];
+
+// Caché de sprites PNG en Signals/
+const IMG_CACHE = {};
+const offCv = document.createElement("canvas");
+const offCx = offCv.getContext("2d");
+
+function getSprite(src) {
+  if (!src) return null;
+  if (!IMG_CACHE[src]) {
+    const im = new Image();
+    im._failed = false;
+    im.onerror = () => { im._failed = true; };
+    im.src = src;
+    IMG_CACHE[src] = im;
+  }
+  const im = IMG_CACHE[src];
+  if (im._failed) return null;
+  return (im.complete && im.naturalWidth > 0) ? im : null;
+}
+
+function preloadAllSprites() {
+  MODELS.forEach(m => { if (m.img) getSprite(m.img); });
+  ANOMALY_DEFS.forEach(a => {
+    if (a.img) getSprite(a.img);
+    if (a.spectrogramImg) getSprite(a.spectrogramImg);
+  });
+}
+
+// Resolución CRT progresiva según mejora de Filtro (NV 0/5 a NV 5/5)
+const CRT_RES = [
+  [40, 24],
+  [64, 38],
+  [92, 55],
+  [124, 74],
+  [152, 91],
+  [184, 110]
+];
+
+const SCIENTISTS = [
+  {name: "Dra. Elena Vance", inst: "Observatorio Astrofisico Sur"},
+  {name: "Dr. Kenji Takahashi", inst: "Instituto de Dinamica Orbital"},
+  {name: "Dra. Sofia Lindqvist", inst: "Consorcio Espectral Nordico"},
+  {name: "Dr. Mateo Salgado", inst: "Red de Radioastronomia Austral"},
+  {name: "Dra. Aris Thorne", inst: "Laboratorio de Cuerpos Menores"},
+  {name: "Dr. Julian Alreyd", inst: "Centro de Interferometria Profunda"},
+  {name: "Dra. Claire Charles", inst: "Departamento de Astrofisica Estelar"},
+  {name: "Dr. Arthur Powell", inst: "Observatorio Meridian"},
+  {name: "Dra. Helena Branco", inst: "Instituto Lusitano de Radioastronomia"},
+  {name: "Dr. Emiliano Rojas", inst: "Estacion Austral de Telemetria"},
+  {name: "Dra. Nadia Koustoulas", inst: "Consorcio Egeo de Espacio Profundo"},
+  {name: "Dr. Victor Hammond", inst: "Laboratorio de Propulsiones y Sondas"}
+];
+
+const NIGHT_SCENARIO_LABELS = [
+  "Noche 1 — Inicio (Recarga rápida)",
+  "Noche 2 — Guardia estándar (Recarga rápida)",
+  "Noche 3 — Pulsares + Espectrograma integrado",
+  "Noche 4 — Guardia intermedia (Recarga rápida)",
+  "Noche 5 — Archivos visuales dañados (Solo espectrograma)",
+  "Noche 6 — Desgaste térmico (Recarga lenta)",
+  "Noche 7 — Guardia profunda (Recarga lenta)",
+  "Noche 8 — Víspera de tormenta (Recarga lenta)",
+  "Noche 9 — Evento: Fallo óptico CRT (Sin imagen)",
+  "Noche 10 — Subcategorías y Anomalías activas",
+  "Noche 11 — Corte de generador (Sin recarga)",
+  "Noche 12 — Vigilancia crítica (Sin recarga)",
+  "Noche 13 — Sector profundo (Sin recarga)",
+  "Noche 14 — Penúltima guardia (Sin recarga)",
+  "Noche 15 — Guardia final (Sin recarga)"
+];
+
+const LIVE_STORAGE_KEY = "erial7_live_sessions_v1";
+let bc = null;
+try {
+  if ("BroadcastChannel" in window) bc = new BroadcastChannel("erial7_telemetry");
+} catch (_) {
+  bc = null;
+}
+
+function normalizeDbUrl(raw) {
+  const clean = String(raw || "").trim().replace(/\/+$/, "");
+  if (!clean) return "";
+  return /^https?:\/\//i.test(clean) ? clean : `https://${clean}`;
+}
+
+const activeDbUrl = normalizeDbUrl(CLOUD_DB_URL);
+let cloudInFlight = false;
+let cloudQueuedSnap = null;
+
+let V = "boot", G = null, S = null;
+let bootElapsed = 0;
+let bootProgress = 0;
+let bootSoundPlayed = false;
+let bootLoginChimePending = false;
+let startupAudio = null;
+let adminModalOpen = false;
+let playerNameInput = "";
+let selectedStartNight = 0;
+let freeModeSelected = false;
+let isFreeMode = false;
+let sessionStartPerf = 0;
+let liveSyncTimer = 0;
+let cloudSyncTimer = 0;
+
+let sigs = [], cam = {x: 750, y: 480};
+let en = 100, cap = 100, rd = 0;
+let mail = [], selMail = null;
+let shift = 0; // 0 = Noche 1 ... 14 = Noche 15
+let nightAssignments = [];
+let nightAssignPool = [];
+let nightExtraSpawned = 0;
+let nightTotalSpawned = 0;
+let usedPlanetModelsThisNight = new Set();
+let isTransitioningNight = false;
+let nextMailChimeAt = 0;
+let srv = null, crashes = 0;
+let cur = null, knobF = 50, knobP = 50, choiceCat = null, choiceMod = null;
+let outbox = []; // Paquetes clasificados listos en Plataforma de Envío
+let selPkgId = null;
+let pendingOverrideSig = null; // Confirmación al insistir en cambiar búsqueda activa
+let discoveredModels = new Set(); // Modelos normales verificados en Central
+let discoveredAnomalies = []; // Lista privada de anomalías encontradas (aparece en papel dentro de Atlas)
+let atlasSpecMode = new Set(); // Entradas del Atlas mostradas como espectrograma en lugar de imagen
+let firstAnomalyFound = false;
+let shadowBuyerUnlocked = false;
+let gameOverReason = ""; // "ARREST" | "COMPLETED"
+let R = null, sid = 0, last = performance.now();
+let flash = "", flashOk = 1, flashT = 0;
+let drag = null, moved = 0, uiTick = 0;
+let au = null, analyser = null, specFreqData = null, specTimeData = null;
+let muted = false, activeVoice = null;
+let pendingEvals = [];
+
+// Búferes persistentes para el espectrograma waterfall en tiempo real
+const SPEC_BUFFERS = {};
+let lastProcSpecSigId = null;
+
+const uid = () => Math.random().toString(36).slice(2, 8).toUpperCase();
+const shiftLabel = idx => isFreeMode ? `MODO LIBRE · N${idx + 1}` : `NOCHE ${idx + 1}`;
+const isSubcatEnabled = () => shift >= 9;      // Noche 10 en adelante (0-based >= 9)
+const isPulsarEnabled = () => shift >= 2;      // Noche 3 en adelante (0-based >= 2)
+const isSpectrogramEnabled = () => shift >= 2; // Noche 3 en adelante (0-based >= 2)
+const isAnomEnabled = () => shift >= 9;        // Todas las anomalías solo desde Noche 10 (0-based >= 9)
+const isOpticalFailed = () => shift === 8;     // Noche 9 (0-based === 8): fallo óptico/imagen CRT
+const isPaperTheme = () => V !== "boot";
+function syncThemeClass() {
+  if (document.body) {
+    document.body.classList.toggle("paper-theme", isPaperTheme());
+    document.body.classList.toggle("boot-mode", V === "boot");
+    document.body.classList.toggle("login-mode", V === "intro");
+  }
+}
+
+function ensureAudioContext() {
+  try {
+    au = au || new (window.AudioContext || window.webkitAudioContext)();
+    if (au.state === "suspended") {
+      au.resume().catch(() => {});
+    }
+    if (!analyser && au) {
+      analyser = au.createAnalyser();
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.72;
+      analyser.minDecibels = -95;
+      analyser.maxDecibels = -15;
+      analyser.connect(au.destination);
+      specFreqData = new Uint8Array(analyser.frequencyBinCount);
+      specTimeData = new Uint8Array(analyser.fftSize);
+    }
+  } catch (_) {}
+  return au;
+}
+
+// Recuperación de energía escalonada:
+// Noches 1-5 (shift 0..4): rápida
+// Noches 6-10 (shift 5..9): lenta
+// Noches 11-15 (shift 10..14): nula (en Modo Libre se mantiene recarga rápida)
+function getEnergyRegenMode() {
+  if (isFreeMode) return "fast";
+  if (shift <= 4) return "fast";
+  if (shift <= 9) return "slow";
+  return "none";
+}
+
+const activeAssigns = () => nightAssignments.filter(a => a.night === shift && !a.done && !a.failed);
+const allNightAssignsClosed = () => {
+  const list = nightAssignments.filter(a => a.night === shift);
+  return list.length > 0 && list.every(a => a.done || a.failed);
+};
+
+function formatLocalDateTime(d) {
+  const pad = n => String(n).padStart(2, "0");
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function buildSessionSnapshot(finalized = false) {
+  if (!S) return null;
+  const elapsedTotal = sessionStartPerf ? +((performance.now() - sessionStartPerf) / 1000).toFixed(1) : (S.totalPlayTime || 0);
+  S.totalPlayTime = elapsedTotal;
+  S.status = finalized ? (gameOverReason === "ARREST" ? "CLAUSURADA_ONU" : "FINALIZADA") : "EN_CURSO";
+  S.lastUpdated = new Date().toISOString();
+
+  const shiftsList = [...S.shifts];
+  if (!finalized && R && V !== "end") {
+    shiftsList.push({
+      ...R,
+      time: +((performance.now() - R.t0) / 1000).toFixed(1),
+      energy: Math.round(en),
+      money: G ? G.money : 75
+    });
+  }
+
+  return {
+    id: S.id,
+    playerName: S.playerName,
+    startNight: selectedStartNight + 1,
+    freeMode: isFreeMode,
+    date: S.date,
+    dateISO: S.dateISO,
+    totalPlayTime: S.totalPlayTime,
+    status: S.status,
+    lastUpdated: S.lastUpdated,
+    shifts: shiftsList,
+    survey: null
+  };
+}
+
+async function pushSnapshotToCloud(snap) {
+  if (!activeDbUrl || !snap) return;
+  if (cloudInFlight) {
+    cloudQueuedSnap = snap;
+    return;
+  }
+  cloudInFlight = true;
+  try {
+    await fetch(`${activeDbUrl}/sessions/${encodeURIComponent(snap.id)}.json`, {
+      method: "PUT",
+      body: JSON.stringify(snap)
+    });
+  } catch (_) {
+  } finally {
+    cloudInFlight = false;
+    if (cloudQueuedSnap) {
+      const next = cloudQueuedSnap;
+      cloudQueuedSnap = null;
+      pushSnapshotToCloud(next);
+    }
+  }
+}
+
+function syncLiveTelemetry(finalized = false, pushCloudNow = true) {
+  const snap = buildSessionSnapshot(finalized);
+  if (!snap) return;
+  try {
+    const raw = localStorage.getItem(LIVE_STORAGE_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    const idx = list.findIndex(item => item.id === snap.id);
+    if (idx >= 0) list[idx] = snap;
+    else list.push(snap);
+    localStorage.setItem(LIVE_STORAGE_KEY, JSON.stringify(list));
+  } catch (_) {}
+
+  if (bc) {
+    try { bc.postMessage({type: "SESSION_UPDATE", session: snap}); } catch (_) {}
+  }
+
+  if (pushCloudNow && activeDbUrl) {
+    pushSnapshotToCloud(snap);
+  }
+}
+
+function msg(t, ok = 1) {
+  flash = t; flashOk = ok; flashT = 3.4; updTop();
+}
+
+function beep(freq, dur = 0.08, type = "sine", vol = 0.06) {
+  if (muted) return;
+  try {
+    ensureAudioContext();
+    const o = au.createOscillator(), g = au.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, au.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, au.currentTime + dur);
+    o.connect(g); g.connect(au.destination);
+    o.start(); o.stop(au.currentTime + dur);
+  } catch (_) {}
+}
+
+function stopVoice() {
+  if (!activeVoice) return;
+  if (activeVoice.o) {
+    try { activeVoice.o.stop(); } catch (_) {}
+  }
+  if (activeVoice.audio) {
+    try {
+      activeVoice.audio.pause();
+      activeVoice.audio.currentTime = 0;
+    } catch (_) {}
+  }
+  activeVoice = null;
+}
+
+function playFallbackStartupSynth() {
+  try {
+    ensureAudioContext();
+    if (!au || au.state !== "running") return false;
+    const now = au.currentTime + 0.03;
+    const master = au.createGain();
+    const filter = au.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(360, now);
+    filter.frequency.exponentialRampToValueAtTime(2400, now + 0.85);
+    filter.frequency.exponentialRampToValueAtTime(980, now + 3.4);
+    filter.Q.value = 1.4;
+
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.linearRampToValueAtTime(0.16, now + 0.22);
+    master.gain.setValueAtTime(0.15, now + 1.65);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + 3.6);
+
+    filter.connect(master);
+    master.connect(au.destination);
+
+    const chords = [
+      { t: 0.00, dur: 1.05, freqs: [155.56, 233.08, 311.13, 392.00, 466.16, 587.33] },
+      { t: 0.82, dur: 1.05, freqs: [207.65, 311.13, 415.30, 523.25, 622.25, 783.99] },
+      { t: 1.58, dur: 2.00, freqs: [155.56, 233.08, 349.23, 392.00, 587.33, 932.33] }
+    ];
+
+    chords.forEach((ch, ci) => {
+      ch.freqs.forEach((f, fi) => {
+        const osc = au.createOscillator();
+        const vg = au.createGain();
+        osc.type = (fi % 2 === 0) ? "triangle" : "sine";
+        const detune = (fi % 2 === 0 ? -5 : 5) + ci * 1.5;
+        osc.frequency.setValueAtTime(f, now + ch.t);
+        osc.detune.setValueAtTime(detune, now + ch.t);
+
+        const voicePeak = (fi === 0 ? 0.22 : 0.13) / Math.sqrt(ch.freqs.length);
+        vg.gain.setValueAtTime(0.0001, now + ch.t);
+        vg.gain.linearRampToValueAtTime(voicePeak, now + ch.t + 0.14);
+        vg.gain.exponentialRampToValueAtTime(0.0001, now + ch.t + ch.dur);
+
+        osc.connect(vg);
+        vg.connect(filter);
+        osc.start(now + ch.t);
+        osc.stop(now + ch.t + ch.dur + 0.05);
+      });
+    });
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function playStartupSound(forceReplay = false) {
+  if (muted) return false;
+  if (bootSoundPlayed && !forceReplay) return true;
+  try {
+    if (startupAudio) {
+      try {
+        startupAudio.pause();
+        startupAudio.currentTime = 0;
+      } catch (_) {}
+    }
+    const audio = new Audio("assets/audio/startup.mp3");
+    audio.volume = 0.65;
+    startupAudio = audio;
+
+    audio.onerror = () => {
+      if (!bootSoundPlayed && playFallbackStartupSynth()) {
+        bootSoundPlayed = true;
+        bootLoginChimePending = false;
+      }
+    };
+
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.then === "function") {
+      playPromise.then(() => {
+        bootSoundPlayed = true;
+        bootLoginChimePending = false;
+        const hint = document.querySelector("#bootAudioHint");
+        if (hint) hint.style.display = "none";
+      }).catch(() => {
+        // Navegador bloqueó reproducción automática hasta la primera interacción del usuario
+      });
+    } else {
+      bootSoundPlayed = true;
+      bootLoginChimePending = false;
+    }
+    return bootSoundPlayed;
+  } catch (_) {
+    return false;
+  }
+}
+
+function startBootSequence() {
+  V = "boot";
+  bootElapsed = 0;
+  bootProgress = 0;
+  bootSoundPlayed = false;
+  bootLoginChimePending = true;
+  render();
+  updTop();
+  if (playStartupSound(true)) {
+    const hint = document.querySelector("#bootAudioHint");
+    if (hint) hint.style.display = "none";
+  }
+}
+
+function playSignalAudio(sigObj) {
+  stopVoice();
+  if (muted) return;
+  ensureAudioContext();
+  const anomDef = sigObj.anom ? ANOMALY_DEFS.find(a => a.type === sigObj.anomType) : null;
+  if (anomDef && anomDef.audioSrc) {
+    try {
+      const audio = new Audio(anomDef.audioSrc);
+      audio.crossOrigin = "anonymous";
+      const baseVol = (typeof anomDef.audioVol === "number") ? anomDef.audioVol : 0.48;
+      const clarity = sigObj.fixed ? 1 : (sigObj.tgF !== undefined ? Math.max(0.25, 1 - (offF(sigObj) + offP(sigObj)) * 0.55) : 1);
+      audio.volume = Math.max(0.08, Math.min(baseVol, baseVol * clarity));
+
+      // Conectar el flujo de audio al AnalyserNode de Web Audio para que el espectrograma sea el audio real
+      try {
+        if (au && analyser) {
+          const mediaSrc = au.createMediaElementSource(audio);
+          mediaSrc.connect(analyser);
+        }
+      } catch (_) {}
+
+      audio.onended = () => {
+        if (activeVoice && activeVoice.audio === audio) {
+          activeVoice = null;
+          if (V === "proc") render();
+        }
+      };
+      audio.onerror = () => {
+        if (activeVoice && activeVoice.audio === audio) {
+          activeVoice = null;
+          if (V === "proc") render();
+        }
+      };
+      activeVoice = {audio, baseVol, sig: sigObj, t: 0};
+      const p = audio.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          if (activeVoice && activeVoice.audio === audio) {
+            activeVoice = null;
+            if (V === "proc") render();
+          }
+        });
+      }
+      return;
+    } catch (_) {}
+  }
+  try {
+    ensureAudioContext();
+    const o = au.createOscillator(), g = au.createGain();
+    const mod = MODELS.find(m => m.id === sigObj.modelId) || MODELS[0];
+    o.type = anomDef ? anomDef.wave : mod.wave;
+    o.frequency.value = anomDef ? anomDef.freq : mod.freq;
+    g.gain.value = 0.08;
+    // Conectar directamente el mismo oscilador al AnalyserNode de Web Audio
+    o.connect(g);
+    if (analyser) {
+      g.connect(analyser);
+    } else {
+      g.connect(au.destination);
+    }
+    o.start();
+    activeVoice = {o, g, sig: sigObj, t: 0, max: 3.8};
+  } catch (_) {}
+}
+
+function playMailChime() {
+  if (muted) return;
+  try {
+    ensureAudioContext();
+    if (!au || au.state !== "running") return;
+    const now = au.currentTime;
+    const startAt = Math.max(now + 0.01, nextMailChimeAt);
+    nextMailChimeAt = startAt + 0.17;
+
+    const notes = [880, 1174.66];
+    notes.forEach((freq, idx) => {
+      const o = au.createOscillator();
+      const g = au.createGain();
+      o.type = "triangle";
+      const t0 = startAt + idx * 0.065;
+      o.frequency.setValueAtTime(freq, t0);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.linearRampToValueAtTime(0.065, t0 + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.16);
+      o.connect(g);
+      g.connect(au.destination);
+      o.start(t0);
+      o.stop(t0 + 0.17);
+    });
+  } catch (_) {}
+}
+
+function addMail(subj, body, extra = {}) {
+  const id = uid();
+  const sender = extra.sender || extra.sciName || "CENTRAL";
+  const tag = extra.tag || `N${shift + 1}`;
+  mail.unshift({id, subj, body, sender, tag, read: 0, ...extra});
+  if (!selMail) selMail = id;
+  playMailChime();
+  return id;
+}
+
+function pickUniqueModelForCat(cat, forcedModelId = null) {
+  const catModels = MODELS.filter(m => m.cat === cat);
+  if (forcedModelId) {
+    const found = catModels.find(m => m.id === forcedModelId);
+    if (found) {
+      if (cat === 1) usedPlanetModelsThisNight.add(found.id);
+      return found;
+    }
+  }
+  if (cat === 1) {
+    const unusedPlanets = catModels.filter(m => !usedPlanetModelsThisNight.has(m.id));
+    const pool = unusedPlanets.length ? unusedPlanets : catModels;
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+    usedPlanetModelsThisNight.add(chosen.id);
+    return chosen;
+  }
+  return catModels[Math.floor(Math.random() * catModels.length)];
+}
+
+function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId = null, assignRefId = null) {
+  let x, y, tries = 0;
+  do {
+    x = 140 + Math.random() * (W - 280);
+    y = 140 + Math.random() * (H - 280);
+  } while (tries++ < 70 && sigs.some(s => s.st !== "gone" && Math.hypot(s.x - x, s.y - y) < 260));
+
+  // Las anomalías SOLO aparecen a partir de Noche 10 (isAnomEnabled()) y nunca reemplazan una señal de asignación
+  const allowAnom = isAnomEnabled() && !assignRefId;
+  const anom = allowAnom ? (forcedAnom !== null ? forcedAnom : (Math.random() < 0.22)) : false;
+
+  let anomDef = null;
+  if (anom) {
+    if (forcedAnomType) {
+      anomDef = ANOMALY_DEFS.find(a => a.type === forcedAnomType) || ANOMALY_DEFS[0];
+    } else {
+      const undiscovered = ANOMALY_DEFS.filter(a => !discoveredAnomalies.some(d => d.anomType === a.type));
+      const pool = undiscovered.length ? undiscovered : ANOMALY_DEFS;
+      anomDef = pool[Math.floor(Math.random() * pool.length)];
+    }
+  }
+
+  let actualCat = anomDef ? anomDef.cat : cat;
+  // Si todos los planetas únicos de la noche ya aparecieron y no es asignación forzada, rotar a otra categoría disponible
+  if (!anomDef && !forcedModelId && actualCat === 1) {
+    const allPlanets = MODELS.filter(m => m.cat === 1);
+    if (usedPlanetModelsThisNight.size >= allPlanets.length) {
+      const altCats = (isPulsarEnabled() ? [0, 2, 3, 4] : [0, 2, 3]);
+      actualCat = altCats[Math.floor(Math.random() * altCats.length)];
+    }
+  }
+
+  const chosenModel = pickUniqueModelForCat(actualCat, forcedModelId);
+
+  // A partir de la Noche 5 (shift >= 4), algunos archivos sufren daño visual con un ratio bajo (12% - 20%),
+  // dejando visible únicamente el espectrograma y el audio para identificarlos (nunca en anomalías ni encargos)
+  const corruptProb = (!anom && !assignRefId && shift >= 4)
+    ? Math.min(0.20, 0.12 + (shift - 4) * 0.01)
+    : 0;
+  const isCorruptSignal = Math.random() < corruptProb;
+
+  const moving = (actualCat === 2 || actualCat === 3);
+  const ang = Math.random() * Math.PI * 2;
+  const spd = moving ? (2.1 + Math.random() * 1.4) : 0;
+
+  let textData = "[Sin subportadora]";
+  let anomTitle = "";
+  let anomType = "";
+  if (anomDef) {
+    anomType = anomDef.type;
+    anomTitle = anomDef.title;
+    textData = anomDef.textData;
+  } else if (actualCat === 3) {
+    const satNum = 100 + Math.floor(Math.random() * 899);
+    const alt = 420 + Math.floor(Math.random() * 380);
+    const hex = uid();
+    textData = `TLM-SAT-${satNum} // ${chosenModel.name.toUpperCase()} // ALT:${alt}KM // PWR:88% // HASH:${hex}`;
+  } else {
+    textData = `ESPECTRO-${chosenModel.id.toUpperCase()} // INTENSIDAD:${62 + Math.floor(Math.random()*35)}%`;
+  }
+
+  return {
+    id: ++sid, x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+    cat: actualCat, modelId: chosenModel.id, img: anomDef ? anomDef.img : chosenModel.img,
+    anom, anomType, anomTitle, assignRefId,
+    isCorruptSignal, st: "echo", align: 0, prog: 0,
+    tot: 0, bad: 0, acc: 0, seed: Math.random() * 100,
+    tgF: 14 + Math.floor(Math.random() * 72),
+    tgP: 14 + Math.floor(Math.random() * 72),
+    fixed: false, textData
+  };
+}
+
+function getStoredMemoryCount() {
+  return sigs.filter(s => s.st === "raw").length + outbox.length;
+}
+
+function getReservedMemoryCount() {
+  return getStoredMemoryCount() + sigs.filter(s => s.st === "align" || s.st === "dl").length;
+}
+
+function getUncatalogedNightAssignments() {
+  const nightAsgs = nightAssignments.filter(a => a.night === shift && !a.done && !a.failed);
+  const availableOutbox = [...outbox];
+  const uncataloged = [];
+
+  for (const asg of nightAsgs) {
+    const matchIdx = availableOutbox.findIndex(p =>
+      !p.anom &&
+      p.trueCat === asg.cat &&
+      p.chosenCat === asg.cat &&
+      (!asg.modelId || (p.trueMod === asg.modelId && p.chosenMod === asg.modelId))
+    );
+    if (matchIdx >= 0) {
+      availableOutbox.splice(matchIdx, 1);
+    } else {
+      uncataloged.push(asg);
+    }
+  }
+  return uncataloged;
+}
+
+function areNightAssignmentsCataloged() {
+  return getUncatalogedNightAssignments().length === 0;
+}
+
+function ensureSectorDiversity() {
+  if (!isPulsarEnabled()) {
+    sigs.forEach(s => { if (s.cat === 4 && s.st === "echo") s.st = "gone"; });
+  }
+  if (!isAnomEnabled()) {
+    sigs.forEach(s => { if (s.anom && s.st === "echo") s.st = "gone"; });
+  }
+
+  const inSector = () => sigs.filter(s => s.st === "echo" || s.st === "align" || s.st === "dl");
+  const heldOrQueued = sigs.filter(s => s.st === "raw");
+
+  // 1. Garantizar que toda asignación aún no catalogada (ni entregada) tenga su señal disponible en mapa o procesador
+  const uncatalogedAsgs = getUncatalogedNightAssignments();
+  const availableSignals = [...inSector(), ...heldOrQueued];
+
+  for (const asg of uncatalogedAsgs) {
+    const matchIdx = availableSignals.findIndex(s =>
+      !s.anom &&
+      !s.isCorruptSignal &&
+      s.cat === asg.cat &&
+      (!asg.modelId || s.modelId === asg.modelId)
+    );
+    if (matchIdx >= 0) {
+      availableSignals.splice(matchIdx, 1);
+    } else {
+      if (inSector().length >= 5) {
+        const idleExtra = sigs.find(s => s.st === "echo" && !s.assignRefId);
+        if (idleExtra) idleExtra.st = "gone";
+      }
+      const spawnMod = asg.spawnModelId || asg.modelId || null;
+      const newSig = makeSignal(asg.cat, false, null, spawnMod, asg.id);
+      sigs.push(newSig);
+      nightTotalSpawned++;
+    }
+  }
+
+  // 2. Completar ecos en sector
+  const allowedCats = isPulsarEnabled() ? [0, 1, 2, 3, 4] : [0, 1, 2, 3];
+  while (inSector().length < 5 && (!areNightAssignmentsCataloged() || nightTotalSpawned < MAX_NIGHT_SIGNALS_AFTER_CATALOG)) {
+    const curSector = inSector();
+    const missingCats = allowedCats.filter(c => !curSector.some(s => s.cat === c && !s.anom));
+    let chosenCat;
+    if (missingCats.length > 0) {
+      chosenCat = missingCats[Math.floor(Math.random() * missingCats.length)];
+    } else {
+      const activeCats = getUncatalogedNightAssignments().map(a => a.cat);
+      const weightedPool = [...allowedCats, ...activeCats];
+      chosenCat = weightedPool[Math.floor(Math.random() * weightedPool.length)];
+    }
+
+    const forceAnom = isAnomEnabled() && !curSector.some(s => s.anom) && nightExtraSpawned === 2 ? true : null;
+    sigs.push(makeSignal(chosenCat, forceAnom, null, null, null));
+    nightExtraSpawned++;
+    nightTotalSpawned++;
+  }
+}
+
+function initShift() {
+  pendingOverrideSig = null;
+  usedPlanetModelsThisNight = new Set();
+  nightExtraSpawned = 0;
+  nightTotalSpawned = 0;
+  nightAssignPool = [];
+  sigs = sigs.filter(s => s.st === "raw"); // Conservar únicamente tramas ya descargadas en buffer
+
+  R = {
+    shift: shiftLabel(shift), status: "EN_CURSO", ok: 0,
+    t0: performance.now(), tFirst: null,
+    slewTime: 0, retunes: 0, invalid: 0,
+    repeats: 0, corrupt: 0, silentErrors: 0,
+    specUses: 0, anomSent: 0, crash: 0, fix: 0
+  };
+
+  // Generar exactamente 3 encargos científicos diarios (pagos: $45-$65 CR)
+  const allowedCats = isPulsarEnabled() ? [0, 1, 2, 3, 4] : [0, 1, 2, 3];
+  const usedSci = new Set();
+
+  for (let i = 0; i < 3; i++) {
+    let sci;
+    do {
+      sci = SCIENTISTS[Math.floor(Math.random() * SCIENTISTS.length)];
+    } while (usedSci.has(sci.name) && usedSci.size < SCIENTISTS.length);
+    usedSci.add(sci.name);
+
+    const cat = allowedCats[(shift + i) % allowedCats.length];
+    let mod;
+    if (cat === 1) {
+      const unusedPlanets = MODELS.filter(m => m.cat === 1 && !usedPlanetModelsThisNight.has(m.id));
+      const pool = unusedPlanets.length ? unusedPlanets : MODELS.filter(m => m.cat === 1);
+      mod = pool[Math.floor(Math.random() * pool.length)];
+      usedPlanetModelsThisNight.add(mod.id);
+    } else {
+      const catModels = MODELS.filter(m => m.cat === cat);
+      mod = catModels[Math.floor(Math.random() * catModels.length)];
+    }
+
+    const reward = 45 + Math.floor(Math.random() * 21); // $45 a $65 CR
+    const requireModel = isSubcatEnabled();
+
+    const targetDesc = requireModel
+      ? `${CLASSES[cat]} (${mod.name})`
+      : `${CLASSES[cat]}`;
+
+    const assignObj = {
+      id: uid(),
+      night: shift,
+      idx: i + 1,
+      sciName: sci.name,
+      inst: sci.inst,
+      cat,
+      modelId: requireModel ? mod.id : null,
+      spawnModelId: mod.id,
+      reward,
+      done: false,
+      failed: false
+    };
+    nightAssignments.push(assignObj);
+    nightAssignPool.push({
+      assignId: assignObj.id,
+      cat,
+      modelId: mod.id
+    });
+
+    addMail(
+      `Encargo ${i + 1}/3 · ${targetDesc}`,
+      `Remitente: ${sci.name} (${sci.inst})\n` +
+      `Solicitud para ${shiftLabel(shift)}: Registro espectral verificado de ${targetDesc}.\n` +
+      `Honorarios autorizados: $${reward} CR.\n\n` +
+      `Procesa la captura y enviala manualmente a esta asignacion desde la pestana Plataforma.`,
+      {
+        kind: "as",
+        assignId: assignObj.id,
+        night: shift,
+        sender: sci.name,
+        tag: `N${shift + 1} · 0${i + 1}`,
+        sciName: sci.name,
+        cat,
+        modelId: requireModel ? mod.id : null,
+        reward,
+        done: false,
+        failed: false
+      }
+    );
+  }
+
+  // Avisos narrativos y técnicos por noche
+  if (shift === 2) {
+    addMail(
+      "Actualizacion de Sistema // Espectrograma Integrado",
+      "AVISO DE ACTUALIZACION DE FIRMWARE:\n\n" +
+      "Se ha completado una actualizacion de sistema en la terminal de Erial-7 y ahora fue integrado el Espectrograma en tiempo real directamente dentro del Procesador, junto al monitor CRT.\n\n" +
+      "Ademas, se habilito un boton dentro del Atlas para alternar la vista de cualquier registro entre su imagen y su espectrograma. Reproduce el audio de una senal para analizar sus niveles y espectro en vivo.",
+      {sender: "SISTEMA", tag: `N${shift + 1} · UPD`}
+    );
+    addMail(
+      "Boletin Tecnico // Pulsares",
+      "Se han detectado emisiones de Pulsares en el cuadrante. El catalogo de clasificacion ya incluye su firma espectral.",
+      {sender: "SISTEMA", tag: `N${shift + 1} · SYS`}
+    );
+  } else if (shift === 4) {
+    addMail(
+      "Aviso de Interferencia Solar // Archivos Danados",
+      "Tormentas magneticas estan danando la capa de imagen de algunos archivos entrantes. En esos casos el monitor CRT no mostrara imagen y solo sera visible el espectrograma; usa el audio y sus niveles para identificarlos y catalogarlos.",
+      {sender: "SISTEMA", tag: `N${shift + 1} · SYS`}
+    );
+  } else if (shift === 5) {
+    addMail(
+      "Desgaste del Generador",
+      "Los acumuladores principales operan a capacidad reducida entre las Noches 6 y 10. La recuperacion pasiva de energia sera notablemente mas lenta.",
+      {sender: "MANTENIMIENTO", tag: `N${shift + 1} · SYS`}
+    );
+  } else if (shift === 8) {
+    addMail(
+      "Averia Critica de Monitor Optico",
+      "ALERTA DE MANTENIMIENTO: Una sobretension ha danado el tubo de rayos catodicos del Procesador durante toda esta guardia.\n\n" +
+      "No podras visualizar la imagen de los objetos capturados esta noche. Identifica cada senal guiandote por su firma de audio, los medidores de proximidad y el espectrograma.",
+      {sender: "MANTENIMIENTO", tag: `N${shift + 1} · ERR`}
+    );
+  } else if (shift === 9) {
+    addMail(
+      "Actualizacion de Protocolo",
+      "El monitor optico ha sido restablecido. A partir de esta noche los investigadores exigen especificar la subcategoria exacta de cada cuerpo celeste al clasificarlo.",
+      {sender: "CENTRAL", tag: `N${shift + 1} · SYS`}
+    );
+  } else if (shift === 10) {
+    addMail(
+      "Corte de Generador Auxiliar",
+      "A partir de esta guardia (Noches 11 a 15), la recarga automatica de energia queda completamente deshabilitada. Adquiere Celdas Auxiliares en Taller para mantener el suministro.",
+      {sender: "MANTENIMIENTO", tag: `N${shift + 1} · PWR`}
+    );
+  }
+
+  ensureSectorDiversity();
+  syncLiveTelemetry(false, true);
+}
+
+function start(operatorName, startNightIdx = 0, sandboxMode = false) {
+  const cleanName = (operatorName || "").trim();
+  if (!cleanName) {
+    msg("[ERR] Ingresa tu nombre antes de iniciar la guardia", 0);
+    return;
+  }
+  preloadAllSprites();
+  const clampedNight = Math.max(0, Math.min(TOTAL_NIGHTS - 1, Number(startNightIdx) || 0));
+  selectedStartNight = clampedNight;
+  isFreeMode = Boolean(sandboxMode);
+
+  const nowDate = new Date();
+  sessionStartPerf = performance.now();
+  S = {
+    id: uid(),
+    playerName: cleanName,
+    startNight: clampedNight + 1,
+    freeMode: isFreeMode,
+    date: formatLocalDateTime(nowDate),
+    dateISO: nowDate.toISOString(),
+    totalPlayTime: 0,
+    status: "EN_CURSO",
+    shifts: [],
+    survey: null
+  };
+
+  if (isFreeMode) {
+    G = {money: 9999, a: 5, f: 5, b: 5};
+    cap = 200;
+    en = 200;
+  } else {
+    G = {money: 75, a: 0, f: 0, b: 0};
+    cap = 100;
+    en = 100;
+  }
+
+  sigs = []; cam = {x: 750, y: 480}; mail = []; selMail = null;
+  nightAssignments = []; nightAssignPool = []; nightExtraSpawned = 0; nightTotalSpawned = 0; usedPlanetModelsThisNight = new Set(); isTransitioningNight = false;
+  shift = clampedNight; srv = null; crashes = 0; cur = null; rd = 0;
+  knobF = 50; knobP = 50; choiceCat = null; choiceMod = null;
+  outbox = []; selPkgId = null; pendingOverrideSig = null;
+  atlasSpecMode = new Set();
+  lastProcSpecSigId = null;
+  Object.keys(SPEC_BUFFERS).forEach(k => delete SPEC_BUFFERS[k]);
+
+  if (isFreeMode) {
+    discoveredModels = new Set(MODELS.map(m => m.id));
+    discoveredAnomalies = ANOMALY_DEFS.map((a, idx) => ({
+      anomTitle: a.title,
+      anomType: a.type,
+      modelId: MODELS.find(m => m.cat === a.cat)?.id || "est_enana",
+      img: a.img,
+      seed: 1.7 + idx * 1.3,
+      anom: true,
+      textData: a.textData
+    }));
+    firstAnomalyFound = true;
+    shadowBuyerUnlocked = true;
+  } else {
+    discoveredModels = new Set();
+    discoveredAnomalies = [];
+    firstAnomalyFound = false;
+    shadowBuyerUnlocked = false;
+  }
+
+  gameOverReason = "";
+  pendingEvals = [];
+
+  const introId = addMail(
+    `Protocolo de Operaciones // ${cleanName}`,
+    `Estacion de Escucha Erial-7 · Inicio en ${shiftLabel(shift)} de ${TOTAL_NIGHTS}${isFreeMode ? " [MODO LIBRE ACTIVO]" : ""}.\n\n` +
+    "Obtencion de senales:\n" +
+    "1. Mapa Estelar: Selecciona un eco para alinear antenas y descargar la trama.\n" +
+    "2. Procesador: Ajusta Frecuencia y Polaridad, fija la captura y cataloga el objeto.\n" +
+    "3. Plataforma: Despacha el paquete resultante desde la Plataforma de Envio.",
+    {sender: "CENTRAL", tag: `N${shift + 1} · 00`}
+  );
+  selMail = introId;
+  initShift();
+  V = "mail";
+  render();
+  updTop();
+}
+
+function markFirst() {
+  if (R && R.tFirst === null) {
+    R.tFirst = +((performance.now() - R.t0) / 1000).toFixed(2);
+    syncLiveTelemetry(false, true);
+  }
+}
+
+function offF(s) { return Math.min(1, Math.abs(knobF - s.tgF) / 45); }
+function offP(s) { return Math.min(1, Math.abs(knobP - s.tgP) / 45); }
+function proxPct(val, target) { return Math.max(0, Math.round(100 - Math.min(100, Math.abs(val - target) * 2.2))); }
+function isTuned(s) { return Math.abs(knobF - s.tgF) <= 6 && Math.abs(knobP - s.tgP) <= 6; }
+
+function updBadges() {
+  const bMail = $("#bd-mail");
+  const bProc = $("#bd-proc");
+  const bPlat = $("#bd-plat");
+  const bSrv = $("#bd-srv");
+  if (bMail) {
+    const un = mail.filter(m => !m.read).length;
+    bMail.textContent = un ? un : "";
+    bMail.style.display = un ? "inline-block" : "none";
+  }
+  if (bProc) {
+    const rc = sigs.filter(s => s.st === "raw").length;
+    bProc.textContent = rc ? rc : "";
+    bProc.style.display = rc ? "inline-block" : "none";
+  }
+  if (bPlat) {
+    bPlat.textContent = outbox.length ? outbox.length : "";
+    bPlat.style.display = outbox.length ? "inline-block" : "none";
+  }
+  if (bSrv) {
+    bSrv.textContent = srv ? "!" : "";
+    bSrv.style.display = srv ? "inline-block" : "none";
+  }
+}
+
+function updTop() {
+  syncThemeClass();
+  const st = $("#st");
+  const topTitle = $("#topTitle");
+  const t = $("#toast");
+  if (!G || V === "boot" || V === "intro" || V === "end") {
+    if (topTitle) {
+      topTitle.textContent = V === "boot"
+        ? "ARRANQUE DEL SISTEMA"
+        : V === "intro"
+          ? "INICIO DE SESION DEL SISTEMA"
+          : "ERIAL-7 // TERMINAL DE ESCUCHA";
+    }
+    document.title = V === "intro" || V === "boot"
+      ? "Inicio de Sesion del Sistema"
+      : "Frecuencia de Fondo · Estación Erial-7";
+    st.innerHTML = V === "boot"
+      ? `<span class="pill">BIOS v4.95</span>`
+      : V === "intro"
+        ? `<span class="pill">TERMINAL LOCAL</span>`
+        : `<span class="pill">SESION FINALIZADA</span>`;
+    t.textContent = flash;
+    t.className = flash ? (flashOk ? "ok" : "bad") : "";
+    t.style.display = flash ? "block" : "none";
+    return;
+  }
+  if (topTitle) topTitle.textContent = "ERIAL-7 // TERMINAL DE ESCUCHA";
+  document.title = "Frecuencia de Fondo · Estación Erial-7";
+  const remAssigns = activeAssigns().length;
+  const canLogout = allNightAssignsClosed();
+  const regenMode = getEnergyRegenMode();
+  const pwrClass = regenMode === "none" ? "norech" : regenMode === "slow" ? "slowrech" : "";
+  const pwrTag = isFreeMode ? " [LIBRE]" : regenMode === "none" ? " [SIN RECARGA]" : regenMode === "slow" ? " [RECARGA LENTA]" : "";
+
+  st.innerHTML = `
+    <span class="pill">OP: ${S.playerName}</span>
+    <span class="pill ${shift >= 8 ? "night" : ""}">${shiftLabel(shift)}/${TOTAL_NIGHTS}</span>
+    <span class="pill ${pwrClass}">PWR ${Math.round(en)}/${cap}${pwrTag}</span>
+    <span class="pill">CR $${G.money}</span>
+    <span class="pill ${getStoredMemoryCount() >= MAX_MEMORY_SIGNALS ? "slowrech" : ""}">MEM ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}</span>
+    <span class="pill">ENCARGOS: ${3 - remAssigns}/3</span>
+    <button class="alt" id="muteBtn" style="padding:3px 8px;font-size:11px">${muted ? "SONIDO: OFF" : "SONIDO: ON"}</button>
+    <button class="logout-btn" id="logoutShiftBtn" ${canLogout ? "" : "disabled"}>Cerrar sesión</button>
+  `;
+  const mb = $("#muteBtn");
+  if (mb) mb.onclick = () => { muted = !muted; if (muted) stopVoice(); updTop(); };
+  const lb = $("#logoutShiftBtn");
+  if (lb) lb.onclick = () => {
+    if (!allNightAssignsClosed() || isTransitioningNight) return;
+    triggerNightFadeTransition();
+  };
+
+  t.textContent = flash;
+  t.className = flash ? (flashOk ? "ok" : "bad") : "";
+  t.style.display = flash ? "block" : "none";
+  updBadges();
+}
+
+function makeServerChallenge() {
+  const count = Math.min(7, 3 + Math.floor(shift / 3));
+  const seq = Array.from({length: count}, (_, i) => i);
+  if (shift >= 2) {
+    for (let i = seq.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [seq[i], seq[j]] = [seq[j], seq[i]];
+    }
+  }
+  return {
+    count,
+    seq,
+    step: 0,
+    latched: Array(count).fill(false),
+    t: performance.now()
+  };
+}
+
+function triggerCrash() {
+  crashes++;
+  if (R) R.crash++;
+  srv = makeServerChallenge();
+  beep(140, 0.32, "sawtooth", 0.08);
+  msg("[ALERTA] Fallo de servidor // Revisa Mapa Estelar o Servidor", 0);
+  syncLiveTelemetry(false, true);
+  if (V === "srv" || V === "map") render();
+  else updBadges();
+}
+
+function onFirstAnomalyDiscovered() {
+  if (firstAnomalyFound) return;
+  firstAnomalyFound = true;
+
+  addMail(
+    "Protocolo de Incidencias Orbitales",
+    "Comunicado oficial de la Oficina de Asuntos del Espacio Ultraterrestre (Division del Espacio de Naciones Unidas):\n\n" +
+    "Nuestros monitores orbitales han registrado una fluctuacion no catalogada en el cuadrante de la Estacion Erial-7.\n\n" +
+    "Le invitamos a reportar de inmediato cualquier incidencia, senal anomala o lectura fuera de parametro a traves de los canales oficiales de Central para su analisis institucional.",
+    {kind: "un_notice", sender: "ONU ESPACIO", tag: `N${shift + 1} · ONU`}
+  );
+
+  addMail(
+    "NO LA ENVIES POR LA RED",
+    "Detectamos que acabas de fijar una lectura anomala en tu terminal.\n\n" +
+    "ADVERTENCIA: No transmitas esa senal a los cientificos ni al Archivo Central. Si la subes a la red oficial, activaras los protocolos de seguridad de la Division del Espacio de Naciones Unidas: clausuraran la estacion y te arrestaran para interrogatorio.\n\n" +
+    "Guardala en tus apuntes personales. Alguien mas se pondra en contacto contigo pronto.",
+    {kind: "anon_warn", sender: "OCULTO", tag: `N${shift + 1} · ???`}
+  );
+
+  setTimeout(() => {
+    if (V === "end") return;
+    shadowBuyerUnlocked = true;
+    addMail(
+      "Oferta Privada ($240 CR)",
+      "Sabemos lo que tienes en el buffer de Erial-7. Nos interesan las lecturas anomalas que las agencias oficiales intentan ocultar.\n\n" +
+      "Hemos habilitado un Canal Cifrado en tu Plataforma de Envio. Transmite alli cualquier senal anomala y te transferiremos $240 CR sin dejar rastro en los servidores de Naciones Unidas.",
+      {kind: "buyer", sender: "SOMBRA", tag: `N${shift + 1} · $240`}
+    );
+    beep(610, 0.14, "triangle", 0.07);
+    msg("[CORREO CIFRADO] Nuevo mensaje en bandeja", 1);
+    if (V === "mail" || V === "plat") render();
+    else updBadges();
+  }, 4200);
+}
+
+function triggerGovernmentArrestEnding() {
+  gameOverReason = "ARREST";
+  stopVoice();
+  if (R) {
+    R.ok = 0;
+    R.status = "CLAUSURADA_ONU";
+    R.time = +((performance.now() - R.t0) / 1000).toFixed(1);
+    R.energy = Math.round(en);
+    R.money = G.money;
+    S.shifts.push({...R});
+  }
+  beep(110, 0.5, "sawtooth", 0.1);
+  V = "end";
+  syncLiveTelemetry(true, true);
+  updTop();
+  render();
+}
+
+function evaluatePlatformDispatch(ev) {
+  const {pkg, targetType, assignId} = ev;
+
+  if (pkg.anom && targetType !== "shadow") {
+    if (R) R.anomSent++;
+    triggerGovernmentArrestEnding();
+    return;
+  }
+
+  if (targetType === "shadow") {
+    if (!pkg.anom) {
+      addMail(
+        "INTERMEDIARIO SOMBRA // PAQUETE RECHAZADO",
+        "Esto es telemetria convencional. Solo pagamos por anomalias reales fuera de catalogo. Pago: $0 CR."
+      );
+    } else {
+      if (R) R.anomSent++;
+      G.money += 240;
+      addMail(
+        "INTERMEDIARIO SOMBRA // TRANSFERENCIA COMPLETADA",
+        `Paquete anomalo (${pkg.anomTitle}) recibido en el nodo cifrado. Fondos acreditados: +$240 CR.`
+      );
+      msg("[OK] Venta cifrada completada (+$240 CR)", 1);
+    }
+    syncLiveTelemetry(false, true);
+    updTop();
+    if (V === "mail" || V === "shop") render();
+    return;
+  }
+
+  const modObj = MODELS.find(m => m.id === pkg.modelId);
+
+  if (targetType === "assign") {
+    const asg = nightAssignments.find(a => a.id === assignId) || mail.find(m => m.id === assignId);
+    if (!asg || asg.done || asg.failed) {
+      addMail(
+        `Envio #${pkg.sigId} [Asignacion Cerrada]`,
+        "El encargo seleccionado ya no se encuentra vigente. Abono acreditado: $0 CR.",
+        {sender: "CENTRAL", tag: `N${shift + 1} · $0`}
+      );
+      return;
+    }
+
+    const catMatches = pkg.chosenCat === pkg.trueCat && pkg.chosenCat === asg.cat;
+    const modMatches = !asg.modelId || (pkg.chosenMod === pkg.trueMod && pkg.chosenMod === asg.modelId);
+
+    if (!catMatches || !modMatches) {
+      if (R) R.silentErrors++;
+      addMail(
+        `Archivo Erroneo (#${pkg.sigId})`,
+        `El paquete enviado (#${pkg.sigId}) no coincide con los parametros solicitados o contiene una clasificacion erronea.\n\n` +
+        `Lectura real verificada: ${CLASSES[pkg.trueCat]}${modObj ? ` (${modObj.name})` : ""}.\n` +
+        `Pago emitido: $0 CR.`,
+        {sender: asg.sciName, tag: `N${shift + 1} · ERR`}
+      );
+      ensureSectorDiversity();
+      syncLiveTelemetry(false, true);
+      if (V === "mail" || V === "map") render();
+      else updBadges();
+      return;
+    }
+
+    asg.done = true;
+    const mailItem = mail.find(m => m.assignId === asg.id || m.id === assignId);
+    if (mailItem) mailItem.done = true;
+    discoveredModels.add(pkg.trueMod);
+    G.money += asg.reward;
+    addMail(
+      `Encargo Validado (+$${asg.reward} CR)`,
+      `Excelente trabajo, Operador. Los datos de ${CLASSES[pkg.trueCat]} (${modObj ? modObj.name : ""}) han sido incorporados a nuestra investigacion.\n\n` +
+      `Honorarios transferidos: +$${asg.reward} CR.`,
+      {sender: asg.sciName, tag: `N${shift + 1} · +$${asg.reward}`}
+    );
+    msg(`[OK] Encargo validado (+$${asg.reward} CR)`, 1);
+    syncLiveTelemetry(false, true);
+    updTop();
+    if (V === "mail" || V === "shop" || V === "atlas") render();
+    return;
+  }
+
+  if (targetType === "central") {
+    const catOk = pkg.chosenCat === pkg.trueCat;
+    const modOk = !isSubcatEnabled() || (pkg.chosenMod === pkg.trueMod);
+
+    if (!catOk || !modOk) {
+      if (R) R.silentErrors++;
+      addMail(
+        `CENTRAL // PAQUETE #${pkg.sigId} [ARCHIVO ERRONEO]`,
+        `La verificacion automatica detecto discrepancias en tu etiqueta (${CLASSES[pkg.chosenCat]}).\n` +
+        `Cuerpo real: ${CLASSES[pkg.trueCat]}${modObj ? ` (${modObj.name})` : ""}. Abono: $0 CR.`
+      );
+      syncLiveTelemetry(false, true);
+      if (V === "mail") render();
+      else updBadges();
+      return;
+    }
+
+    const isNewDiscovery = !discoveredModels.has(pkg.trueMod);
+    discoveredModels.add(pkg.trueMod);
+    const pay = isNewDiscovery ? 20 : 10;
+    G.money += pay;
+
+    addMail(
+      `CENTRAL // REGISTRO EXTRA #${pkg.sigId} [ACEPTADO]`,
+      isNewDiscovery
+        ? `Nuevo cuerpo celeste (${modObj ? modObj.name : CLASSES[pkg.trueCat]}) catalogado en el Archivo Central: +$${pay} CR.`
+        : `Registro adicional de ${modObj ? modObj.name : CLASSES[pkg.trueCat]} (ya descubierto previamente): +$${pay} CR.`
+    );
+    msg(`[OK] Registro extra acreditado (+$${pay} CR)`, 1);
+    syncLiveTelemetry(false, true);
+    updTop();
+    if (V === "mail" || V === "shop" || V === "atlas") render();
+  }
+}
+
+function advanceNight() {
+  const pendingList = nightAssignments.filter(a => a.night === shift && !a.done && !a.failed);
+  const completed = pendingList.length === 0;
+
+  if (R) {
+    R.ok = completed ? 1 : 0;
+    R.status = completed ? "COMPLETADA" : "INCOMPLETA";
+    R.time = +((performance.now() - R.t0) / 1000).toFixed(1);
+    R.energy = Math.round(en);
+    R.money = G.money;
+    S.shifts.push({...R});
+  }
+
+  if (shift < TOTAL_NIGHTS - 1) {
+    shift++;
+    selMail = null;
+    initShift();
+    V = "mail";
+    updTop();
+    render();
+  } else {
+    gameOverReason = "COMPLETED";
+    V = "end";
+    syncLiveTelemetry(true, true);
+    updTop();
+    render();
+  }
+}
+
+function triggerNightFadeTransition() {
+  if (isTransitioningNight) return;
+  isTransitioningNight = true;
+  stopVoice();
+  beep(420, 0.14, "sine", 0.06);
+  const overlay = document.querySelector("#nightFadeOverlay");
+  const textEl = document.querySelector("#nightFadeText");
+  const hasNextNight = shift < TOTAL_NIGHTS - 1;
+
+  if (textEl) {
+    textEl.classList.remove("visible");
+    textEl.textContent = hasNextNight ? `Noche ${shift + 2}` : "";
+  }
+  if (overlay) {
+    overlay.classList.add("active");
+  }
+
+  if (hasNextNight) {
+    setTimeout(() => {
+      if (textEl) textEl.classList.add("visible");
+      setTimeout(() => {
+        if (textEl) textEl.classList.remove("visible");
+        setTimeout(() => {
+          advanceNight();
+          setTimeout(() => {
+            if (overlay) overlay.classList.remove("active");
+            isTransitioningNight = false;
+          }, 160);
+        }, 600);
+      }, 1350);
+    }, 700);
+  } else {
+    setTimeout(() => {
+      advanceNight();
+      setTimeout(() => {
+        if (overlay) overlay.classList.remove("active");
+        isTransitioningNight = false;
+      }, 180);
+    }, 680);
+  }
+}
+
+function computeBootProgress(sec) {
+  if (sec <= 0.8) return Math.round((sec / 0.8) * 18);
+  if (sec <= 2.0) return Math.round(18 + ((sec - 0.8) / 1.2) * 34);
+  if (sec <= 3.1) return Math.round(52 + ((sec - 2.0) / 1.1) * 16);
+  if (sec <= 4.4) return Math.round(68 + ((sec - 3.1) / 1.3) * 28);
+  if (sec <= 4.9) return Math.round(96 + ((sec - 4.4) / 0.5) * 4);
+  return 100;
+}
+
+function drawBoot() {
+  const fill = document.querySelector("#bootBarFill");
+  if (fill) fill.style.width = `${bootProgress}%`;
+}
+
+function tick(dt) {
+  if (V === "boot") {
+    bootElapsed += dt;
+    bootProgress = computeBootProgress(bootElapsed);
+    if (!bootSoundPlayed) {
+      playStartupSound(false);
+    }
+    if (bootElapsed >= 5.0) {
+      V = "intro";
+      updTop();
+      render();
+    }
+    return;
+  }
+  if (!G || V === "intro" || V === "end") return;
+
+  const regenMode = getEnergyRegenMode();
+  if (regenMode === "fast") {
+    en = Math.min(cap, en + dt * (en < 25 ? 1.45 : 0.90));
+  } else if (regenMode === "slow") {
+    en = Math.min(cap, en + dt * (en < 20 ? 0.42 : 0.22));
+  }
+
+  if (rd > 0) rd = Math.max(0, rd - dt);
+
+  const alignDur = Math.max(1.1, 4.4 - G.a * 0.65);
+  const dlDur = Math.max(3.8, 12.0 - G.a * 1.6);
+  const noiseProb = Math.max(0.02, 0.24 - G.f * 0.04);
+  let activeDl = false;
+
+  sigs.forEach(s => {
+    if ((s.st === "echo" || s.st === "align" || s.st === "dl") && (s.vx || s.vy)) {
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      if (s.x < 90 || s.x > W - 90) { s.vx *= -1; s.x = Math.max(90, Math.min(W - 90, s.x)); }
+      if (s.y < 90 || s.y > H - 90) { s.vy *= -1; s.y = Math.max(90, Math.min(H - 90, s.y)); }
+    }
+
+    if (srv) return;
+
+    if (s.st === "align") {
+      if (R) R.slewTime += dt;
+      s.align += dt / alignDur;
+      if (s.align >= 1) {
+        s.align = 1;
+        s.st = "dl";
+        beep(520, 0.08, "triangle", 0.05);
+        msg("[OK] Antenas alineadas // Descargando trama", 1);
+      }
+    } else if (s.st === "dl") {
+      activeDl = true;
+      s.prog += dt / dlDur;
+      s.acc += dt;
+      while (s.acc >= 0.5) {
+        s.acc -= 0.5;
+        s.tot++;
+        if (Math.random() < noiseProb) {
+          s.bad++;
+          if (R) R.corrupt++;
+        }
+      }
+      if (s.prog >= 1) {
+        s.prog = 1;
+        s.st = "raw";
+        beep(680, 0.12, "sine", 0.07);
+        msg(`[OK] Trama #${s.id} lista en Procesador`, 1);
+        ensureSectorDiversity();
+        syncLiveTelemetry(false, true);
+        if (V === "map" || V === "mail") render();
+        else updBadges();
+      }
+    }
+  });
+
+  if (activeDl && !srv && Math.random() < dt / 46) triggerCrash();
+
+  if (activeVoice) {
+    activeVoice.t += dt;
+    const s = activeVoice.sig;
+    const clarity = s.fixed ? 1 : (s.tgF !== undefined ? Math.max(0.18, 1 - (offF(s) + offP(s)) * 0.6) : 1);
+    if (activeVoice.audio) {
+      const baseVol = typeof activeVoice.baseVol === "number" ? activeVoice.baseVol : 0.48;
+      activeVoice.audio.volume = Math.max(0.08, Math.min(baseVol, baseVol * clarity));
+    } else if (activeVoice.g) {
+      const pulse = s.cat === 4 ? ((activeVoice.t * 7 % 1) < 0.22 ? 1 : 0.05)
+                  : s.cat === 3 ? ((activeVoice.t * 2.5 % 1) < 0.45 ? 0.9 : 0.1)
+                  : (0.65 + 0.35 * Math.sin(activeVoice.t * 3));
+      activeVoice.g.gain.value = 0.08 * clarity * pulse;
+      if (activeVoice.t >= activeVoice.max) {
+        stopVoice();
+        if (V === "proc") render();
+      }
+    }
+  }
+
+  for (let i = pendingEvals.length - 1; i >= 0; i--) {
+    if (performance.now() >= pendingEvals[i].at) {
+      const ev = pendingEvals.splice(i, 1)[0];
+      evaluatePlatformDispatch(ev);
+    }
+  }
+
+  if (flashT > 0) {
+    flashT -= dt;
+    if (flashT <= 0) { flash = ""; updTop(); }
+  }
+
+  uiTick += dt;
+  if (uiTick >= 0.45) { uiTick = 0; updTop(); }
+
+  liveSyncTimer += dt;
+  if (liveSyncTimer >= 2.0) {
+    liveSyncTimer = 0;
+    syncLiveTelemetry(false, false);
+  }
+
+  cloudSyncTimer += dt;
+  if (cloudSyncTimer >= 5.0) {
+    cloudSyncTimer = 0;
+    if (activeDbUrl) {
+      pushSnapshotToCloud(buildSessionSnapshot(false));
+    }
+  }
+}
+
+// Renderizador procedural de modelos y anomalías
+function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMode = false, opticalFailure = false) {
+  if (!cv) return;
+  const cx = cv.getContext("2d");
+  const w = cv.width, h = cv.height;
+  const img = cx.createImageData(w, h);
+  const d = img.data;
+
+  // Fallo óptico (Noche 9) o archivo visual dañado (desde Noche 5): no se muestra imagen en el CRT
+  if (opticalFailure) {
+    for (let y = 0; y < h; y++) {
+      const band = Math.sin(y * 0.4 + t * 22) > 0.72 ? 42 : 0;
+      for (let x = 0; x < w; x++) {
+        const noise = (Math.random() * 28 + band) * ((y % 2 === 0) ? 0.7 : 1.0);
+        const idx = (y * w + x) * 4;
+        d[idx] = Math.min(255, noise * 1.45);
+        d[idx + 1] = Math.min(255, noise * 0.42);
+        d[idx + 2] = Math.min(255, noise * 0.42);
+        d[idx + 3] = 255;
+      }
+    }
+    cx.putImageData(img, 0, 0);
+    return;
+  }
+
+  const baseFloor = [0.60, 0.44, 0.30, 0.18, 0.09, 0.02][Math.min(5, Math.max(0, filterLv))];
+  const staticAmt = (sepiaMode && tuneErr === 0 && filterLv >= 5) ? 0.06 : Math.min(0.98, baseFloor + tuneErr * (1 - baseFloor));
+
+  const modObj = MODELS.find(m => m.id === spec.modelId);
+  const spriteSrc = spec.img || (modObj && modObj.img);
+  const sprite = getSprite(spriteSrc);
+
+  if (sprite && offCx) {
+    offCv.width = w;
+    offCv.height = h;
+    offCx.imageSmoothingEnabled = false;
+    offCx.fillStyle = "#000000";
+    offCx.fillRect(0, 0, w, h);
+
+    const aspect = sprite.naturalWidth / sprite.naturalHeight;
+    let dw = w, dh = h;
+    if (w / h > aspect) {
+      dw = Math.round(h * aspect);
+    } else {
+      dh = Math.round(w / aspect);
+    }
+    const ox = Math.floor((w - dw) / 2);
+    const oy = Math.floor((h - dh) / 2);
+    offCx.drawImage(sprite, ox, oy, dw, dh);
+
+    try {
+      const srcData = offCx.getImageData(0, 0, w, h).data;
+      for (let y = 0; y < h; y++) {
+        const scanline = (y % 2 === 0) ? 0.86 : 1.0;
+        for (let x = 0; x < w; x++) {
+          const idx = (y * w + x) * 4;
+          const alpha = srcData[idx + 3] / 255;
+          const r0 = srcData[idx] * alpha;
+          const g0 = srcData[idx + 1] * alpha;
+          const b0 = srcData[idx + 2] * alpha;
+          const snow = Math.random() * 255;
+
+          let r = (r0 * (1 - staticAmt) + snow * staticAmt) * scanline;
+          let g = (g0 * (1 - staticAmt) + snow * staticAmt) * scanline;
+          let b = (b0 * (1 - staticAmt) + snow * staticAmt) * scanline;
+
+          if (sepiaMode) {
+            r *= 1.04;
+            g *= 0.99;
+            b *= 0.90;
+          }
+
+          d[idx] = Math.max(0, Math.min(255, r));
+          d[idx + 1] = Math.max(0, Math.min(255, g));
+          d[idx + 2] = Math.max(0, Math.min(255, b));
+          d[idx + 3] = 255;
+        }
+      }
+      cx.putImageData(img, 0, 0);
+      return;
+    } catch (_) {
+      cx.imageSmoothingEnabled = false;
+      cx.fillStyle = sepiaMode ? "#1e1912" : "#000000";
+      cx.fillRect(0, 0, w, h);
+      cx.save();
+      cx.globalAlpha = Math.max(0.18, 1 - staticAmt * 0.85);
+      cx.drawImage(sprite, ox, oy, dw, dh);
+      cx.restore();
+      cx.fillStyle = "rgba(0, 0, 0, 0.18)";
+      for (let y = 0; y < h; y += 2) {
+        cx.fillRect(0, y, w, 1);
+      }
+      if (staticAmt > 0.04) {
+        const specks = Math.floor(w * h * staticAmt * 0.35);
+        for (let i = 0; i < specks; i++) {
+          const sx = Math.floor(Math.random() * w);
+          const sy = Math.floor(Math.random() * h);
+          const v = Math.floor(Math.random() * 255);
+          cx.fillStyle = `rgba(${v},${v},${v},0.45)`;
+          cx.fillRect(sx, sy, 1, 1);
+        }
+      }
+      return;
+    }
+  }
+
+  const cx0 = w / 2, cy0 = h / 2;
+  const scale = Math.min(w, h) / 96;
+  const mid = spec.modelId || "est_enana";
+  const seed = spec.seed || 1.5;
+  const anomType = spec.anomType || "";
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const dx = (x - cx0) / scale;
+      const dy = (y - cy0) / scale;
+      const dist = Math.hypot(dx, dy);
+      let lum = 10;
+
+      if (anomType === "voyager") {
+        const dish = Math.hypot(dx + 6, dy + 2);
+        const crack = Math.abs(dx - dy * 0.7 + 4) < 1.6;
+        const bus = Math.abs(dx - 8) < 6 && Math.abs(dy - 5) < 5;
+        const boom = Math.abs(dy - (dx - 8) * 0.45 - 5) < 1.2 && dx >= 12 && dx <= 34;
+        const frag1 = Math.hypot(dx + 22, dy - 14) < 3.2;
+        const frag2 = Math.hypot(dx - 24, dy + 16) < 2.6;
+        if (dish < 15 && dish > 10 && !crack) lum = 225;
+        else if (dish <= 10 && !crack) lum = 145;
+        else if (bus) lum = 205;
+        else if (boom) lum = 185;
+        else if (frag1 || frag2) lum = 195;
+      } else if (anomType === "dyson") {
+        const core = dist < 15;
+        const shellOuter = dist >= 22 && dist <= 26;
+        const latRing = Math.abs(dy - Math.sin(dx * 0.14 + t * 1.4) * 9) < 2.1 && dist <= 26;
+        const lonRing = Math.abs(dx - Math.cos(dy * 0.14 - t * 1.1) * 9) < 2.1 && dist <= 26;
+        const gap = ((Math.floor(dx + 40) + Math.floor(dy + 40)) % 7 === 0);
+        if (shellOuter && !gap) lum = 235;
+        else if ((latRing || lonRing) && !gap) lum = 215;
+        else if (core) lum = 155 + Math.sin(t * 6) * 20;
+      } else if (anomType === "failed_planet") {
+        const ang = Math.atan2(dy, dx);
+        const rad = 25 + Math.sin(ang * 5 + seed) * 3;
+        const fissure = Math.abs(Math.sin(dx * 0.22 + dy * 0.18)) < 0.16 && dist < rad;
+        const deb1 = Math.hypot(dx - 31, dy + 12) < 3.2;
+        const deb2 = Math.hypot(dx + 30, dy - 15) < 2.8;
+        if (dist < rad) {
+          lum = fissure ? (235 + Math.sin(t * 8) * 18) : (105 - dx * 0.9);
+        } else if (deb1 || deb2) {
+          lum = 190;
+        }
+      } else if (anomType === "dark_eyes") {
+        const oval = Math.hypot(dx * 1.15, dy * 0.85);
+        const leftEye = Math.hypot(dx + 9, dy + 4) < 5.2;
+        const rightEye = Math.hypot(dx - 9, dy + 4) < 5.2;
+        if (oval < 27) {
+          if (leftEye || rightEye) lum = 4;
+          else lum = 205 - oval * 2.4 + Math.sin(t * 5 + dy * 0.3) * 10;
+        }
+      } else if (mid === "est_enana") {
+        if (dist < 20) lum = 235 - dist * 2;
+        else if (dist < 40) lum = Math.max(14, 155 - (dist - 20) * 6);
+        if ((Math.abs(dx) < 1.6 || Math.abs(dy) < 1.6) && dist < 48) lum = Math.max(lum, 185 - dist * 2.5);
+      } else if (mid === "est_gigante") {
+        if (dist < 30) lum = 240 - dist * 1.4;
+        else if (dist < 50) lum = Math.max(14, 180 - (dist - 30) * 7 + Math.sin(Math.atan2(dy, dx)*10 + t*2)*16);
+      } else if (mid === "est_binaria") {
+        const off = 14;
+        const a = t * 1.4;
+        const d1 = Math.hypot(dx - Math.cos(a)*off, dy - Math.sin(a)*off);
+        const d2 = Math.hypot(dx + Math.cos(a)*off, dy + Math.sin(a)*off);
+        if (d1 < 12) lum = 240 - d1 * 5;
+        if (d2 < 9) lum = Math.max(lum, 225 - d2 * 6);
+      } else if (mid === "est_trinaria") {
+        for (let k = 0; k < 3; k++) {
+          const a = t * 1.2 + k * (Math.PI * 2 / 3);
+          const dk = Math.hypot(dx - Math.cos(a)*15, dy - Math.sin(a)*15);
+          if (dk < 9) lum = Math.max(lum, 235 - dk * 6);
+        }
+      } else if (mid === "ast_metalico") {
+        const ang = Math.atan2(dy, dx);
+        const rad = 22 + Math.sin(ang * 3 + seed) * 7 + Math.cos(ang * 5) * 4;
+        if (dist < rad) lum = 195 + Math.sin(dx * 0.4) * 40;
+      } else if (mid === "ast_condrita") {
+        const ang = Math.atan2(dy, dx);
+        const rad = 24 + Math.cos(ang * 4 + seed) * 6;
+        if (dist < rad) lum = 125 + Math.sin(dx * 0.5) * Math.cos(dy * 0.5) * 35;
+      } else if (mid === "ast_cometa") {
+        const head = Math.hypot(dx + 14, dy);
+        if (head < 10) lum = 240 - head * 6;
+        else if (dx > -14 && Math.abs(dy) < (dx + 14) * 0.38 && dx < 38) {
+          lum = Math.max(14, 175 - (dx + 14) * 3.1);
+        }
+      } else if (mid === "sat_com") {
+        const core = Math.abs(dx) < 7 && Math.abs(dy) < 9;
+        const panel = Math.abs(dx) >= 11 && Math.abs(dx) <= 42 && Math.abs(dy) < 6;
+        const strut = Math.abs(dy) < 1.8 && Math.abs(dx) < 42;
+        if (core) lum = 225;
+        else if (panel) lum = ((x % 5 === 0 || y % 4 === 0) ? 95 : 190);
+        else if (strut) lum = 170;
+      } else if (mid === "sat_sonda") {
+        const dish = Math.hypot(dx + 8, dy);
+        const body = dx >= 4 && dx <= 22 && Math.abs(dy) < 6;
+        if (dish < 14 && dish > 9) lum = 230;
+        else if (body) lum = 195;
+      } else if (mid === "sat_telescopio") {
+        const tube = Math.abs(dx) < 22 && Math.abs(dy) < 8;
+        const flap = dx < -18 && dx > -28 && Math.abs(dy + 10) < 4;
+        if (tube) lum = 210 - Math.abs(dy) * 8;
+        else if (flap) lum = 180;
+      } else if (mid === "sat_estacion") {
+        const truss = Math.abs(dy) < 2.2 && Math.abs(dx) < 44;
+        const modV = Math.abs(dx) < 5 && Math.abs(dy) < 22;
+        const wings = (Math.abs(dx + 28) < 6 || Math.abs(dx - 28) < 6) && Math.abs(dy) < 18;
+        if (truss || modV) lum = 225;
+        else if (wings) lum = 175;
+      } else if (mid === "pul_ms") {
+        const beam = Math.abs(dy - dx * Math.tan(t * 9)) < 2.4 && dist < 46;
+        if (dist < 11) lum = 245;
+        else if (beam) lum = 220;
+      } else if (mid === "pul_magnetar") {
+        const ring = Math.abs(dist - 24) < 2.5;
+        if (dist < 14) lum = 250;
+        else if (ring) lum = 200;
+      } else if (mid === "pul_binario") {
+        const d1 = Math.hypot(dx + 12, dy);
+        const d2 = Math.hypot(dx - 14, dy);
+        if (d1 < 10) lum = 245;
+        if (d2 < 14 && d2 > 10) lum = 195;
+      }
+
+      const snow = Math.random() * 255;
+      const scanline = (y % 2 === 0) ? 0.90 : 1.0;
+      const finalVal = Math.max(0, Math.min(255, (lum * (1 - staticAmt) + snow * staticAmt) * scanline));
+
+      const idx = (y * w + x) * 4;
+      if (sepiaMode) {
+        d[idx] = Math.min(255, finalVal * 1.05);
+        d[idx + 1] = Math.min(255, finalVal * 0.92);
+        d[idx + 2] = Math.min(255, finalVal * 0.72);
+      } else {
+        d[idx] = finalVal;
+        d[idx + 1] = finalVal;
+        d[idx + 2] = finalVal;
+      }
+      d[idx + 3] = 255;
+    }
+  }
+  cx.putImageData(img, 0, 0);
+}
+
+function getMapViewportMetrics(cv) {
+  const vw = Math.max(320, Math.round(cv.clientWidth || 960));
+  const vh = Math.max(240, Math.round(cv.clientHeight || 520));
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const pw = Math.round(vw * dpr);
+  const ph = Math.round(vh * dpr);
+  if (cv.width !== pw || cv.height !== ph) {
+    cv.width = pw;
+    cv.height = ph;
+  }
+  return {vw, vh, dpr};
+}
+
+function drawMap(t) {
+  const cv = $("#cv");
+  if (!cv) return;
+  const {vw, vh, dpr} = getMapViewportMetrics(cv);
+  cam.x = Math.max(0, Math.min(Math.max(0, W - vw), cam.x));
+  cam.y = Math.max(0, Math.min(Math.max(0, H - vh), cam.y));
+
+  const cx = cv.getContext("2d");
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const paper = isPaperTheme();
+  cx.fillStyle = paper ? "#1e1912" : "#03070d";
+  cx.fillRect(0, 0, vw, vh);
+
+  cx.strokeStyle = paper ? "rgba(168, 144, 104, 0.20)" : "rgba(52, 95, 68, 0.22)";
+  cx.lineWidth = 1;
+  const step = 90;
+  const gx0 = -(cam.x % step), gy0 = -(cam.y % step);
+  for (let x = gx0; x < vw; x += step) {
+    const px = Math.round(x) + 0.5;
+    cx.beginPath(); cx.moveTo(px, 0); cx.lineTo(px, vh); cx.stroke();
+  }
+  for (let y = gy0; y < vh; y += step) {
+    const py = Math.round(y) + 0.5;
+    cx.beginPath(); cx.moveTo(0, py); cx.lineTo(vw, py); cx.stroke();
+  }
+
+  cx.fillStyle = paper ? "#f5eedc" : "#d1fae5";
+  stars.forEach(([x, y, r]) => {
+    const sx = x - cam.x, sy = y - cam.y;
+    if (sx < -2 || sx > vw + 2 || sy < -2 || sy > vh + 2) return;
+    cx.globalAlpha = 0.32 + 0.38 * Math.sin(t * 1.4 + x);
+    cx.beginPath();
+    cx.arc(sx, sy, r * 0.72, 0, Math.PI * 2);
+    cx.fill();
+  });
+  cx.globalAlpha = 1;
+
+  cx.save();
+  cx.translate(-cam.x, -cam.y);
+  sigs.forEach(s => {
+    if (s.st === "gone" || s.st === "raw") return;
+    const col = paper
+      ? (s.st === "echo" ? "233, 222, 196" : s.st === "align" ? "217, 119, 6" : "245, 158, 11")
+      : (s.st === "echo" ? "96, 195, 255" : s.st === "align" ? "234, 179, 8" : "74, 222, 128");
+    const pulse = (t * 0.45 + s.seed) % 1;
+    cx.strokeStyle = `rgba(${col}, ${(1 - pulse) * 0.7})`;
+    cx.lineWidth = 1.3;
+    cx.beginPath(); cx.arc(s.x, s.y, 7 + pulse * 30, 0, Math.PI * 2); cx.stroke();
+
+    cx.fillStyle = `rgb(${col})`;
+    cx.beginPath(); cx.arc(s.x, s.y, 5, 0, Math.PI * 2); cx.fill();
+
+    if (s.st === "align") {
+      cx.strokeStyle = paper ? "#d97706" : "#eab308";
+      cx.lineWidth = 2.6;
+      cx.beginPath(); cx.arc(s.x, s.y, 17, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.align); cx.stroke();
+    } else if (s.st === "dl") {
+      cx.strokeStyle = srv ? "#ef4444" : (paper ? "#f59e0b" : "#4ade80");
+      cx.lineWidth = 2.6;
+      cx.beginPath(); cx.arc(s.x, s.y, 17, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.prog); cx.stroke();
+    }
+    cx.lineWidth = 1;
+  });
+  cx.restore();
+
+  if (rd > 0) {
+    cx.globalAlpha = Math.min(1, rd / 2);
+    const halfW = vw / 2, halfH = vh / 2;
+    sigs.forEach(s => {
+      if (s.st !== "echo") return;
+      const sx = s.x - cam.x, sy = s.y - cam.y;
+      if (sx > 14 && sx < vw - 14 && sy > 14 && sy < vh - 14) return;
+      const a = Math.atan2(sy - halfH, sx - halfW);
+      const k = Math.min((halfW - 22) / Math.abs(Math.cos(a) || 1e-5), (halfH - 22) / Math.abs(Math.sin(a) || 1e-5));
+      cx.save();
+      cx.translate(halfW + Math.cos(a)*k, halfH + Math.sin(a)*k);
+      cx.rotate(a);
+      cx.fillStyle = paper ? "#e9dec4" : "#4ade80";
+      cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(-15, -6.5); cx.lineTo(-15, 6.5); cx.fill();
+      cx.restore();
+    });
+    cx.globalAlpha = 1;
+  }
+
+  cx.fillStyle = paper ? "rgba(30, 25, 18, 0.86)" : "rgba(8, 14, 11, 0.72)";
+  cx.fillRect(vw - 178, 10, 168, 24);
+  cx.strokeStyle = paper ? "#8c734b" : "#166534";
+  cx.strokeRect(vw - 178, 10, 168, 24);
+  cx.fillStyle = paper ? "#e9dec4" : "#86efac";
+  cx.font = paper ? "11px 'Courier New', Courier, monospace" : "11px ui-monospace, Consolas, monospace";
+  cx.textAlign = "right";
+  cx.fillText(`SEC ${Math.round(cam.x + vw/2)} // ${Math.round(cam.y + vh/2)}`, vw - 18, 26);
+  cx.textAlign = "left";
+
+  const aligning = sigs.find(s => s.st === "align");
+  const targetAng = aligning ? Math.atan2(aligning.y - H/2, aligning.x - W/2) : -Math.PI/2;
+  const hudY = vh - 46;
+  cx.fillStyle = paper ? "rgba(30, 25, 18, 0.88)" : "rgba(8, 14, 11, 0.84)";
+  cx.fillRect(10, hudY, 118, 36);
+  cx.strokeStyle = paper ? "#8c734b" : "#243d2b";
+  cx.strokeRect(10, hudY, 118, 36);
+  for (let i = 0; i < 3; i++) {
+    const ax = 30 + i * 38, ay = hudY + 18;
+    cx.strokeStyle = paper ? "#e9dec4" : "#4ade80";
+    cx.lineWidth = 1.4;
+    cx.beginPath(); cx.arc(ax, ay, 9, 0, Math.PI * 2); cx.stroke();
+    const curA = aligning ? (targetAng - (1 - aligning.align) * 2.2) : targetAng;
+    cx.beginPath(); cx.moveTo(ax, ay); cx.lineTo(ax + Math.cos(curA)*11, ay + Math.sin(curA)*11); cx.stroke();
+  }
+  cx.lineWidth = 1;
+}
+
+function drawCRT(t) {
+  const cv = $("#crt");
+  if (!cv || !cur) return;
+  const [rw, rh] = CRT_RES[Math.min(5, G.f)];
+  if (cv.width !== rw || cv.height !== rh) {
+    cv.width = rw;
+    cv.height = rh;
+  }
+  const tuneErr = cur.fixed ? 0 : Math.min(1, (offF(cur) + offP(cur)) * 0.75);
+  const visualBlocked = isOpticalFailed() || Boolean(cur.isCorruptSignal);
+  renderCelestialToCanvas(cv, cur, t, G.f, tuneErr, isPaperTheme(), visualBlocked);
+}
+
+function drawAtlasCanvases(t) {
+  document.querySelectorAll("[data-atlas-mid]").forEach(cv => {
+    const mid = cv.dataset.atlasMid;
+    const mod = MODELS.find(m => m.id === mid);
+    if (mod) {
+      renderCelestialToCanvas(cv, {modelId: mod.id, img: mod.img, seed: 2.1, anom: false, anomType: ""}, t, 5, 0, isPaperTheme(), false);
+    }
+  });
+  document.querySelectorAll("[data-atlas-spec]").forEach(cv => {
+    const mid = cv.dataset.atlasSpec;
+    const mod = MODELS.find(m => m.id === mid);
+    if (mod) {
+      drawSpectrogram(t, cv, {
+        bufKey: `atlas_${mid}`,
+        matchModelId: mid,
+        isAnom: false,
+        compact: true
+      });
+    }
+  });
+  document.querySelectorAll("[data-anom-idx]").forEach(cv => {
+    const idx = +cv.dataset.anomIdx;
+    const item = discoveredAnomalies[idx];
+    if (item) {
+      renderCelestialToCanvas(cv, item, t, 5, 0, true, false);
+    }
+  });
+  document.querySelectorAll("[data-anom-spec]").forEach(cv => {
+    const idx = +cv.dataset.anomSpec;
+    const item = discoveredAnomalies[idx];
+    if (item) {
+      drawSpectrogram(t, cv, {
+        bufKey: `anom_${item.anomType}`,
+        matchAnomType: item.anomType,
+        isAnom: true,
+        compact: true
+      });
+    }
+  });
+}
+
+function getSpecBuffer(key, w = 280, h = 150) {
+  let buf = SPEC_BUFFERS[key];
+  if (!buf) {
+    const cv = document.createElement("canvas");
+    cv.width = w;
+    cv.height = h;
+    const ctx = cv.getContext("2d");
+    ctx.fillStyle = "#16120c";
+    ctx.fillRect(0, 0, w, h);
+    buf = {cv, ctx, peakHold: 0, rmsSmooth: 0};
+    SPEC_BUFFERS[key] = buf;
+  }
+  return buf;
+}
+
+// Espectrograma impulsado literalmente por el AnalyserNode de Web Audio sobre el oscilador / flujo activo
+function drawSpectrogram(t, targetCv = null, opts = {}) {
+  const cv = targetCv || $("#spec");
+  if (!cv) return;
+  if (!targetCv && !cur) return;
+
+  const isCompact = Boolean(opts.compact);
+  const targetW = isCompact ? 260 : 340;
+  const targetH = isCompact ? 110 : 185;
+  if (cv.width !== targetW || cv.height !== targetH) {
+    cv.width = targetW;
+    cv.height = targetH;
+  }
+
+  const bufKey = opts.bufKey || "proc";
+  if (bufKey === "proc" && cur && lastProcSpecSigId !== cur.id) {
+    delete SPEC_BUFFERS["proc"];
+    lastProcSpecSigId = cur.id;
+  }
+
+  const paper = isPaperTheme();
+  const cx = cv.getContext("2d");
+  const w = cv.width, h = cv.height;
+
+  // Determinar si el AnalyserNode está recibiendo audio activo correspondiente a esta vista
+  let isLive = false;
+  if (analyser && specFreqData && specTimeData && activeVoice) {
+    if (opts.matchModelId) {
+      isLive = Boolean(activeVoice.sig && !activeVoice.sig.anom && activeVoice.sig.modelId === opts.matchModelId);
+    } else if (opts.matchAnomType) {
+      isLive = Boolean(activeVoice.sig && activeVoice.sig.anom && activeVoice.sig.anomType === opts.matchAnomType);
+    } else if (cur) {
+      isLive = Boolean(activeVoice.sig && (activeVoice.sig.id === cur.id || activeVoice.sig === cur));
+    }
+  }
+
+  const isAnom = opts.isAnom !== undefined ? opts.isAnom : Boolean(cur && cur.anom);
+  const meterW = isCompact ? 34 : 44;
+  const wfW = w - meterW - 4;
+  const wfH = h;
+  const buf = getSpecBuffer(bufKey, wfW, wfH);
+
+  let rmsLevel = 0;
+  let dbText = "-- dB";
+
+  if (isLive) {
+    analyser.getByteFrequencyData(specFreqData);
+    analyser.getByteTimeDomainData(specTimeData);
+
+    // Calcular nivel RMS real del oscilador / audio desde getByteTimeDomainData
+    let sumSq = 0;
+    for (let i = 0; i < specTimeData.length; i++) {
+      const sample = (specTimeData[i] - 128) / 128;
+      sumSq += sample * sample;
+    }
+    const rms = Math.sqrt(sumSq / specTimeData.length);
+    const dbVal = rms > 0.0005 ? Math.max(-60, Math.min(0, Math.round(20 * Math.log10(rms * 3.2)))) : -60;
+    dbText = `${dbVal}dB`;
+    rmsLevel = Math.min(1, Math.pow(rms * 3.8, 0.72));
+    buf.rmsSmooth = buf.rmsSmooth * 0.65 + rmsLevel * 0.35;
+    buf.peakHold = Math.max(buf.rmsSmooth, buf.peakHold - 0.008);
+
+    // Desplazar cascada (waterfall) 2px hacia la izquierda y pintar nueva columna FFT a la derecha
+    buf.ctx.drawImage(buf.cv, -2, 0);
+    buf.ctx.fillStyle = paper ? "#18130d" : "#030805";
+    buf.ctx.fillRect(wfW - 2, 0, 2, wfH);
+
+    // Rango enfocado en bins 1..140 (~23 Hz a ~3.2 kHz con fftSize=2048) para capturar fundamentales y armónicos
+    const maxBin = Math.min(specFreqData.length - 1, 140);
+    for (let py = 0; py < wfH; py++) {
+      const normY = 1 - (py / Math.max(1, wfH - 1)); // 0 abajo (graves), 1 arriba (agudos)
+      const binIdx = Math.max(1, Math.min(maxBin, Math.floor(1 + Math.pow(normY, 1.35) * (maxBin - 1))));
+      const rawVal = specFreqData[binIdx] / 255;
+      const val = rawVal > 0.03 ? Math.min(1, Math.pow(rawVal, 0.76) * 1.15) : 0;
+
+      if (val > 0.02) {
+        if (isAnom) {
+          const r = Math.min(255, Math.round(90 + val * 165));
+          const g = Math.min(255, Math.round(val > 0.78 ? (val - 0.78) * 650 : 18 * val));
+          const b = Math.min(255, Math.round(35 + val * 75));
+          buf.ctx.fillStyle = `rgb(${r},${g},${b})`;
+        } else if (paper) {
+          const r = Math.min(255, Math.round(55 + val * 200));
+          const g = Math.min(255, Math.round(45 + val * 185));
+          const b = Math.min(255, Math.round(25 + val * 115));
+          buf.ctx.fillStyle = `rgb(${r},${g},${b})`;
+        } else {
+          const r = Math.min(255, Math.round(val > 0.75 ? (val - 0.75) * 600 : 12 * val));
+          const g = Math.min(255, Math.round(60 + val * 195));
+          const b = Math.min(255, Math.round(30 + val * 110));
+          buf.ctx.fillStyle = `rgb(${r},${g},${b})`;
+        }
+        buf.ctx.fillRect(wfW - 2, py, 2, 1);
+      }
+    }
+  } else {
+    buf.rmsSmooth = Math.max(0, buf.rmsSmooth - 0.06);
+    buf.peakHold = Math.max(0, buf.peakHold - 0.015);
+    buf.ctx.drawImage(buf.cv, -1, 0);
+    buf.ctx.fillStyle = paper ? "#18130d" : "#030805";
+    buf.ctx.fillRect(wfW - 1, 0, 1, wfH);
+  }
+
+  // Dibujar fondo y cascada FFT
+  cx.fillStyle = paper ? "#18130d" : "#030805";
+  cx.fillRect(0, 0, w, h);
+  cx.drawImage(buf.cv, 0, 0, wfW, wfH);
+
+  // Rejilla de frecuencias y niveles
+  cx.strokeStyle = paper ? "rgba(168, 144, 104, 0.22)" : "rgba(52, 95, 68, 0.25)";
+  cx.lineWidth = 1;
+  for (let gx = 40; gx < wfW; gx += 48) {
+    cx.beginPath(); cx.moveTo(gx + 0.5, 0); cx.lineTo(gx + 0.5, wfH); cx.stroke();
+  }
+  const freqTicks = [
+    {yFrac: 0.22, label: "2kHz"},
+    {yFrac: 0.50, label: "800Hz"},
+    {yFrac: 0.78, label: "200Hz"}
+  ];
+  cx.font = isCompact ? "9px 'Courier New', monospace" : "10px 'Courier New', monospace";
+  freqTicks.forEach(ft => {
+    const gy = Math.round(wfH * ft.yFrac) + 0.5;
+    cx.beginPath(); cx.moveTo(0, gy); cx.lineTo(wfW, gy); cx.stroke();
+    cx.fillStyle = paper ? "rgba(233, 222, 196, 0.62)" : "rgba(134, 239, 172, 0.62)";
+    cx.fillText(ft.label, 4, gy - 2);
+  });
+
+  // Etiqueta de estado FFT arriba a la izquierda
+  cx.fillStyle = isLive
+    ? (isAnom ? "#f87171" : (paper ? "#fde68a" : "#4ade80"))
+    : (paper ? "rgba(233, 222, 196, 0.68)" : "rgba(161, 161, 170, 0.75)");
+  cx.fillText(isLive ? "FFT AUDIO // VIVO" : "FFT // SIN AUDIO", 4, isCompact ? 11 : 12);
+
+  // Panel derecho: Medidor de Niveles (VU / dB)
+  const mx = wfW + 4;
+  cx.fillStyle = paper ? "#241d14" : "#060e09";
+  cx.fillRect(mx, 0, meterW, h);
+  cx.strokeStyle = paper ? "#8c734b" : "#166534";
+  cx.strokeRect(mx + 0.5, 0.5, meterW - 1, h - 1);
+
+  cx.fillStyle = paper ? "#e9dec4" : "#86efac";
+  cx.textAlign = "center";
+  cx.fillText("LVL", mx + meterW / 2, isCompact ? 10 : 12);
+
+  const barTop = isCompact ? 14 : 17;
+  const barBot = h - (isCompact ? 14 : 16);
+  const barH = Math.max(20, barBot - barTop);
+  const barW = isCompact ? 10 : 14;
+  const barX = mx + Math.floor((meterW - barW) / 2);
+
+  const segments = isCompact ? 14 : 18;
+  const segGap = 1.5;
+  const segH = (barH - segGap * (segments - 1)) / segments;
+
+  for (let s = 0; s < segments; s++) {
+    const frac = (s + 1) / segments;
+    const sy = barBot - (s + 1) * segH - s * segGap;
+    const active = buf.rmsSmooth >= frac - (0.5 / segments);
+    if (active) {
+      if (frac > 0.82) cx.fillStyle = "#ef4444";
+      else if (frac > 0.62) cx.fillStyle = "#eab308";
+      else cx.fillStyle = paper ? "#d97706" : "#22c55e";
+    } else {
+      cx.fillStyle = paper ? "rgba(140, 115, 75, 0.22)" : "rgba(34, 197, 94, 0.14)";
+    }
+    cx.fillRect(barX, sy, barW, segH);
+  }
+
+  // Indicador de pico retenido (Peak Hold)
+  if (buf.peakHold > 0.02) {
+    const peakY = Math.max(barTop, Math.min(barBot - 2, barBot - buf.peakHold * barH));
+    cx.fillStyle = "#ffffff";
+    cx.fillRect(barX - 1, peakY, barW + 2, 2);
+  }
+
+  // Lectura numérica en dB al pie del medidor
+  cx.fillStyle = isLive ? (paper ? "#fde68a" : "#4ade80") : (paper ? "#a89068" : "#71717a");
+  cx.fillText(dbText, mx + meterW / 2, h - 4);
+  cx.textAlign = "left";
+}
+
+function loop(now) {
+  const dt = Math.min(0.1, (now - last) / 1000);
+  last = now;
+  tick(dt);
+  const t = now / 1000;
+  if (V === "boot") drawBoot();
+  if (V === "map") drawMap(t);
+  if (V === "proc") {
+    drawCRT(t);
+    if (isSpectrogramEnabled()) drawSpectrogram(t);
+  }
+  if (V === "atlas") drawAtlasCanvases(t);
+  requestAnimationFrame(loop);
+}
+
+function render() {
+  syncThemeClass();
+  const w = $("#win"), tb = $("#tabs");
+  if (V === "boot" || V === "intro" || V === "end") {
+    tb.innerHTML = "";
+  } else {
+    const un = mail.filter(m => !m.read).length;
+    const rawCount = sigs.filter(s => s.st === "raw").length;
+    const pkgCount = outbox.length;
+    const tabList = [
+      ["mail", `Correo<span class="bd" id="bd-mail" style="display:${un ? "inline-block" : "none"}">${un || ""}</span>`],
+      ["map", "Mapa Estelar"],
+      ["proc", `Procesador<span class="bd" id="bd-proc" style="display:${rawCount ? "inline-block" : "none"}">${rawCount || ""}</span>`],
+      ["plat", `Plataforma<span class="bd" id="bd-plat" style="display:${pkgCount ? "inline-block" : "none"}">${pkgCount || ""}</span>`],
+      ["atlas", "Atlas"],
+      ["srv", `Servidor<span class="bd" id="bd-srv" style="display:${srv ? "inline-block" : "none"}">!</span>`],
+      ["shop", "Taller"]
+    ];
+
+    tb.innerHTML = tabList.map(([k, label]) =>
+      `<button class="tab ${V === k ? "on" : ""}" data-t="${k}">${label}</button>`
+    ).join("");
+    tb.querySelectorAll("[data-t]").forEach(b => b.onclick = () => {
+      beep(420, 0.05);
+      V = b.dataset.t;
+      syncLiveTelemetry(false, true);
+      render();
+    });
+  }
+
+  let h = "";
+  if (V === "boot") {
+    h = `
+      <div class="boot-screen" id="bootScreen">
+        <img
+          src="assets/cosmos95.png"
+          alt="Avalanche Cosmos 95"
+          class="boot-logo"
+        >
+        <div class="boot-bar-frame">
+          <div class="boot-bar-track">
+            <div class="boot-bar-fill" id="bootBarFill" style="width:${bootProgress}%"></div>
+          </div>
+        </div>
+      </div>`;
+  } else if (V === "intro") {
+    h = `
+      <div class="login-win">
+        <div class="os-win-bar">
+          <span>BIENVENIDO</span>
+          <span>[USR]</span>
+        </div>
+        <div class="login-body">
+          <div class="user-avatar-frame" aria-label="Usuario">
+            <svg width="62" height="62" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="22" r="11" stroke="#8c734b" stroke-width="2.5" fill="#f5eedc"/>
+              <path d="M12 54C12 42.9543 20.9543 36 32 36C43.0457 36 52 42.9543 52 54" stroke="#8c734b" stroke-width="2.5" fill="#f5eedc"/>
+            </svg>
+          </div>
+          <div style="max-width:340px;margin:0 auto 18px;text-align:left">
+            <label for="playerName" style="display:block;font-size:13px;font-weight:700;margin-bottom:8px">
+              Introduzca su nombre de usuario
+            </label>
+            <input type="text" id="playerName" maxlength="32" value="${playerNameInput}" autocomplete="off">
+          </div>
+          <div class="row" style="justify-content:center;gap:10px;margin-top:8px">
+            <button id="go" class="primary-os">Iniciar sistema</button>
+            <button id="openAdminBtn" class="alt">Iniciar Modo Admin</button>
+          </div>
+        </div>
+      </div>
+
+      ${adminModalOpen ? `
+        <div class="os-modal-backdrop" id="adminBackdrop">
+          <div class="os-modal-win" role="dialog" aria-modal="true" aria-label="Modo Admin">
+            <div class="os-win-bar">
+              <span>MODO ADMIN // CONFIGURACION DE INICIO</span>
+              <button class="alt" id="closeAdminBtn" style="padding:2px 8px;font-size:11px">X</button>
+            </div>
+            <div class="os-modal-body">
+              <div style="margin-bottom:14px">
+                <label for="adminPlayerName" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">
+                  Introduzca su nombre de usuario
+                </label>
+                <input type="text" id="adminPlayerName" maxlength="32" value="${playerNameInput}" autocomplete="off" style="max-width:100%">
+              </div>
+              <div style="margin-bottom:14px">
+                <label for="startNight" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">
+                  SELECTOR DE NOCHES:
+                </label>
+                <select id="startNight">
+                  ${NIGHT_SCENARIO_LABELS.map((lbl, idx) => `<option value="${idx}" ${selectedStartNight === idx ? "selected" : ""}>${lbl}</option>`).join("")}
+                </select>
+              </div>
+              <div class="card" style="margin:0 0 16px;padding:10px 12px">
+                <div style="font-size:12px;font-weight:700;margin-bottom:4px">MODO LIBRE / SANDBOX</div>
+                <div class="mut" style="font-size:11px">
+                  Inicia con mejoras al maximo, 200 PWR con recarga activa, $9999 CR y todo el Atlas + anomalias desbloqueadas.
+                </div>
+              </div>
+              <div class="row" style="justify-content:flex-end;gap:8px;margin:0">
+                <button class="alt" id="cancelAdminBtn">Cancelar</button>
+                <button class="alt" id="adminNormalBtn">Iniciar Noche</button>
+                <button class="primary-os" id="adminFreeBtn">Iniciar Modo Libre / Sandbox</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ` : ""}`;
+  } else if (V === "mail") {
+    const sm = mail.find(m => m.id === selMail) || mail[0] || null;
+    if (sm && !sm.read) { sm.read = 1; selMail = sm.id; }
+    const senderLabel = sm ? (sm.sender || sm.sciName || "CENTRAL") : "";
+    const metaLabel = sm ? (sm.tag || `NOCHE ${shift + 1}`) : "";
+    h = `
+      <div class="mail-shell">
+        <div class="mail-layout">
+          <div class="mail-pane">
+            <div class="mail-pane-top">
+              <span>BANDEJA (${mail.length})</span>
+              <button class="alt" id="clearMailBtn" style="padding:3px 9px;font-size:11.5px;font-weight:700" ${mail.length ? "" : "disabled"}>Vaciar bandeja</button>
+            </div>
+            <div class="mail-list">
+              ${mail.length ? mail.map(m => {
+                const sName = m.sender || m.sciName || "CENTRAL";
+                const sTag = m.tag || `N${shift + 1}`;
+                return `<div class="mi ${m.read ? "" : "un"} ${m.kind === "anon_warn" || m.kind === "buyer" ? "anom-mail" : ""} ${sm && sm.id === m.id ? "sel" : ""}" data-m="${m.id}">
+                  <span class="mi-sender">${sName}</span>
+                  <span class="mi-subj">${m.subj}</span>
+                  <span class="mi-tag">${sTag}</span>
+                </div>`;
+              }).join("") : `<div class="mut" style="padding:18px 12px;font-size:12.5px">Bandeja de entrada vacia.</div>`}
+            </div>
+          </div>
+
+          <div class="mail-pane">
+            ${sm ? `
+              <div class="mail-reader-head">
+                <div class="mail-sender-box">
+                  <div class="mail-sender-avatar" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="32" cy="22" r="11" stroke="#8c734b" stroke-width="3" fill="#f5eedc"/>
+                      <path d="M12 54C12 42.9543 20.9543 36 32 36C43.0457 36 52 42.9543 52 54" stroke="#8c734b" stroke-width="3" fill="#f5eedc"/>
+                    </svg>
+                  </div>
+                  <span class="mail-sender-name">${senderLabel}</span>
+                </div>
+                <span class="mail-reader-meta">${metaLabel}</span>
+              </div>
+              <div class="mail-reader-subj">${sm.subj}</div>
+              <div class="mail-body">${sm.body}</div>
+            ` : `
+              <div class="mail-reader-head">
+                <span class="mut">SIN MENSAJE SELECCIONADO</span>
+                <span class="mail-reader-meta">NOCHE ${shift + 1}</span>
+              </div>
+              <div class="mail-body mut">No hay mensajes en la bandeja de entrada.</div>
+            `}
+          </div>
+        </div>
+      </div>`;
+  } else if (V === "map") {
+    const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
+    h = `
+      <div class="map-shell">
+        ${srv ? `
+          <div class="card dangerbox between" style="margin:0;padding:7px 10px;flex:none">
+            <div>
+              <b>[!] ALERTA DE SERVIDOR // ENLACE DE RELES CAIDO (${srv.count} MODULOS)</b>
+              <div style="font-size:11.5px">La alineacion y descarga de antenas estan detenidas hasta restablecer el servidor.</div>
+            </div>
+            <button class="bad" id="goSrvBtn" style="padding:4px 10px;font-size:12px">Ir a Servidor</button>
+          </div>
+        ` : ""}
+        <div class="map-viewport">
+          <canvas id="cv"></canvas>
+        </div>
+        ${pendingOverrideSig ? `
+          <div class="card warnbox between" style="margin:0;padding:7px 10px;flex:none">
+            <div>
+              <b>ANTENAS OCUPADAS // RASTREO EN CURSO (#${busySig ? busySig.id : ""})</b>
+              <div style="font-size:11.5px">Ya existe una busqueda activa. Si insistes, se borrara la investigacion en curso y comenzara con el eco #${pendingOverrideSig.id} (-${ECHO_LOCK_COST} PWR).</div>
+            </div>
+            <div class="row" style="margin:0">
+              <button class="warn" id="confirmOverrideBtn" style="padding:4px 10px;font-size:12px">Insistir y reemplazar</button>
+              <button class="alt" id="cancelOverrideBtn" style="padding:4px 10px;font-size:12px">Mantener actual</button>
+            </div>
+          </div>
+        ` : ""}
+        <div class="map-hud-bar">
+          <span class="mut">${
+            getReservedMemoryCount() >= MAX_MEMORY_SIGNALS && !busySig
+              ? `Memoria llena (${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}): envia en Plataforma o descarta en Procesador.`
+              : busySig
+                ? `Antenas ocupadas rastreando senal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}]`
+                : sigs.filter(s => s.st === "echo").length === 0 && areNightAssignmentsCataloged() && nightTotalSpawned >= MAX_NIGHT_SIGNALS_AFTER_CATALOG
+                  ? "No quedan mas senales en el sector durante esta noche."
+                  : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco) · Memoria: ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}.`
+          }</span>
+          <button class="alt" id="rd">Pulso Radar (-6 PWR)</button>
+        </div>
+      </div>`;
+  } else if (V === "proc") {
+    const ready = sigs.filter(s => s.st === "raw");
+    if (cur && !ready.includes(cur)) cur = null;
+    if (!cur && ready[0]) { cur = ready[0]; knobF = 50; knobP = 50; choiceCat = null; choiceMod = null; }
+
+    h = `<div class="proc-shell">
+      <div class="proc-buffer-bar">
+        <span class="mut" style="font-size:12px">MEMORIA (${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}) · BUFFER:</span>
+        ${ready.length ? ready.map(s => `<button class="${s === cur ? "" : "alt"}" data-s="${s.id}">TRAMA #${s.id}</button>`).join("") : `<span class="mut">Sin tramas descargadas</span>`}
+      </div>`;
+
+    if (cur) {
+      const tuned = isTuned(cur);
+      const optFail = isOpticalFailed();
+      const visualCorrupt = Boolean(cur.isCorruptSignal);
+      const crtBlocked = optFail || visualCorrupt;
+      const specEnabled = isSpectrogramEnabled();
+      const [rw, rh] = CRT_RES[Math.min(5, G.f)];
+      const pF = proxPct(knobF, cur.tgF);
+      const pP = proxPct(knobP, cur.tgP);
+      const colF = pF >= 88 ? "#15803d" : pF >= 55 ? "#b45309" : "#b91c1c";
+      const colP = pP >= 88 ? "#15803d" : pP >= 55 ? "#b45309" : "#b91c1c";
+
+      const needSub = isSubcatEnabled();
+      const catModels = choiceCat !== null ? MODELS.filter(m => m.cat === choiceCat) : [];
+      const canQueue = choiceCat !== null && (!needSub || choiceMod !== null);
+
+      const crtFooterMsg = optFail
+        ? "[ERROR OPTICO // MONITOR CRT AVERIADO]"
+        : visualCorrupt
+          ? "[ARCHIVO VISUAL DANADO // USAR ESPECTROGRAMA]"
+          : `CRT ${rw}x${rh}px // FILTRO NV.${G.f}/5`;
+
+      h += `
+        <div class="proc-grid">
+          <div class="proc-monitors ${specEnabled ? "dual" : ""}">
+            <div class="crt-wrap ${crtBlocked ? "opt-fail" : ""}">
+              <div class="crt-stage">
+                <canvas id="crt" width="${rw}" height="${rh}"></canvas>
+              </div>
+              <div class="between" style="width:100%;margin-top:8px;font-size:11px;flex:none">
+                <span class="mut" style="${crtBlocked ? "color:#991b1b;font-weight:700" : ""}">${crtFooterMsg}</span>
+                <span class="mut">${cur.fixed ? "[CAPTURA FIJADA]" : "SIN FIJAR"}</span>
+              </div>
+            </div>
+
+            ${specEnabled ? `
+              <div class="crt-wrap">
+                <div class="crt-stage" style="padding:4px">
+                  <canvas id="spec" width="340" height="185"></canvas>
+                </div>
+                <div class="databox ${cur.anom ? "anom" : ""}" style="margin-top:6px">${cur.textData}</div>
+                <div class="between" style="width:100%;margin-top:6px;font-size:11px;flex:none">
+                  <span class="mut">ESPECTROGRAMA FFT + NIVELES</span>
+                  <span class="mut">${activeVoice ? "[AUDIO ACTIVO]" : "REPRODUCE AUDIO"}</span>
+                </div>
+              </div>
+            ` : ""}
+          </div>
+
+          <div class="proc-side">
+            <div class="card">
+              <div>
+                <div class="row" style="margin-bottom:4px">
+                  <span style="width:95px;font-size:12px">FRECUENCIA</span>
+                  <input type="range" id="knF" min="0" max="100" value="${knobF}">
+                  <span id="valF" style="width:32px;text-align:right">${knobF}</span>
+                </div>
+                <div class="prox-wrap">
+                  <span class="mut" style="width:95px">PROXIMIDAD:</span>
+                  <div class="prox-bar"><div class="prox-fill" id="barF" style="width:${pF}%;background:${colF}"></div></div>
+                  <span id="txtF" style="width:52px;text-align:right;color:${colF}">${pF}%</span>
+                </div>
+              </div>
+
+              <div style="margin-top:12px">
+                <div class="row" style="margin-bottom:4px">
+                  <span style="width:95px;font-size:12px">POLARIDAD</span>
+                  <input type="range" id="knP" min="0" max="100" value="${knobP}">
+                  <span id="valP" style="width:32px;text-align:right">${knobP}</span>
+                </div>
+                <div class="prox-wrap">
+                  <span class="mut" style="width:95px">PROXIMIDAD:</span>
+                  <div class="prox-bar"><div class="prox-fill" id="barP" style="width:${pP}%;background:${colP}"></div></div>
+                  <span id="txtP" style="width:52px;text-align:right;color:${colP}">${pP}%</span>
+                </div>
+              </div>
+
+              <div class="row" style="margin-top:14px;padding-top:10px;border-top:1px dashed #8c734b">
+                <button class="alt" id="playAu">${activeVoice ? "Detener audio" : "Escuchar audio (-2 PWR)"}</button>
+                <button id="fixBtn" ${tuned && !cur.fixed ? "" : "disabled"}>Fijar captura</button>
+                <button class="bad" id="dropBtn">Descartar</button>
+              </div>
+            </div>
+
+            ${cur.fixed ? `
+              <div class="card" style="flex:none">
+                <div class="mut" style="font-size:12px;margin-bottom:6px">1. SELECCIONA CATEGORIA PRINCIPAL:</div>
+                <div class="grid">
+                  ${CLASSES.map((c, i) => `<button class="${choiceCat === i ? "" : "alt"}" data-k="${i}">${c}</button>`).join("")}
+                </div>
+                ${needSub && choiceCat !== null ? `
+                  <div class="mut" style="font-size:12px;margin:10px 0 6px">2. ESPECIFICA SUBCATEGORIA (HABILITADO DESDE NOCHE 10):</div>
+                  <div class="grid">
+                    ${catModels.map(m => `<button class="${choiceMod === m.id ? "" : "alt"}" data-mod="${m.id}">${m.name}</button>`).join("")}
+                  </div>
+                ` : ""}
+                <div class="row" style="justify-content:flex-end;margin-top:10px;margin-bottom:0">
+                  <button id="queueBtn" ${canQueue ? "" : "disabled"}>Preparar paquete para Plataforma</button>
+                </div>
+              </div>
+            ` : ""}
+          </div>
+        </div>`;
+    }
+    h += `</div>`;
+  } else if (V === "plat") {
+    const selPkg = outbox.find(p => p.id === selPkgId) || outbox[0] || null;
+    if (selPkg) selPkgId = selPkg.id;
+    const nightAssigns = nightAssignments.filter(a => a.night === shift);
+
+    h = `
+      <div class="card">
+        <div class="between">
+          <b>PLATAFORMA DE ENVIO INDEPENDIENTE</b>
+          <span class="mut" style="font-size:12px">MEMORIA: ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS} (Cola: ${outbox.length} · Procesador: ${sigs.filter(s => s.st === "raw").length})</span>
+        </div>
+        <div class="mut" style="font-size:12px">Selecciona un paquete preparado y elige manualmente su destinatario.</div>
+        <div class="row" style="margin-top:8px">
+          ${outbox.length
+            ? outbox.map(p => {
+                const mod = MODELS.find(m => m.id === p.chosenMod);
+                const lbl = `PAQ #${p.sigId} · ${CLASSES[p.chosenCat]}${mod ? ` (${mod.name})` : ""}`;
+                return `<button class="${selPkg && selPkg.id === p.id ? "" : "alt"}" data-pkg="${p.id}">${lbl}</button>`;
+              }).join("")
+            : `<span class="mut">No hay paquetes preparados en cola. Procesa y fija una captura primero.</span>`}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="mut" style="font-size:12px;margin-bottom:8px">${
+          selPkg
+            ? `DESTINATARIOS DISPONIBLES PARA PAQUETE #${selPkg.sigId}:`
+            : "ASIGNACIONES DEL TURNO Y DESTINATARIOS (PREPARA UN PAQUETE PARA ENVIAR):"
+        }</div>
+        ${nightAssigns.map((a, idx) => {
+          const mod = a.modelId ? MODELS.find(m => m.id === a.modelId) : null;
+          const reqTxt = `${CLASSES[a.cat]}${mod ? ` (${mod.name})` : ""}`;
+          return `<div class="between" style="padding:7px 0;border-bottom:1px dashed #a89068">
+            <div>
+              <b>Encargo ${idx + 1}/3 · ${a.sciName}</b>
+              <div class="mut" style="font-size:12px">Solicita: ${reqTxt} · Pago: $${a.reward} CR</div>
+            </div>
+            <button data-send-as="${a.id}" ${a.done || a.failed || !selPkg ? "disabled" : ""}>
+              ${a.done ? "ENTREGADO" : a.failed ? "EXPIRADO" : "Enviar a encargo"}
+            </button>
+          </div>`;
+        }).join("")}
+
+        <div class="between" style="padding:9px 0;${shadowBuyerUnlocked ? "border-bottom:1px dashed #a89068" : ""}">
+          <div>
+            <b>Archivo Central (Envio Libre / Extra)</b>
+            <div class="mut" style="font-size:12px">
+              Envio libre fuera de asignacion: $20 CR si es un descubrimiento nuevo, $10 CR si ya fue descubierto.
+            </div>
+          </div>
+          <button class="alt" id="sendCentralBtn" ${!selPkg ? "disabled" : ""}>Enviar a Central</button>
+        </div>
+
+        ${shadowBuyerUnlocked ? `
+          <div class="between" style="padding:9px 0">
+            <div>
+              <b style="color:#581c87">Canal Cifrado // Intermediario Sombra</b>
+              <div class="mut" style="font-size:12px">Compra directa de lecturas anomalas fuera de la red oficial ($240 CR).</div>
+            </div>
+            <button class="shadow" id="sendShadowBtn" ${!selPkg ? "disabled" : ""}>Transmitir por Canal Cifrado</button>
+          </div>
+        ` : ""}
+      </div>`;
+  } else if (V === "atlas") {
+    const specAvail = isSpectrogramEnabled();
+    h = `
+      <div class="card">
+        <b>ATLAS DE CUERPOS CELESTES (${discoveredModels.size}/${MODELS.length} DESCUBIERTOS)</b>
+        <div class="atlas-grid">
+          ${MODELS.map(m => {
+            const unlocked = discoveredModels.has(m.id);
+            if (!unlocked) {
+              return `<div class="atlas-card locked">
+                <div style="font-size:11px" class="mut">${CLASSES[m.cat].toUpperCase()}</div>
+                <b>[NO DESCUBIERTO]</b>
+                <div class="mut" style="font-size:11px">Verifica esta senal en Central para desbloquear su registro visual y sonoro.</div>
+              </div>`;
+            }
+            const showSpec = specAvail && atlasSpecMode.has(m.id);
+            return `<div class="atlas-card">
+              <div class="between">
+                <span class="mut" style="font-size:11px;font-weight:700">${CLASSES[m.cat].toUpperCase()}</span>
+                <div class="row" style="margin:0;gap:4px">
+                  ${specAvail ? `<button class="alt" style="padding:2px 7px;font-size:11px" data-atlas-view="${m.id}">${showSpec ? "Imagen" : "Espectrograma"}</button>` : ""}
+                  <button class="alt" style="padding:2px 7px;font-size:11px" data-atlas-au="${m.id}">Audio</button>
+                </div>
+              </div>
+              <b>${m.name}</b>
+              ${showSpec
+                ? `<canvas class="atlas-cv spec-mode" width="260" height="110" data-atlas-spec="${m.id}"></canvas>`
+                : `<canvas class="atlas-cv" width="96" height="58" data-atlas-mid="${m.id}"></canvas>`}
+              <div class="mut" style="font-size:11px">${m.desc}</div>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+
+    if (discoveredAnomalies.length > 0) {
+      h += `
+        <div class="paper-sheet">
+          <h3>ANOMALÍAS</h3>
+          <div class="paper-grid">
+            ${discoveredAnomalies.map((a, idx) => {
+              const anomKey = `anom_${a.anomType}`;
+              const showSpec = specAvail && atlasSpecMode.has(anomKey);
+              return `
+                <div class="paper-entry">
+                  <div class="between">
+                    <b>${a.anomTitle}</b>
+                    <div class="row" style="margin:0;gap:4px">
+                      ${specAvail ? `<button class="paper-btn" data-anom-view="${idx}">${showSpec ? "Imagen" : "Espectrograma"}</button>` : ""}
+                      <button class="paper-btn" data-anom-au="${idx}">Audio</button>
+                    </div>
+                  </div>
+                  ${showSpec
+                    ? `<canvas class="paper-cv spec-mode" width="260" height="110" data-anom-spec="${idx}"></canvas>`
+                    : `<canvas class="paper-cv" width="96" height="58" data-anom-idx="${idx}"></canvas>`}
+                  <div class="paper-bin">${a.textData}</div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>`;
+    }
+  } else if (V === "srv") {
+    h = srv ? `
+      <div class="card">
+        <b>ENLACE DE RELES INTERRUMPIDO (${srv.count} MODULOS)</b>
+        <p class="mut">Activa los ${srv.count} reles en el orden correcto de sincronizacion (avance: ${srv.step}/${srv.count}).</p>
+        <div class="grid">
+          ${Array.from({length: srv.count}, (_, i) => {
+            const on = srv.latched[i];
+            return `<button class="${on ? "" : "alt"}" data-b="${i}">RELE 0${i + 1}</button>`;
+          }).join("")}
+        </div>
+      </div>` : `<div class="card"><b>SERVIDOR EN LINEA</b><p class="mut">Sin incidencias.</p></div>`;
+  } else if (V === "shop") {
+    const upgrades = [
+      ["a", "Servomotores de Antena", "Acelera el giro de antenas y la descarga.", 5, 85 + 55 * G.a],
+      ["f", "Filtro CRT Optico", "Aumenta la resolucion del CRT y reduce la estatica.", 5, 80 + 50 * G.f],
+      ["b", "Banco de Baterias", "Aumenta la capacidad maxima de PWR (+20 por nivel).", 5, 75 + 45 * G.b]
+    ];
+    h = upgrades.map(([k, name, desc, maxLv, cost]) => {
+      const lv = G[k];
+      return `<div class="card between">
+        <div>
+          <b>${name}</b> <span class="mut">[NV ${lv}/${maxLv}]</span>
+          <div class="mut" style="font-size:12px">${desc}</div>
+        </div>
+        <button data-u="${k}" ${lv >= maxLv || G.money < cost ? "disabled" : ""}>${lv >= maxLv ? "MAXIMO" : `$${cost} CR`}</button>
+      </div>`;
+    }).join("") + `
+    <div class="card between">
+      <div>
+        <b>Celda de Energia Auxiliar (+45 PWR)</b>
+        <div class="mut" style="font-size:12px">Suministro de emergencia indispensable cuando la recarga es lenta o nula.</div>
+      </div>
+      <button id="buyCellBtn" ${G.money < 30 || en >= cap ? "disabled" : ""}>$30 CR</button>
+    </div>`;
+  } else if (V === "end") {
+    if (gameOverReason === "ARREST") {
+      h = `
+        <div class="card dangerbox" style="padding:22px">
+          <div style="font-size:12px;color:#7f1d1d;font-weight:700;letter-spacing:1.5px">INTERVENCION GUBERNAMENTAL // DIVISION DEL ESPACIO DE NACIONES UNIDAS</div>
+          <h2 style="margin:8px 0;color:#991b1b">ESTACION ERIAL-7 CLAUSURADA</h2>
+          <p>
+            Al transmitir una senal anomala a traves de la red oficial, los filtros de seguridad de la <b>Division del Espacio de Naciones Unidas</b> rastrearon el origen hasta tu terminal.
+          </p>
+          <p class="mut">
+            Fuerzas de contencion orbital han clausurado la estacion Erial-7 y has sido puesto bajo arresto preventivo para investigacion.
+          </p>
+          <div class="row" style="margin-top:16px">
+            <button id="rsBtn">Iniciar nueva partida</button>
+          </div>
+        </div>`;
+    } else {
+      h = `
+        <div class="card" style="padding:22px">
+          <div class="mut" style="font-size:12px;font-weight:700;letter-spacing:1.5px">CAMPANA COMPLETADA // 15 NOCHES</div>
+          <h2 style="margin:8px 0">GUARDIA FINALIZADA · OP. ${S.playerName.toUpperCase()}</h2>
+          <p>
+            Has completado las 15 noches de vigilancia en la Estacion Erial-7.
+          </p>
+          <div class="row">
+            <span class="pill">Creditos finales: $${G.money} CR</span>
+            <span class="pill">Modelos en Atlas: ${discoveredModels.size}/${MODELS.length}</span>
+            <span class="pill">Anomalias registradas: ${discoveredAnomalies.length}</span>
+          </div>
+          <div class="row" style="margin-top:16px">
+            <button id="rsBtn">Iniciar nueva partida</button>
+          </div>
+        </div>`;
+    }
+  }
+
+  w.innerHTML = h;
+  bindEvents(w);
+}
+
+function bindEvents(w) {
+  const on = (sel, fn) => { const el = w.querySelector(sel); if (el) el.onclick = fn; };
+
+  const bootEl = w.querySelector("#bootScreen");
+  if (bootEl) {
+    bootEl.onclick = () => {
+      if (playStartupSound(false)) {
+        const hint = w.querySelector("#bootAudioHint");
+        if (hint) hint.style.display = "none";
+      }
+    };
+  }
+
+  const pn = w.querySelector("#playerName");
+  const apn = w.querySelector("#adminPlayerName");
+  const sn = w.querySelector("#startNight");
+
+  if (sn) {
+    sn.onchange = e => { selectedStartNight = +e.target.value; };
+  }
+
+  if (pn) {
+    pn.oninput = e => { playerNameInput = e.target.value; };
+    pn.onkeydown = e => {
+      if (e.key === "Enter") {
+        beep(520, 0.1);
+        adminModalOpen = false;
+        start(pn.value, 0, false);
+      }
+    };
+    pn.onfocus = () => {
+      if (bootLoginChimePending && !bootSoundPlayed) {
+        playStartupSound(false);
+      }
+    };
+    if (!adminModalOpen) {
+      setTimeout(() => pn.focus(), 30);
+    }
+  }
+
+  if (apn) {
+    apn.oninput = e => {
+      playerNameInput = e.target.value;
+      if (pn) pn.value = playerNameInput;
+    };
+    apn.onkeydown = e => {
+      if (e.key === "Enter") {
+        const nightVal = sn ? +sn.value : selectedStartNight;
+        beep(620, 0.12);
+        adminModalOpen = false;
+        start(apn.value, nightVal, true);
+      } else if (e.key === "Escape") {
+        adminModalOpen = false;
+        render();
+      }
+    };
+    setTimeout(() => apn.focus(), 30);
+  }
+
+  on("#go", () => {
+    const val = w.querySelector("#playerName")?.value || playerNameInput;
+    if (bootLoginChimePending && !bootSoundPlayed) {
+      playStartupSound(false);
+    } else {
+      beep(520, 0.1);
+    }
+    adminModalOpen = false;
+    start(val, 0, false);
+  });
+
+  on("#openAdminBtn", () => {
+    const val = w.querySelector("#playerName")?.value;
+    if (typeof val === "string") playerNameInput = val;
+    if (bootLoginChimePending && !bootSoundPlayed) {
+      playStartupSound(false);
+    } else {
+      beep(460, 0.08);
+    }
+    adminModalOpen = true;
+    render();
+  });
+
+  on("#closeAdminBtn", () => {
+    beep(380, 0.06);
+    adminModalOpen = false;
+    render();
+  });
+
+  on("#cancelAdminBtn", () => {
+    beep(380, 0.06);
+    adminModalOpen = false;
+    render();
+  });
+
+  on("#adminNormalBtn", () => {
+    const val = w.querySelector("#adminPlayerName")?.value || playerNameInput;
+    const nightVal = sn ? +sn.value : selectedStartNight;
+    beep(520, 0.1);
+    adminModalOpen = false;
+    start(val, nightVal, false);
+  });
+
+  on("#adminFreeBtn", () => {
+    const val = w.querySelector("#adminPlayerName")?.value || playerNameInput;
+    const nightVal = sn ? +sn.value : selectedStartNight;
+    beep(620, 0.12);
+    adminModalOpen = false;
+    start(val, nightVal, true);
+  });
+
+  w.querySelectorAll("[data-m]").forEach(el => el.onclick = () => {
+    markFirst();
+    const m = mail.find(x => x.id === el.dataset.m);
+    if (m) { m.read = 1; selMail = m.id; beep(380, 0.04); render(); updBadges(); }
+  });
+
+  on("#clearMailBtn", () => {
+    if (!mail.length) return;
+    mail = [];
+    selMail = null;
+    beep(340, 0.06);
+    updBadges();
+    render();
+  });
+
+  on("#goSrvBtn", () => {
+    beep(420, 0.05);
+    V = "srv";
+    render();
+  });
+
+  const cv = $("#cv");
+  if (cv) {
+    cv.onpointerdown = e => {
+      moved = 0;
+      drag = {x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y};
+      try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    };
+    cv.onpointermove = e => {
+      if (!drag) return;
+      const r = cv.getBoundingClientRect();
+      const vw = cv.clientWidth || r.width || 640;
+      const vh = cv.clientHeight || r.height || 310;
+      const dx = (e.clientX - drag.x) * vw / (r.width || vw);
+      const dy = (e.clientY - drag.y) * vh / (r.height || vh);
+      if (Math.hypot(dx, dy) > 6) moved = 1;
+      if (moved) {
+        cam.x = Math.max(0, Math.min(Math.max(0, W - vw), drag.cx - dx));
+        cam.y = Math.max(0, Math.min(Math.max(0, H - vh), drag.cy - dy));
+      }
+    };
+    cv.onpointerup = cv.onpointercancel = () => { drag = null; };
+    cv.onclick = e => {
+      if (moved) return;
+      markFirst();
+      const r = cv.getBoundingClientRect();
+      const vw = cv.clientWidth || r.width || 640;
+      const vh = cv.clientHeight || r.height || 310;
+      const x = (e.clientX - r.left) * vw / (r.width || vw) + cam.x;
+      const y = (e.clientY - r.top) * vh / (r.height || vh) + cam.y;
+      const hit = sigs.find(s => (s.st === "echo" || s.st === "align" || s.st === "dl") && Math.hypot(s.x - x, s.y - y) < 34);
+      if (!hit) { if (R) R.invalid++; syncLiveTelemetry(false, false); return; }
+
+      if (hit.st === "echo") {
+        const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
+        if (busySig) {
+          if (pendingOverrideSig && pendingOverrideSig.id === hit.id) {
+            if (en < ECHO_LOCK_COST) { beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
+            busySig.st = "gone";
+            pendingOverrideSig = null;
+            en -= ECHO_LOCK_COST;
+            hit.st = "align";
+            ensureSectorDiversity();
+            beep(340, 0.12, "triangle");
+            msg(`[OK] Busqueda anterior cancelada // Rastreando #${hit.id}`, 1);
+            updTop();
+            render();
+            return;
+          }
+          pendingOverrideSig = hit;
+          beep(220, 0.1, "sawtooth");
+          msg(`[AVISO] Antenas ocupadas con #${busySig.id}. Insiste para cancelar y cambiar.`, 0);
+          render();
+          return;
+        }
+
+        if (getReservedMemoryCount() >= MAX_MEMORY_SIGNALS) {
+          if (R) R.invalid++;
+          beep(180, 0.15, "sawtooth");
+          return msg(`[ERR] Memoria llena (${MAX_MEMORY_SIGNALS}/${MAX_MEMORY_SIGNALS}) // Envia o descarta senales antes de capturar mas`, 0);
+        }
+        if (en < ECHO_LOCK_COST) { if (R) R.invalid++; beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
+        en -= ECHO_LOCK_COST;
+        hit.st = "align";
+        pendingOverrideSig = null;
+        beep(320, 0.12, "triangle");
+        syncLiveTelemetry(false, true);
+        updTop();
+        render();
+      }
+    };
+  }
+
+  on("#confirmOverrideBtn", () => {
+    if (!pendingOverrideSig) return;
+    const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
+    if (en < ECHO_LOCK_COST) { beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
+    if (busySig) busySig.st = "gone";
+    en -= ECHO_LOCK_COST;
+    pendingOverrideSig.st = "align";
+    const newId = pendingOverrideSig.id;
+    pendingOverrideSig = null;
+    ensureSectorDiversity();
+    beep(340, 0.12, "triangle");
+    msg(`[OK] Investigacion reemplazada // Rastreando #${newId}`, 1);
+    updTop();
+    render();
+  });
+
+  on("#cancelOverrideBtn", () => {
+    pendingOverrideSig = null;
+    render();
+  });
+
+  on("#rd", () => {
+    markFirst();
+    if (rd > 0) return;
+    if (en < 6) { if (R) R.invalid++; return msg("[ERR] Energia insuficiente (6 PWR)", 0); }
+    en -= 6; rd = 7;
+    beep(580, 0.12);
+    updTop();
+  });
+
+  w.querySelectorAll("[data-s]").forEach(el => el.onclick = () => {
+    cur = sigs.find(s => s.id === +el.dataset.s) || null;
+    knobF = 50;
+    knobP = 50;
+    choiceCat = null;
+    choiceMod = null;
+    delete SPEC_BUFFERS["proc"];
+    stopVoice();
+    render();
+  });
+
+  const knF = $("#knF"), knP = $("#knP");
+  if (knF) knF.oninput = e => {
+    knobF = +e.target.value;
+    const vf = $("#valF");
+    if (vf) vf.textContent = knobF;
+    if (R) R.retunes++;
+    if (cur) {
+      const pF = proxPct(knobF, cur.tgF);
+      const colF = pF >= 88 ? "#15803d" : pF >= 55 ? "#b45309" : "#b91c1c";
+      const bf = $("#barF"), tf = $("#txtF");
+      if (bf) { bf.style.width = `${pF}%`; bf.style.background = colF; }
+      if (tf) { tf.textContent = `${pF}%`; tf.style.color = colF; }
+      const fb = $("#fixBtn");
+      if (fb) fb.disabled = !(isTuned(cur) && !cur.fixed);
+    }
+  };
+  if (knP) knP.oninput = e => {
+    knobP = +e.target.value;
+    const vp = $("#valP");
+    if (vp) vp.textContent = knobP;
+    if (R) R.retunes++;
+    if (cur) {
+      const pP = proxPct(knobP, cur.tgP);
+      const colP = pP >= 88 ? "#15803d" : pP >= 55 ? "#b45309" : "#b91c1c";
+      const bp = $("#barP"), tp = $("#txtP");
+      if (bp) { bp.style.width = `${pP}%`; bp.style.background = colP; }
+      if (tp) { tp.textContent = `${pP}%`; tp.style.color = colP; }
+      const fb = $("#fixBtn");
+      if (fb) fb.disabled = !(isTuned(cur) && !cur.fixed);
+    }
+  };
+
+  on("#playAu", () => {
+    if (!cur) return;
+    if (activeVoice) { stopVoice(); render(); return; }
+    if (en < 2) { if (R) R.invalid++; return msg("[ERR] Energia insuficiente (2 PWR)", 0); }
+    en -= 2;
+    if (R) {
+      R.repeats++;
+      if (isSpectrogramEnabled()) R.specUses++;
+    }
+    playSignalAudio(cur);
+    syncLiveTelemetry(false, false);
+    updTop();
+    render();
+  });
+
+  on("#fixBtn", () => {
+    if (!cur || !isTuned(cur)) return;
+    cur.fixed = true;
+    beep(620, 0.08);
+
+    if (cur.anom) {
+      if (!discoveredAnomalies.some(a => a.anomType === cur.anomType)) {
+        discoveredAnomalies.push({
+          anomTitle: cur.anomTitle,
+          anomType: cur.anomType,
+          modelId: cur.modelId,
+          img: cur.img,
+          seed: cur.seed,
+          anom: true,
+          textData: cur.textData
+        });
+      }
+      onFirstAnomalyDiscovered();
+    }
+
+    syncLiveTelemetry(false, true);
+    render();
+  });
+
+  on("#dropBtn", () => {
+    if (!cur) return;
+    stopVoice();
+    cur.st = "gone";
+    cur = null;
+    knobF = 50;
+    knobP = 50;
+    choiceCat = null;
+    choiceMod = null;
+    delete SPEC_BUFFERS["proc"];
+    ensureSectorDiversity();
+    msg("Trama descartada", 1);
+    updTop();
+    render();
+  });
+
+  w.querySelectorAll("[data-k]").forEach(el => el.onclick = () => {
+    choiceCat = +el.dataset.k;
+    choiceMod = null;
+    beep(440, 0.04);
+    render();
+  });
+
+  w.querySelectorAll("[data-mod]").forEach(el => el.onclick = () => {
+    choiceMod = el.dataset.mod;
+    beep(490, 0.04);
+    render();
+  });
+
+  on("#queueBtn", () => {
+    if (!cur || choiceCat === null) return;
+    if (isSubcatEnabled() && choiceMod === null) return;
+    stopVoice();
+    const pkgId = uid();
+    outbox.push({
+      id: pkgId,
+      sigId: cur.id,
+      trueCat: cur.cat,
+      trueMod: cur.modelId,
+      anom: cur.anom,
+      anomTitle: cur.anomTitle,
+      chosenCat: choiceCat,
+      chosenMod: choiceMod
+    });
+    selPkgId = pkgId;
+    cur.st = "gone";
+    cur = null;
+    knobF = 50;
+    knobP = 50;
+    choiceCat = null;
+    choiceMod = null;
+    delete SPEC_BUFFERS["proc"];
+    ensureSectorDiversity();
+    beep(560, 0.1);
+    msg("[OK] Paquete enviado a Plataforma de Envio", 1);
+    V = "plat";
+    updTop();
+    render();
+  });
+
+  w.querySelectorAll("[data-pkg]").forEach(el => el.onclick = () => {
+    selPkgId = el.dataset.pkg;
+    render();
+  });
+
+  w.querySelectorAll("[data-send-as]").forEach(el => el.onclick = () => {
+    const pkgIdx = outbox.findIndex(p => p.id === selPkgId);
+    if (pkgIdx < 0) return;
+    const pkg = outbox.splice(pkgIdx, 1)[0];
+    selPkgId = outbox[0]?.id || null;
+    beep(540, 0.1);
+    msg("[OK] Paquete despachado a asignacion", 1);
+    pendingEvals.push({
+      at: performance.now() + 1800,
+      pkg,
+      targetType: "assign",
+      assignId: el.dataset.sendAs
+    });
+    updTop();
+    render();
+  });
+
+  on("#sendCentralBtn", () => {
+    const pkgIdx = outbox.findIndex(p => p.id === selPkgId);
+    if (pkgIdx < 0) return;
+    const pkg = outbox.splice(pkgIdx, 1)[0];
+    selPkgId = outbox[0]?.id || null;
+    beep(540, 0.1);
+    msg("[OK] Paquete despachado a Archivo Central", 1);
+    pendingEvals.push({
+      at: performance.now() + 1800,
+      pkg,
+      targetType: "central"
+    });
+    updTop();
+    render();
+  });
+
+  on("#sendShadowBtn", () => {
+    const pkgIdx = outbox.findIndex(p => p.id === selPkgId);
+    if (pkgIdx < 0) return;
+    const pkg = outbox.splice(pkgIdx, 1)[0];
+    selPkgId = outbox[0]?.id || null;
+    beep(620, 0.12);
+    msg("[OK] Paquete enviado por Canal Cifrado", 1);
+    pendingEvals.push({
+      at: performance.now() + 1800,
+      pkg,
+      targetType: "shadow"
+    });
+    updTop();
+    render();
+  });
+
+  // Botón en Atlas para alternar entre imagen y espectrograma
+  w.querySelectorAll("[data-atlas-view]").forEach(el => el.onclick = () => {
+    const mid = el.dataset.atlasView;
+    if (atlasSpecMode.has(mid)) {
+      atlasSpecMode.delete(mid);
+    } else {
+      atlasSpecMode.add(mid);
+      delete SPEC_BUFFERS[`atlas_${mid}`];
+      const alreadyPlaying = activeVoice && activeVoice.sig && !activeVoice.sig.anom && activeVoice.sig.modelId === mid;
+      if (!alreadyPlaying) {
+        playSignalAudio({modelId: mid, anom: false, anomType: ""});
+      }
+    }
+    beep(470, 0.05);
+    render();
+  });
+
+  w.querySelectorAll("[data-atlas-au]").forEach(el => el.onclick = () => {
+    const mid = el.dataset.atlasAu;
+    const alreadyPlaying = activeVoice && activeVoice.sig && !activeVoice.sig.anom && activeVoice.sig.modelId === mid;
+    if (alreadyPlaying) {
+      stopVoice();
+      return;
+    }
+    playSignalAudio({modelId: mid, anom: false, anomType: ""});
+  });
+
+  // Botón en sección Anomalías del Atlas para alternar entre imagen y espectrograma
+  w.querySelectorAll("[data-anom-view]").forEach(el => el.onclick = () => {
+    const item = discoveredAnomalies[+el.dataset.anomView];
+    if (!item) return;
+    const anomKey = `anom_${item.anomType}`;
+    if (atlasSpecMode.has(anomKey)) {
+      atlasSpecMode.delete(anomKey);
+    } else {
+      atlasSpecMode.add(anomKey);
+      delete SPEC_BUFFERS[anomKey];
+      const alreadyPlaying = activeVoice && activeVoice.sig && activeVoice.sig.anom && activeVoice.sig.anomType === item.anomType;
+      if (!alreadyPlaying) {
+        playSignalAudio(item);
+      }
+    }
+    beep(470, 0.05);
+    render();
+  });
+
+  w.querySelectorAll("[data-anom-au]").forEach(el => el.onclick = () => {
+    const item = discoveredAnomalies[+el.dataset.anomAu];
+    if (!item) return;
+    if (activeVoice && activeVoice.sig && activeVoice.sig.anomType === item.anomType) {
+      stopVoice();
+      return;
+    }
+    playSignalAudio(item);
+  });
+
+  w.querySelectorAll("[data-b]").forEach(el => el.onclick = () => {
+    if (!srv) return;
+    const idx = +el.dataset.b;
+    if (srv.latched[idx]) return;
+    const expected = srv.seq[srv.step];
+    if (idx === expected) {
+      srv.latched[idx] = true;
+      srv.step++;
+      en = Math.max(0, en - 1);
+      beep(440 + srv.step * 90, 0.09);
+      if (srv.step >= srv.seq.length) {
+        if (R) R.fix += +((performance.now() - srv.t) / 1000).toFixed(1);
+        srv = null;
+        msg("[OK] Servidor restablecido", 1);
+        syncLiveTelemetry(false, true);
+      }
+      render();
+    } else {
+      srv.step = 0;
+      srv.latched = Array(srv.count).fill(false);
+      beep(150, 0.16, "sawtooth");
+      msg("[ERR] Secuencia de reles reiniciada", 0);
+      render();
+    }
+  });
+
+  w.querySelectorAll("[data-u]").forEach(el => el.onclick = () => {
+    const k = el.dataset.u;
+    const maxLv = 5;
+    if (G[k] >= maxLv) return;
+    const costs = {
+      a: 85 + 55 * G.a,
+      f: 80 + 50 * G.f,
+      b: 75 + 45 * G.b
+    };
+    const cost = costs[k];
+    if (G.money < cost) return;
+    G.money -= cost;
+    G[k]++;
+    if (k === "b") { cap = 100 + 20 * G.b; en = Math.min(cap, en + 20); }
+    beep(660, 0.1);
+    msg(`[OK] Mejora instalada (NV ${G[k]}/${maxLv})`, 1);
+    syncLiveTelemetry(false, true);
+    updTop();
+    render();
+  });
+
+  on("#buyCellBtn", () => {
+    if (G.money < 30 || en >= cap) return;
+    G.money -= 30;
+    en = Math.min(cap, en + 45);
+    beep(680, 0.1);
+    msg("[OK] Celda auxiliar conectada (+45 PWR)", 1);
+    updTop();
+    render();
+  });
+
+  on("#rsBtn", () => { adminModalOpen = false; V = "intro"; updTop(); render(); });
+}
+
+function unlockBootAudioOnGesture() {
+  if (V === "boot" && !bootSoundPlayed) {
+    if (playStartupSound(false)) {
+      const hint = document.querySelector("#bootAudioHint");
+      if (hint) hint.style.display = "none";
+    }
+  }
+}
+window.addEventListener("pointerdown", unlockBootAudioOnGesture, { passive: true });
+window.addEventListener("keydown", unlockBootAudioOnGesture, { passive: true });
+
+function bootTerminal() {
+  try {
+    preloadAllSprites();
+    startBootSequence();
+    requestAnimationFrame(loop);
+  } catch (err) {
+    const w = document.querySelector("#win");
+    if (w) {
+      w.innerHTML = `<div class="card dangerbox"><b>ERROR DE INICIALIZACION</b><pre style="white-space:pre-wrap;font-size:12px">${err && err.stack ? err.stack : err}</pre></div>`;
+    }
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootTerminal);
+} else {
+  bootTerminal();
+}
+</script>
+</body>
+</html>
