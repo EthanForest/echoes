@@ -2163,7 +2163,7 @@ function updTop() {
         ? "ARRANQUE DEL SISTEMA"
         : V === "intro"
           ? "INICIO DE SESION DEL SISTEMA"
-          : "ERIAL-7 // TERMINAL DE ESCUCHA";
+          : "AVALANCHE(r) COSMOS 95";
     }
     document.title = V === "intro" || V === "boot"
       ? "Inicio de Sesion del Sistema"
@@ -2178,7 +2178,7 @@ function updTop() {
     t.style.display = flash ? "block" : "none";
     return;
   }
-  if (topTitle) topTitle.textContent = "ERIAL-7 // TERMINAL DE ESCUCHA";
+  if (topTitle) topTitle.textContent = "AVALANCHE(r) COSMOS 95";
   document.title = "Frecuencia de Fondo · Estación Erial-7";
   const remAssigns = activeAssigns().length;
   const canLogout = allNightAssignsClosed();
@@ -3495,9 +3495,9 @@ function render() {
       const canQueue = choiceCat !== null && (!needSub || choiceMod !== null);
 
       const crtFooterMsg = optFail
-        ? "[ERROR OPTICO // MONITOR CRT AVERIADO]"
+        ? "[ERROR OPTICO // MONITOR AVERIADO]"
         : visualCorrupt
-          ? "[ARCHIVO VISUAL DANADO // USAR ESPECTROGRAMA]"
+          ? "[ARCHIVO VISUAL DAÑADO // USAR ESPECTROGRAMA]"
           : `CRT ${rw}x${rh}px // FILTRO NV.${G.f}/5`;
 
       h += `
@@ -3505,14 +3505,13 @@ function render() {
           <div class="proc-monitors ${specEnabled ? "dual" : ""}">
             <div class="crt-wrap ${crtBlocked ? "opt-fail" : ""}">
               <div class="monitor-head">
-                <span>MONITOR OPTICO CRT</span>
+                <span>MONITOR</span>
                 <span class="mut">${cur.fixed ? "[CAPTURA FIJADA]" : "SIN FIJAR"}</span>
               </div>
               <div class="crt-stage">
                 <canvas id="crt" width="${rw}" height="${rh}"></canvas>
               </div>
               <div class="monitor-foot">
-                <span class="mut" style="${crtBlocked ? "color:#991b1b;font-weight:700" : ""}">${crtFooterMsg}</span>
                 <span class="mut">#${cur.id}</span>
               </div>
             </div>
@@ -3520,7 +3519,7 @@ function render() {
             ${specEnabled ? `
               <div class="crt-wrap">
                 <div class="monitor-head">
-                  <span>ESPECTROGRAMA FFT + NIVELES</span>
+                  <span>ESPECTROGRAMA</span>
                   <span class="mut">${activeVoice ? "[AUDIO ACTIVO]" : "EN ESPERA"}</span>
                 </div>
                 <div class="crt-stage" style="padding:4px">
