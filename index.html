@@ -362,6 +362,330 @@ select:focus{border-color:#4ade80;box-shadow:0 0 0 2px rgba(34,197,94,.28)}
 #nightFadeOverlay.active{
   opacity:1;pointer-events:all;
 }
+
+/* ============================================================================
+   ENTORNO GRAFICO UNIFICADO ESTILO ARCHIVO / ANOMALIAS (A PARTIR DEL LOGIN)
+   ============================================================================ */
+body.paper-theme{
+  background:#1e1912;
+  color:#2b2116;
+  font-family:"Courier New",Courier,ui-monospace,monospace;
+}
+body.paper-theme .terminal{
+  background:linear-gradient(180deg,#e9dec4 0%,#dfd0b0 100%);
+  border:2px solid #8c734b;
+  box-shadow:inset 0 0 28px rgba(92,68,36,.26),0 12px 36px rgba(0,0,0,.78);
+}
+body.paper-theme .terminal::after{
+  background:radial-gradient(circle at center,transparent 62%,rgba(92,68,36,.16) 100%);
+}
+body.paper-theme .topbar{
+  background:#d8c7a3;
+  border-bottom:2px solid #8c734b;
+  color:#2b2116;
+}
+body.paper-theme .topbar b{color:#3d2814}
+body.paper-theme .pill{
+  background:#f5eedc;
+  border:1px solid #8c734b;
+  color:#2b2116;
+  font-weight:700;
+}
+body.paper-theme .pill.night{
+  border-color:#991b1b;
+  background:#f3d8d2;
+  color:#7f1d1d;
+}
+body.paper-theme .pill.slowrech{
+  border-color:#a16207;
+  background:#f6e7c1;
+  color:#713f12;
+}
+body.paper-theme .pill.norech{
+  border-color:#9a3412;
+  background:#f5dcd0;
+  color:#7c2d12;
+}
+body.paper-theme #tabs{
+  background:#d5c39e;
+  border-bottom:2px solid #8c734b;
+}
+body.paper-theme .tab{
+  background:#e9dec4;
+  color:#3d2814;
+  border:1px solid #9c8259;
+}
+body.paper-theme .tab:hover{
+  background:#f5eedc;
+  color:#24190e;
+  border-color:#6e5634;
+}
+body.paper-theme .tab.on{
+  background:#5c4424;
+  color:#fbf6ea;
+  border:2px solid #3d2b14;
+  box-shadow:inset 0 -2px #a89068;
+}
+body.paper-theme .bd{
+  background:#5c4424;
+  color:#fbf6ea;
+  border:1px solid #3d2b14;
+}
+body.paper-theme .tab.on .bd{
+  background:#fbf6ea;
+  color:#3d2b14;
+}
+body.paper-theme #win{
+  background:transparent;
+  color:#2b2116;
+}
+body.paper-theme button{
+  background:#5c4424;
+  color:#fbf6ea;
+  border:1px solid #3d2b14;
+  font-weight:700;
+}
+body.paper-theme button:hover:not(:disabled){
+  background:#473319;
+  border-color:#2b1d0d;
+  color:#fffdf7;
+}
+body.paper-theme button.alt{
+  background:#f5eedc;
+  color:#2b2116;
+  border:1px solid #8c734b;
+  font-weight:600;
+}
+body.paper-theme button.alt:hover:not(:disabled){
+  background:#e6d7b8;
+  border-color:#5c4424;
+  color:#1e1912;
+}
+body.paper-theme button.logout-btn:not(:disabled){
+  background:#5c4424;
+  border-color:#3d2b14;
+  color:#fbf6ea;
+}
+body.paper-theme button.bad{
+  background:#7f1d1d;
+  border-color:#450a0a;
+  color:#fef2f2;
+}
+body.paper-theme button.bad:hover:not(:disabled){
+  background:#991b1b;
+  border-color:#450a0a;
+}
+body.paper-theme button.warn{
+  background:#92400e;
+  border-color:#451a03;
+  color:#fffbeb;
+}
+body.paper-theme button.warn:hover:not(:disabled){
+  background:#78350f;
+}
+body.paper-theme button.shadow{
+  background:#4c1d95;
+  border-color:#2e1065;
+  color:#f5f3ff;
+}
+body.paper-theme button.shadow:hover:not(:disabled){
+  background:#3b0764;
+}
+body.paper-theme .card{
+  background:rgba(255,250,238,.72);
+  border:1px solid #9c8259;
+  color:#2b2116;
+  box-shadow:0 1px 4px rgba(61,40,20,.08);
+}
+body.paper-theme .card.warnbox{
+  border-color:#b45309;
+  background:rgba(254,243,199,.82);
+}
+body.paper-theme .card.dangerbox{
+  border-color:#991b1b;
+  background:rgba(254,226,226,.82);
+}
+body.paper-theme .card.shadowbox{
+  border-color:#6b21a8;
+  background:rgba(243,232,255,.82);
+}
+body.paper-theme .mut{
+  color:#5c462e;
+}
+body.paper-theme .login-win,
+body.paper-theme .os-modal-win{
+  background:linear-gradient(180deg,#f5eedc 0%,#e9dec4 100%);
+  border:2px solid #8c734b;
+  color:#2b2116;
+  box-shadow:inset 0 0 18px rgba(92,68,36,.2),0 8px 26px rgba(30,25,18,.35);
+}
+body.paper-theme .os-win-bar{
+  background:#5c4424;
+  border-bottom:1px solid #3d2b14;
+  color:#fbf6ea;
+  font-weight:700;
+}
+body.paper-theme .login-body,
+body.paper-theme .os-modal-body{
+  background:transparent;
+  color:#2b2116;
+}
+body.paper-theme .user-avatar-frame{
+  background:#1e1912;
+  border:2px solid #6e5634;
+}
+body.paper-theme input[type=text],
+body.paper-theme select{
+  background:#fbf6ea;
+  color:#24190e;
+  border:1px solid #8c734b;
+}
+body.paper-theme input[type=text]:focus,
+body.paper-theme select:focus{
+  border-color:#5c4424;
+  box-shadow:0 0 0 2px rgba(92,68,36,.25);
+}
+body.paper-theme input[type=range]{
+  accent-color:#5c4424;
+}
+body.paper-theme .mail-pane{
+  border:2px solid #8c734b;
+  background:rgba(255,250,238,.68);
+}
+body.paper-theme .mail-pane-top,
+body.paper-theme .mail-reader-head{
+  background:#dfd0b0;
+  border-bottom:1px solid #8c734b;
+  color:#3d2814;
+}
+body.paper-theme .mail-list,
+body.paper-theme .mail-body{
+  background:transparent;
+  color:#2b2116;
+}
+body.paper-theme .mi{
+  border-bottom:1px dashed #b8a078;
+  color:#2b2116;
+}
+body.paper-theme .mi:hover{
+  background:rgba(223,208,176,.55);
+}
+body.paper-theme .mi.un{
+  background:rgba(245,238,220,.92);
+}
+body.paper-theme .mi.sel{
+  background:#d8c59e;
+  outline:1px solid #6e5634;
+}
+body.paper-theme .mi.anom-mail{
+  border-left:4px solid #6b21a8;
+}
+body.paper-theme .mi-sender{
+  color:#5c4424;
+}
+body.paper-theme .mi-subj{
+  color:#24190e;
+}
+body.paper-theme .mi-tag{
+  color:#7c2d12;
+}
+body.paper-theme .mail-sender-avatar{
+  background:#1e1912;
+  border:1px solid #6e5634;
+}
+body.paper-theme .mail-sender-name{
+  color:#3d2814;
+}
+body.paper-theme .mail-reader-meta{
+  color:#6e5634;
+}
+body.paper-theme .mail-reader-subj{
+  background:#ece1c6;
+  border-bottom:1px dashed #8c734b;
+  color:#3d2814;
+}
+body.paper-theme .map-viewport{
+  border:2px solid #6e5634;
+  background:#1e1912;
+}
+body.paper-theme .map-hud-bar,
+body.paper-theme .proc-buffer-bar{
+  background:#dfd0b0;
+  border:1px solid #8c734b;
+  color:#2b2116;
+}
+body.paper-theme .crt-wrap{
+  background:rgba(255,250,238,.72);
+  border:2px solid #8c734b;
+}
+body.paper-theme .crt-wrap.opt-fail{
+  border-color:#991b1b;
+  background:rgba(254,226,226,.78);
+}
+body.paper-theme .crt-stage,
+body.paper-theme #crt{
+  background:#1e1912;
+  border-color:#6e5634;
+}
+body.paper-theme #spec{
+  background:#1e1912;
+  border:2px solid #6e5634;
+}
+body.paper-theme .databox{
+  background:#f5eedc;
+  border:1px solid #a89068;
+  color:#24190e;
+}
+body.paper-theme .databox.anom{
+  border-color:#991b1b;
+  background:#f8e3df;
+  color:#450a0a;
+}
+body.paper-theme .prox-wrap{
+  color:#2b2116;
+}
+body.paper-theme .prox-bar{
+  background:#f5eedc;
+  border:1px solid #8c734b;
+}
+body.paper-theme .atlas-card{
+  background:rgba(255,250,238,.72);
+  border:1px solid #9c8259;
+  color:#2b2116;
+}
+body.paper-theme .atlas-card.locked{
+  opacity:.64;
+  background:rgba(233,222,196,.5);
+  border:1px dashed #8c734b;
+}
+body.paper-theme .atlas-cv{
+  background:#1e1912;
+  border:1px solid #6e5634;
+}
+body.paper-theme .paper-sheet{
+  background:linear-gradient(180deg,#dfd0b0 0%,#d0bc92 100%);
+  border:2px dashed #7f1d1d;
+}
+body.paper-theme .paper-sheet h3{
+  color:#7f1d1d;
+  border-bottom:1px dashed #7f1d1d;
+}
+body.paper-theme #toast{
+  background:#f5eedc;
+  border:1px solid #8c734b;
+  color:#2b2116;
+  font-weight:700;
+}
+body.paper-theme #toast.ok{
+  border-color:#3d2b14;
+  background:#efe4c8;
+  color:#24190e;
+}
+body.paper-theme #toast.bad{
+  border-color:#991b1b;
+  background:#f8e3df;
+  color:#7f1d1d;
+}
 </style>
 </head>
 <body>
@@ -698,6 +1022,12 @@ const isSubcatEnabled = () => shift >= 9;   // Noche 10 en adelante (0-based >= 
 const isPulsarEnabled = () => shift >= 2;   // Noche 3 en adelante (0-based >= 2)
 const isAnomEnabled = () => shift >= 9;     // Todas las anomalías solo desde Noche 10 (0-based >= 9)
 const isOpticalFailed = () => shift === 8;  // Noche 9 (0-based === 8): fallo óptico/imagen CRT
+const isPaperTheme = () => V !== "boot";
+function syncThemeClass() {
+  if (document.body) {
+    document.body.classList.toggle("paper-theme", isPaperTheme());
+  }
+}
 
 // Recuperación de energía escalonada:
 // Noches 1-5 (shift 0..4): rápida
@@ -1446,6 +1776,7 @@ function updBadges() {
 }
 
 function updTop() {
+  syncThemeClass();
   const st = $("#st");
   const topTitle = $("#topTitle");
   const t = $("#toast");
@@ -1927,7 +2258,7 @@ function renderCelestialToCanvas(cv, spec, t, filterLv = 5, tuneErr = 0, sepiaMo
   }
 
   const baseFloor = [0.60, 0.44, 0.30, 0.18, 0.09, 0.02][Math.min(5, Math.max(0, filterLv))];
-  const staticAmt = sepiaMode ? 0.06 : Math.min(0.98, baseFloor + tuneErr * (1 - baseFloor));
+  const staticAmt = (sepiaMode && tuneErr === 0 && filterLv >= 5) ? 0.06 : Math.min(0.98, baseFloor + tuneErr * (1 - baseFloor));
 
   const modObj = MODELS.find(m => m.id === spec.modelId);
   const spriteSrc = spec.img || (modObj && modObj.img);
@@ -2195,11 +2526,12 @@ function drawMap(t) {
   const cx = cv.getContext("2d");
   cx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  cx.fillStyle = "#03070d";
+  const paper = isPaperTheme();
+  cx.fillStyle = paper ? "#1e1912" : "#03070d";
   cx.fillRect(0, 0, vw, vh);
 
   // Cuadrícula espacial de alta nitidez
-  cx.strokeStyle = "rgba(52, 95, 68, 0.22)";
+  cx.strokeStyle = paper ? "rgba(168, 144, 104, 0.20)" : "rgba(52, 95, 68, 0.22)";
   cx.lineWidth = 1;
   const step = 90;
   const gx0 = -(cam.x % step), gy0 = -(cam.y % step);
@@ -2213,7 +2545,7 @@ function drawMap(t) {
   }
 
   // Campo estelar nítido sin estiramiento
-  cx.fillStyle = "#d1fae5";
+  cx.fillStyle = paper ? "#f5eedc" : "#d1fae5";
   stars.forEach(([x, y, r]) => {
     const sx = x - cam.x, sy = y - cam.y;
     if (sx < -2 || sx > vw + 2 || sy < -2 || sy > vh + 2) return;
@@ -2229,7 +2561,9 @@ function drawMap(t) {
   cx.translate(-cam.x, -cam.y);
   sigs.forEach(s => {
     if (s.st === "gone" || s.st === "raw") return;
-    const col = s.st === "echo" ? "96, 195, 255" : s.st === "align" ? "234, 179, 8" : "74, 222, 128";
+    const col = paper
+      ? (s.st === "echo" ? "233, 222, 196" : s.st === "align" ? "217, 119, 6" : "245, 158, 11")
+      : (s.st === "echo" ? "96, 195, 255" : s.st === "align" ? "234, 179, 8" : "74, 222, 128");
     const pulse = (t * 0.45 + s.seed) % 1;
     cx.strokeStyle = `rgba(${col}, ${(1 - pulse) * 0.7})`;
     cx.lineWidth = 1.3;
@@ -2239,11 +2573,11 @@ function drawMap(t) {
     cx.beginPath(); cx.arc(s.x, s.y, 5, 0, Math.PI * 2); cx.fill();
 
     if (s.st === "align") {
-      cx.strokeStyle = "#eab308";
+      cx.strokeStyle = paper ? "#d97706" : "#eab308";
       cx.lineWidth = 2.6;
       cx.beginPath(); cx.arc(s.x, s.y, 17, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.align); cx.stroke();
     } else if (s.st === "dl") {
-      cx.strokeStyle = srv ? "#ef4444" : "#4ade80";
+      cx.strokeStyle = srv ? "#ef4444" : (paper ? "#f59e0b" : "#4ade80");
       cx.lineWidth = 2.6;
       cx.beginPath(); cx.arc(s.x, s.y, 17, -Math.PI/2, -Math.PI/2 + Math.PI*2*s.prog); cx.stroke();
     }
@@ -2264,7 +2598,7 @@ function drawMap(t) {
       cx.save();
       cx.translate(halfW + Math.cos(a)*k, halfH + Math.sin(a)*k);
       cx.rotate(a);
-      cx.fillStyle = "#4ade80";
+      cx.fillStyle = paper ? "#e9dec4" : "#4ade80";
       cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(-15, -6.5); cx.lineTo(-15, 6.5); cx.fill();
       cx.restore();
     });
@@ -2272,12 +2606,12 @@ function drawMap(t) {
   }
 
   // Coordenadas del cuadrante activo (esquina superior derecha del mapa)
-  cx.fillStyle = "rgba(8, 14, 11, 0.72)";
+  cx.fillStyle = paper ? "rgba(30, 25, 18, 0.86)" : "rgba(8, 14, 11, 0.72)";
   cx.fillRect(vw - 178, 10, 168, 24);
-  cx.strokeStyle = "#166534";
+  cx.strokeStyle = paper ? "#8c734b" : "#166534";
   cx.strokeRect(vw - 178, 10, 168, 24);
-  cx.fillStyle = "#86efac";
-  cx.font = "11px ui-monospace, Consolas, monospace";
+  cx.fillStyle = paper ? "#e9dec4" : "#86efac";
+  cx.font = paper ? "11px 'Courier New', Courier, monospace" : "11px ui-monospace, Consolas, monospace";
   cx.textAlign = "right";
   cx.fillText(`SEC ${Math.round(cam.x + vw/2)} // ${Math.round(cam.y + vh/2)}`, vw - 18, 26);
   cx.textAlign = "left";
@@ -2286,13 +2620,13 @@ function drawMap(t) {
   const aligning = sigs.find(s => s.st === "align");
   const targetAng = aligning ? Math.atan2(aligning.y - H/2, aligning.x - W/2) : -Math.PI/2;
   const hudY = vh - 46;
-  cx.fillStyle = "rgba(8, 14, 11, 0.84)";
+  cx.fillStyle = paper ? "rgba(30, 25, 18, 0.88)" : "rgba(8, 14, 11, 0.84)";
   cx.fillRect(10, hudY, 118, 36);
-  cx.strokeStyle = "#243d2b";
+  cx.strokeStyle = paper ? "#8c734b" : "#243d2b";
   cx.strokeRect(10, hudY, 118, 36);
   for (let i = 0; i < 3; i++) {
     const ax = 30 + i * 38, ay = hudY + 18;
-    cx.strokeStyle = "#4ade80";
+    cx.strokeStyle = paper ? "#e9dec4" : "#4ade80";
     cx.lineWidth = 1.4;
     cx.beginPath(); cx.arc(ax, ay, 9, 0, Math.PI * 2); cx.stroke();
     const curA = aligning ? (targetAng - (1 - aligning.align) * 2.2) : targetAng;
@@ -2310,7 +2644,7 @@ function drawCRT(t) {
     cv.height = rh;
   }
   const tuneErr = cur.fixed ? 0 : Math.min(1, (offF(cur) + offP(cur)) * 0.75);
-  renderCelestialToCanvas(cv, cur, t, G.f, tuneErr, false, isOpticalFailed());
+  renderCelestialToCanvas(cv, cur, t, G.f, tuneErr, isPaperTheme(), isOpticalFailed());
 }
 
 function drawAtlasCanvases(t) {
@@ -2318,7 +2652,7 @@ function drawAtlasCanvases(t) {
     const mid = cv.dataset.atlasMid;
     const mod = MODELS.find(m => m.id === mid);
     if (mod) {
-      renderCelestialToCanvas(cv, {modelId: mod.id, img: mod.img, seed: 2.1, anom: false, anomType: ""}, t, 5, 0, false, false);
+      renderCelestialToCanvas(cv, {modelId: mod.id, img: mod.img, seed: 2.1, anom: false, anomType: ""}, t, 5, 0, isPaperTheme(), false);
     }
   });
   document.querySelectorAll("[data-anom-idx]").forEach(cv => {
@@ -2355,11 +2689,12 @@ function drawSpectrogram(t) {
     cv.width = 640;
     cv.height = 190;
   }
+  const paper = isPaperTheme();
   const w = cv.width, h = cv.height;
-  cx.fillStyle = "#030805";
+  cx.fillStyle = paper ? "#1e1912" : "#030805";
   cx.fillRect(0, 0, w, h);
 
-  cx.strokeStyle = "rgba(52, 95, 68, 0.25)";
+  cx.strokeStyle = paper ? "rgba(168, 144, 104, 0.22)" : "rgba(52, 95, 68, 0.25)";
   for (let x = 0; x < w; x += 40) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, h); cx.stroke(); }
   for (let y = 0; y < h; y += 30) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(w, y); cx.stroke(); }
 
@@ -2370,36 +2705,36 @@ function drawSpectrogram(t) {
       for (let b = 0; b < 4; b++) {
         const bend = Math.exp(-Math.pow((x - w/2)/65, 2)) * 38;
         const y = 30 + b * 28 + bend + Math.sin(phase * 1.4 + b) * 4;
-        cx.fillStyle = "rgba(248, 113, 113, 0.88)";
+        cx.fillStyle = "rgba(248, 113, 113, 0.90)";
         cx.fillRect(x, y, 2, 5);
       }
     } else if (cat === 0) {
       for (let b = 0; b < 3; b++) {
         const y = 38 + b * 42 + Math.sin(phase * 0.7 + b) * 4;
-        cx.fillStyle = "rgba(74, 222, 128, 0.55)";
+        cx.fillStyle = paper ? "rgba(233, 222, 196, 0.58)" : "rgba(74, 222, 128, 0.55)";
         cx.fillRect(x, y - 6, 3, 12);
       }
     } else if (cat === 1) {
       for (let b = 0; b < 4; b++) {
         const y = 32 + b * 28 + Math.sin(phase + b) * 2;
-        cx.fillStyle = "rgba(74, 222, 128, 0.82)";
+        cx.fillStyle = paper ? "rgba(233, 222, 196, 0.85)" : "rgba(74, 222, 128, 0.82)";
         cx.fillRect(x, y, 3, 4);
       }
     } else if (cat === 4) {
       if (((x + Math.floor(t * 45)) % 36) < 4) {
-        cx.fillStyle = "rgba(74, 222, 128, 0.9)";
+        cx.fillStyle = paper ? "rgba(245, 158, 11, 0.92)" : "rgba(74, 222, 128, 0.9)";
         cx.fillRect(x, 18, 3, h - 36);
       }
     } else if (cat === 3) {
       const slot = Math.floor((x + t * 35) / 18);
       if ((slot * 7 + Math.floor(cur.seed)) % 3 === 0) {
         const top = 26 + (slot % 3) * 32;
-        cx.fillStyle = "rgba(74, 222, 128, 0.85)";
+        cx.fillStyle = paper ? "rgba(233, 222, 196, 0.88)" : "rgba(74, 222, 128, 0.85)";
         cx.fillRect(x, top, 3, 28);
       }
     } else if (cat === 2) {
       const y = ((x * 0.6 + t * 40) % (h - 30)) + 15;
-      cx.fillStyle = "rgba(134, 239, 172, 0.65)";
+      cx.fillStyle = paper ? "rgba(217, 119, 6, 0.78)" : "rgba(134, 239, 172, 0.65)";
       cx.fillRect(x, y, 2, 9);
     }
   }
@@ -2419,6 +2754,7 @@ function loop(now) {
 }
 
 function render() {
+  syncThemeClass();
   const w = $("#win"), tb = $("#tabs");
   if (V === "boot" || V === "intro" || V === "end") {
     tb.innerHTML = "";
@@ -2482,12 +2818,12 @@ function render() {
         <div class="login-body">
           <div class="user-avatar-frame" aria-label="Usuario">
             <svg width="62" height="62" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="32" cy="22" r="11" stroke="#22c55e" stroke-width="2.5" fill="#ffffff"/>
-              <path d="M12 54C12 42.9543 20.9543 36 32 36C43.0457 36 52 42.9543 52 54" stroke="#22c55e" stroke-width="2.5" fill="#ffffff"/>
+              <circle cx="32" cy="22" r="11" stroke="#8c734b" stroke-width="2.5" fill="#f5eedc"/>
+              <path d="M12 54C12 42.9543 20.9543 36 32 36C43.0457 36 52 42.9543 52 54" stroke="#8c734b" stroke-width="2.5" fill="#f5eedc"/>
             </svg>
           </div>
           <div style="max-width:340px;margin:0 auto 18px;text-align:left">
-            <label for="playerName" style="display:block;font-size:13px;color:#ffffff;margin-bottom:8px">
+            <label for="playerName" style="display:block;font-size:13px;font-weight:700;margin-bottom:8px">
               Introduzca su nombre de usuario
             </label>
             <input type="text" id="playerName" maxlength="32" value="${playerNameInput}" autocomplete="off">
@@ -2508,13 +2844,13 @@ function render() {
             </div>
             <div class="os-modal-body">
               <div style="margin-bottom:14px">
-                <label for="adminPlayerName" style="display:block;font-size:12px;color:#ffffff;margin-bottom:6px">
+                <label for="adminPlayerName" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">
                   Introduzca su nombre de usuario
                 </label>
                 <input type="text" id="adminPlayerName" maxlength="32" value="${playerNameInput}" autocomplete="off" style="max-width:100%">
               </div>
               <div style="margin-bottom:14px">
-                <label for="startNight" style="display:block;font-size:12px;color:#ffffff;margin-bottom:6px">
+                <label for="startNight" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">
                   SELECTOR DE NOCHES:
                 </label>
                 <select id="startNight">
@@ -2522,8 +2858,8 @@ function render() {
                 </select>
               </div>
               <div class="card" style="margin:0 0 16px;padding:10px 12px">
-                <div style="font-size:12px;font-weight:700;color:#ffffff;margin-bottom:4px">MODO LIBRE / SANDBOX</div>
-                <div style="font-size:11px;color:#e4e4e7">
+                <div style="font-size:12px;font-weight:700;margin-bottom:4px">MODO LIBRE / SANDBOX</div>
+                <div class="mut" style="font-size:11px">
                   Inicia con mejoras NV 5/5, 200 PWR con recarga activa, $9999 CR y todo el Atlas + anomalias desbloqueadas.
                 </div>
               </div>
@@ -2568,8 +2904,8 @@ function render() {
                 <div class="mail-sender-box">
                   <div class="mail-sender-avatar" aria-hidden="true">
                     <svg width="20" height="20" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="32" cy="22" r="11" stroke="#22c55e" stroke-width="3" fill="#ffffff"/>
-                      <path d="M12 54C12 42.9543 20.9543 36 32 36C43.0457 36 52 42.9543 52 54" stroke="#22c55e" stroke-width="3" fill="#ffffff"/>
+                      <circle cx="32" cy="22" r="11" stroke="#8c734b" stroke-width="3" fill="#f5eedc"/>
+                      <path d="M12 54C12 42.9543 20.9543 36 32 36C43.0457 36 52 42.9543 52 54" stroke="#8c734b" stroke-width="3" fill="#f5eedc"/>
                     </svg>
                   </div>
                   <span class="mail-sender-name">${senderLabel}</span>
@@ -2654,8 +2990,8 @@ function render() {
         const [rw, rh] = CRT_RES[Math.min(5, G.f)];
         const pF = proxPct(knobF, cur.tgF);
         const pP = proxPct(knobP, cur.tgP);
-        const colF = pF >= 88 ? "#4ade80" : pF >= 55 ? "#eab308" : "#ef4444";
-        const colP = pP >= 88 ? "#4ade80" : pP >= 55 ? "#eab308" : "#ef4444";
+        const colF = pF >= 88 ? "#15803d" : pF >= 55 ? "#b45309" : "#b91c1c";
+        const colP = pP >= 88 ? "#15803d" : pP >= 55 ? "#b45309" : "#b91c1c";
 
         const needSub = isSubcatEnabled();
         const catModels = choiceCat !== null ? MODELS.filter(m => m.cat === choiceCat) : [];
@@ -2668,7 +3004,7 @@ function render() {
                 <canvas id="crt" width="${rw}" height="${rh}"></canvas>
               </div>
               <div class="between" style="width:100%;margin-top:8px;font-size:11.5px;flex:none">
-                <span class="mut" style="${optFail ? "color:#fca5a5" : ""}">${optFail ? "[ERROR OPTICO // MONITOR CRT AVERIADO]" : `CRT ${rw}x${rh}px // FILTRO NV.${G.f}/5`}</span>
+                <span class="mut" style="${optFail ? "color:#991b1b;font-weight:700" : ""}">${optFail ? "[ERROR OPTICO // MONITOR CRT AVERIADO]" : `CRT ${rw}x${rh}px // FILTRO NV.${G.f}/5`}</span>
                 <span class="mut">${cur.fixed ? "[CAPTURA FIJADA]" : "SENAL SIN FIJAR"}</span>
               </div>
             </div>
@@ -2701,7 +3037,7 @@ function render() {
                   </div>
                 </div>
 
-                <div class="row" style="margin-top:14px;padding-top:10px;border-top:1px solid #166534">
+                <div class="row" style="margin-top:14px;padding-top:10px;border-top:1px dashed #8c734b">
                   <button class="alt" id="playAu">${activeVoice ? "Detener audio" : "Escuchar audio (-2 PWR)"}</button>
                   <button id="fixBtn" ${tuned && !cur.fixed ? "" : "disabled"}>Fijar captura</button>
                   <button class="bad" id="dropBtn">Descartar</button>
@@ -2761,7 +3097,7 @@ function render() {
           ${nightAssigns.map((a, idx) => {
             const mod = a.modelId ? MODELS.find(m => m.id === a.modelId) : null;
             const reqTxt = `${CLASSES[a.cat]}${mod ? ` (${mod.name})` : ""}`;
-            return `<div class="between" style="padding:7px 0;border-bottom:1px solid #166534">
+            return `<div class="between" style="padding:7px 0;border-bottom:1px dashed #a89068">`
               <div>
                 <b>Encargo ${idx + 1}/3 · ${a.sciName}</b>
                 <div class="mut" style="font-size:12px">Solicita: ${reqTxt} · Pago: $${a.reward} CR</div>
@@ -2772,7 +3108,7 @@ function render() {
             </div>`;
           }).join("")}
 
-          <div class="between" style="padding:9px 0;border-bottom:1px solid #166534">
+          <div class="between" style="padding:9px 0;border-bottom:1px dashed #a89068">`
             <div>
               <b>Archivo Central (Envio Libre / Extra)</b>
               <div class="mut" style="font-size:12px">
@@ -2787,7 +3123,7 @@ function render() {
           ${shadowBuyerUnlocked ? `
             <div class="between" style="padding:9px 0">
               <div>
-                <b style="color:#d8b4fe">Canal Cifrado // Intermediario Sombra</b>
+                <b style="color:#581c87">Canal Cifrado // Intermediario Sombra</b>
                 <div class="mut" style="font-size:12px">Compra directa de lecturas anomalas fuera de la red oficial ($240 CR).</div>
               </div>
               <button class="shadow" id="sendShadowBtn">Transmitir por Canal Cifrado</button>
@@ -2811,7 +3147,7 @@ function render() {
             }
             return `<div class="atlas-card">
               <div class="between">
-                <span style="font-size:11px;color:#ffffff">${CLASSES[m.cat].toUpperCase()}</span>
+                <span class="mut" style="font-size:11px;font-weight:700">${CLASSES[m.cat].toUpperCase()}</span>
                 <button class="alt" style="padding:2px 7px;font-size:11px" data-atlas-au="${m.id}">Audio</button>
               </div>
               <b>${m.name}</b>
@@ -2900,8 +3236,8 @@ function render() {
     if (gameOverReason === "ARREST") {
       h = `
         <div class="card dangerbox" style="padding:22px">
-          <div style="font-size:12px;color:#fca5a5;letter-spacing:1.5px">INTERVENCION GUBERNAMENTAL // DIVISION DEL ESPACIO DE NACIONES UNIDAS</div>
-          <h2 style="margin:8px 0;color:#f87171">ESTACION ERIAL-7 CLAUSURADA</h2>
+          <div style="font-size:12px;color:#7f1d1d;font-weight:700;letter-spacing:1.5px">INTERVENCION GUBERNAMENTAL // DIVISION DEL ESPACIO DE NACIONES UNIDAS</div>
+          <h2 style="margin:8px 0;color:#991b1b">ESTACION ERIAL-7 CLAUSURADA</h2>
           <p>
             Al transmitir una senal anomala a traves de la red oficial, los filtros de seguridad de la <b>Division del Espacio de Naciones Unidas</b> rastrearon el origen hasta tu terminal.
           </p>
@@ -2915,8 +3251,8 @@ function render() {
     } else {
       h = `
         <div class="card" style="padding:22px">
-          <div style="font-size:12px;color:#ffffff;letter-spacing:1.5px">CAMPANA COMPLETADA // 15 NOCHES</div>
-          <h2 style="margin:8px 0;color:#ffffff">GUARDIA FINALIZADA · OP. ${S.playerName.toUpperCase()}</h2>
+          <div class="mut" style="font-size:12px;font-weight:700;letter-spacing:1.5px">CAMPANA COMPLETADA // 15 NOCHES</div>
+          <h2 style="margin:8px 0">GUARDIA FINALIZADA · OP. ${S.playerName.toUpperCase()}</h2>
           <p>
             Has completado las 15 noches de vigilancia en la Estacion Erial-7.
           </p>
@@ -3187,7 +3523,7 @@ function bindEvents(w) {
     if (R) R.retunes++;
     if (cur) {
       const pF = proxPct(knobF, cur.tgF);
-      const colF = pF >= 88 ? "#4ade80" : pF >= 55 ? "#eab308" : "#ef4444";
+      const colF = pF >= 88 ? "#15803d" : pF >= 55 ? "#b45309" : "#b91c1c";
       const bf = $("#barF"), tf = $("#txtF");
       if (bf) { bf.style.width = `${pF}%`; bf.style.background = colF; }
       if (tf) { tf.textContent = `${pF}%`; tf.style.color = colF; }
@@ -3202,7 +3538,7 @@ function bindEvents(w) {
     if (R) R.retunes++;
     if (cur) {
       const pP = proxPct(knobP, cur.tgP);
-      const colP = pP >= 88 ? "#4ade80" : pP >= 55 ? "#eab308" : "#ef4444";
+      const colP = pP >= 88 ? "#15803d" : pP >= 55 ? "#b45309" : "#b91c1c";
       const bp = $("#barP"), tp = $("#txtP");
       if (bp) { bp.style.width = `${pP}%`; bp.style.background = colP; }
       if (tp) { tp.textContent = `${pP}%`; tp.style.color = colP; }
