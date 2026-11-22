@@ -917,10 +917,12 @@ const ANOMALY_DEFS = [
     type: "earth_echo",
     title: "Tierra",
     img: "Signals/earth_anomaly.png",
+    audioSrc: "assets/audio/earth.wav",
+    audioVol: 0.48,
     cat: 1,
     freq: 118,
     wave: "sine",
-    textData: "... ¿Hola?"
+    textData: "... it... hurts..."
   },
   {
     type: "dyson",
@@ -1069,31 +1071,31 @@ const SCIENTISTS = [
   {name: "Dra. Sofia Lindqvist", inst: "Consorcio Espectral Nordico"},
   {name: "Dr. Mateo Salgado", inst: "Red de Radioastronomia Austral"},
   {name: "Dra. Aris Thorne", inst: "Laboratorio de Cuerpos Menores"},
-  {name: "Dr. Julian Alreyd", inst: "Centro de Interferometria Profunda"},
+  {name: "Dr. Arvid Alreyd", inst: "Observatorio Echo Oslo"},
   {name: "Dra. Claire Charles", inst: "Departamento de Astrofisica Estelar"},
-  {name: "Dr. Arthur Powell", inst: "Observatorio Meridian"},
-  {name: "Dra. Helena Branco", inst: "Instituto Lusitano de Radioastronomia"},
-  {name: "Dr. Emiliano Rojas", inst: "Estacion Austral de Telemetria"},
-  {name: "Dra. Nadia Koustoulas", inst: "Consorcio Egeo de Espacio Profundo"},
+  {name: "Dr. Thomas Powell", inst: "Observatorio Echo Midlands"},
+  {name: "Dr. Francisco Branco", inst: "Instituto Lusitano de Radioastronomia"},
+  {name: "Dra. Helena Rojas", inst: "Estacion Austral de Telemetria"},
+  {name: "Dr. Joseph Day", inst: "Consorcio Egeo de Espacio Profundo"},
   {name: "Dr. Victor Hammond", inst: "Laboratorio de Propulsiones y Sondas"}
 ];
 
 const NIGHT_SCENARIO_LABELS = [
-  "Noche 1 — Inicio (Recarga rápida)",
-  "Noche 2 — Guardia estándar (Recarga rápida)",
-  "Noche 3 — Pulsares + Espectrograma integrado",
-  "Noche 4 — Guardia intermedia (Recarga rápida)",
-  "Noche 5 — Singularidad (Cuasar) + Archivos dañados",
-  "Noche 6 — Desgaste térmico (Recarga lenta)",
-  "Noche 7 — Enana Marrón + Guardia profunda (Recarga lenta)",
-  "Noche 8 — Víspera de tormenta (Recarga lenta)",
-  "Noche 9 — Agujero Negro + Fallo óptico CRT (Sin imagen)",
+  "Noche 1 — Inicio",
+  "Noche 2 — Guardia estándar",
+  "Noche 3 — Pulsares",
+  "Noche 4 — Guardia intermedia",
+  "Noche 5 — Singularidad",
+  "Noche 6 — Desgaste térmico",
+  "Noche 7 — Enana Marrón + Guardia profunda",
+  "Noche 8 — Víspera de tormenta ",
+  "Noche 9 — Fallo óptico CRT",
   "Noche 10 — Subcategorías y Anomalías únicas activas",
-  "Noche 11 — Corte de generador (Sin recarga)",
-  "Noche 12 — Vigilancia crítica (Sin recarga)",
-  "Noche 13 — Sector profundo (Sin recarga)",
-  "Noche 14 — Penúltima guardia (Sin recarga)",
-  "Noche 15 — Guardia final (Sin recarga)"
+  "Noche 11 — Corte de generador",
+  "Noche 12 — Vigilancia crítica",
+  "Noche 13 — Sector profundo",
+  "Noche 14 — Penúltima guardia",
+  "Noche 15 — Guardia final"
 ];
 
 const LIVE_STORAGE_KEY = "erial7_live_sessions_v1";
