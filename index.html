@@ -156,7 +156,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
   color:#4ade80;font-size:15px;font-weight:700;background:#000000;
 }
 .mail-body{
-  flex:1;padding:14px 16px;white-space:pre-line;font-size:14px;line-height:1.62;
+  flex:1;padding:14px 16px;white-space:pre-line;overflow-wrap:anywhere;word-break:break-word;font-size:14px;line-height:1.62;
   color:#ffffff;overflow-y:auto;background:#000000;
 }
 
@@ -1505,6 +1505,7 @@ let discoveredModels = new Set(); // Modelos normales verificados en Central
 let discoveredAnomalies = []; // Lista privada de anomalías encontradas (aparece en papel dentro de Atlas)
 let atlasSpecMode = new Set(); // Entradas del Atlas mostradas como espectrograma en lugar de imagen
 let firstAnomalyFound = false;
+let flockMailSent = false;
 let hasFloppyDisk = false;
 let floppyStoredAnomalies = []; // Anomalías respaldadas en Disco Floppy (máx. 5)
 let gameOverReason = ""; // "ARREST" | "COMPLETED"
@@ -2445,6 +2446,7 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
     discoveredModels = new Set();
     discoveredAnomalies = [];
     firstAnomalyFound = false;
+    flockMailSent = false;
     hasFloppyDisk = false;
     floppyStoredAnomalies = [];
   }
@@ -2619,6 +2621,18 @@ function onFirstAnomalyDiscovered() {
     {kind: "anon_warn", sender: "OCULTO", tag: `N${shift + 1} · FLOPPY`}
   );
   if (V === "shop") render();
+}
+
+function onFlockAnomalyDiscovered() {
+  if (flockMailSent) return;
+  flockMailSent = true;
+
+  addMail(
+    "*chirp*",
+    "*chirp*".repeat(71),
+    {kind: "anon_warn", sender: "flock", tag: `N${shift + 1} · FLOCK`}
+  );
+  updBadges();
 }
 
 function triggerGovernmentArrestEnding() {
@@ -4556,7 +4570,8 @@ function bindEvents(w) {
     beep(620, 0.08);
 
     if (cur.anom) {
-      if (!discoveredAnomalies.some(a => a.anomType === cur.anomType)) {
+      const isNewAnom = !discoveredAnomalies.some(a => a.anomType === cur.anomType);
+      if (isNewAnom) {
         discoveredAnomalies.push({
           anomTitle: cur.anomTitle,
           anomType: cur.anomType,
@@ -4569,6 +4584,9 @@ function bindEvents(w) {
         });
       }
       onFirstAnomalyDiscovered();
+      if (isNewAnom && cur.anomType === "flock") {
+        onFlockAnomalyDiscovered();
+      }
     }
 
     syncLiveTelemetry(false, true);
@@ -5327,7 +5345,7 @@ function startTutorial() {
   atlasSpecMode = new Set(); lastProcSpecSigId = null;
   Object.keys(SPEC_BUFFERS).forEach(k => delete SPEC_BUFFERS[k]);
   discoveredModels = new Set(); discoveredAnomalies = [];
-  firstAnomalyFound = false; hasFloppyDisk = false; floppyStoredAnomalies = [];
+  firstAnomalyFound = false; flockMailSent = false; hasFloppyDisk = false; floppyStoredAnomalies = [];
   gameOverReason = ""; pendingEvals = [];
   stopVoice();
   R = {
@@ -5484,3 +5502,4 @@ if (document.readyState === "loading") {
 </script>
 </body>
 </html>
+Updating the science fiction signal discovery game logic
