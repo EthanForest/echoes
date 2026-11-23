@@ -1338,17 +1338,17 @@ const CRT_RES = [
 ];
 
 const SCIENTISTS = [
-  {name: "Dra. Elena Vance", inst: "Observatorio Astrofisico Sur"},
+  {name: "Dra. Lauren Vance", inst: "Real Observatorio Astrofisico Británico"},
   {name: "Dr. Kenji Takahashi", inst: "Instituto de Dinamica Orbital"},
-  {name: "Dra. Sofia Lindqvist", inst: "Consorcio Espectral Nordico"},
+  {name: "Dra. Sofia Lindqvist", inst: "Centro de Investigación Espectral Nordico"},
   {name: "Dr. Mateo Salgado", inst: "Red de Radioastronomia Austral"},
   {name: "Dra. Aris Thorne", inst: "Laboratorio de Cuerpos Menores"},
   {name: "Dr. Arvid Alreyd", inst: "Observatorio Echo Oslo"},
-  {name: "Dra. Claire Charles", inst: "Departamento de Astrofisica Estelar"},
-  {name: "Dr. Thomas Powell", inst: "Observatorio Echo Midlands"},
+  {name: "Dra. Claire Charles", inst: "Departamento de Astrofisica de Londres"},
+  {name: "Dr. Thomas Powell", inst: "Observatorio Echo Leicester"},
   {name: "Dr. Francisco Branco", inst: "Instituto Lusitano de Radioastronomia"},
-  {name: "Dra. Helena Rojas", inst: "Estacion Austral de Telemetria"},
-  {name: "Dr. Joseph Day", inst: "Consorcio Egeo de Espacio Profundo"},
+  {name: "Dra. Helena Rojas", inst: "Estacion de Telemetria de España"},
+  {name: "Dr. Joseph Day", inst: "Observatorio de Espacio Profundo"},
   {name: "Dr. Victor Hammond", inst: "Laboratorio de Propulsiones y Sondas"}
 ];
 
@@ -1359,10 +1359,10 @@ const NIGHT_SCENARIO_LABELS = [
   "Noche 4 — Guardia intermedia",
   "Noche 5 — Singularidad",
   "Noche 6 — Desgaste térmico",
-  "Noche 7 — Enana Marrón + Guardia profunda",
+  "Noche 7 — Enana Marrón",
   "Noche 8 — Víspera de tormenta ",
   "Noche 9 — Fallo óptico CRT",
-  "Noche 10 — Subcategorías y Anomalías únicas activas",
+  "Noche 10 — Subcategorías",
   "Noche 11 — Corte de generador",
   "Noche 12 — Vigilancia crítica",
   "Noche 13 — Sector profundo",
@@ -4017,7 +4017,7 @@ function render() {
     h = `
       <div class="card">
         <div class="between">
-          <b>PLATAFORMA DE ENVIO INDEPENDIENTE</b>
+          <b>PLATAFORMA DE ENVIO</b>
           <span class="mut" style="font-size:12px">MEMORIA: ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS} (Cola: ${outbox.length} · Procesador: ${sigs.filter(s => s.st === "raw").length})</span>
         </div>
         <div class="mut" style="font-size:12px">Selecciona un paquete preparado y elige manualmente su destinatario.</div>
