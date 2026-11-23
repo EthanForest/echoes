@@ -2326,7 +2326,7 @@ function initShift() {
       "Actualizacion // Categoria Pulsar y Espectrograma",
       "AVISO DE ACTUALIZACION DE FIRMWARE:\n\n" +
       "Se ha habilitado la categoria Pulsar en la consola del Procesador (incluyendo Pulsares y FRB) junto con el Espectrograma FFT en tiempo real.\n\n" +
-      "USO DEL ESPECTROGRAMA: Reproduce el audio de la senal capturada para observar su cadencia de pulsos y bandas de frecuencia en el espectrograma. Esta herramienta te permitira distinguir los Pulsares y otras emisiones energeticas con precision.",
+      "USO DEL ESPECTROGRAMA: Reproduce el audio de la señal capturada para observar su cadencia de pulsos y bandas de frecuencia en el espectrograma. Esta herramienta te permitira distinguir los Pulsares y otras emisiones energeticas con precision.",
       {sender: "SISTEMA", tag: `N${shift + 1} · UPD`}
     );
   } else if (shift === 4) {
@@ -2360,7 +2360,7 @@ function initShift() {
     addMail(
       "Averia Critica de Monitor Optico",
       "ALERTA DE MANTENIMIENTO: Una sobretension ha danado el tubo de rayos catodicos del Procesador durante toda esta guardia.\n\n" +
-      "No podras visualizar la imagen de los objetos capturados esta noche. Identifica cada senal guiandote por su firma de audio, los medidores de proximidad y el espectrograma.",
+      "No podras visualizar la imagen de los objetos capturados esta noche. Identifica cada señal guiandote por su firma de audio, los medidores de proximidad y el espectrograma.",
       {sender: "MANTENIMIENTO", tag: `N${shift + 1} · ERR`}
     );
   } else if (shift === 9) {
@@ -2454,8 +2454,8 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
 
   const introId = addMail(
     `Protocolo de Operaciones // ${cleanName}`,
-    `Estacion de Escucha Erial-7 · Inicio en ${shiftLabel(shift)} de ${TOTAL_NIGHTS}${isFreeMode ? " [MODO LIBRE ACTIVO]" : ""}.\n\n` +
-    "Obtencion de senales:\n" +
+    `Estacion de Escucha Cestovatel · Inicio en ${shiftLabel(shift)} de ${TOTAL_NIGHTS}${isFreeMode ? " [MODO LIBRE ACTIVO]" : ""}.\n\n` +
+    "Obtencion de señales:\n" +
     "1. Mapa Estelar: Selecciona un eco para alinear antenas y descargar la trama.\n" +
     "2. Procesador: Ajusta Frecuencia y Polaridad, fija la captura y cataloga el objeto.\n" +
     "3. Plataforma: Despacha el paquete resultante desde la Plataforma de Envio.",
@@ -2605,16 +2605,16 @@ function onFirstAnomalyDiscovered() {
 
   addMail(
     "Protocolo de Incidencias Orbitales",
-    "Comunicado oficial de la Oficina de Asuntos del Espacio Ultraterrestre (Division del Espacio de Naciones Unidas):\n\n" +
-    "Nuestros monitores orbitales han registrado una fluctuacion no catalogada en el cuadrante de la Estacion Erial-7.\n\n" +
-    "Le invitamos a reportar de inmediato cualquier incidencia, senal anomala o lectura fuera de parametro a traves de los canales oficiales de Central para su analisis institucional.",
+    "Comunicado oficial de la Oficina de Asuntos Internos de la Division del Espacio de Naciones Unidas:\n\n" +
+    "Nuestros monitores orbitales han registrado una fluctuacion no catalogada en el cuadrante de la Estacion.\n\n" +
+    "Le invitamos a reportar de inmediato cualquier incidencia, señal anomala o lectura fuera de parametro a traves de los canales oficiales de Central para su analisis institucional.",
     {kind: "un_notice", sender: "ONU ESPACIO", tag: `N${shift + 1} · ONU`}
   );
 
   addMail(
     "NO LA ENVIES POR LA RED // DISCO FLOPPY",
     "Detectamos que acabas de fijar una lectura anomala en tu terminal.\n\n" +
-    "ADVERTENCIA: No transmitas esa senal a los cientificos ni al Archivo Central. Si la subes a la red oficial, activaras los protocolos de seguridad de la Division del Espacio de Naciones Unidas: clausuraran la estacion y te arrestaran para interrogatorio.\n\n" +
+    "ADVERTENCIA: No transmitas esa señal a los cientificos ni al Archivo Central. Si la subes a la red oficial, activaras los protocolos de seguridad de la Division del Espacio de Naciones Unidas: clausuraran la estacion y te arrestaran para interrogatorio.\n\n" +
     "He dejado un Disco Floppy disponible para su compra en tu Taller. Adquierelo para poder guardar las anomalias directamente en el disco sin usar la red y ampliar tu buffer con capacidad para 5 anomalias extra.",
     {kind: "anon_warn", sender: "OCULTO", tag: `N${shift + 1} · FLOPPY`}
   );
@@ -3862,9 +3862,9 @@ function render() {
             isBufferFullForLock() && !busySig
               ? `Memoria llena (${getStoredMemoryCount()}/${hasFloppyDisk ? MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES : MAX_MEMORY_SIGNALS}): envia en Plataforma o descarta en Procesador.`
               : busySig
-                ? `Antenas ocupadas rastreando senal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${hasFloppyDisk ? MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES : MAX_MEMORY_SIGNALS}]`
+                ? `Antenas ocupadas rastreando señal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${hasFloppyDisk ? MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES : MAX_MEMORY_SIGNALS}]`
                 : sigs.filter(s => s.st === "echo").length === 0 && areNightAssignmentsCataloged() && nightTotalSpawned >= MAX_NIGHT_SIGNALS_AFTER_CATALOG
-                  ? "No quedan mas senales en el sector durante esta noche."
+                  ? "No quedan mas señales en el sector durante esta noche."
                   : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco) · Memoria: ${hasFloppyDisk ? `${getNormalStoredCount()}/${MAX_MEMORY_SIGNALS} + ${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES} ANOM` : `${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}`}.`
           }</span>
           <button class="alt" id="rd">Pulso Radar (-6 PWR)</button>
@@ -3937,7 +3937,7 @@ function render() {
           <div class="proc-side">
             <div class="card">
               <div class="proc-sec-head">
-                <span>SINTONIZACION DE SENAL</span>
+                <span>SINTONIZACION DE SEÑAL</span>
                 <span class="mut">${cur.fixed ? "FIJADA" : tuned ? "LISTA" : "AJUSTANDO"}</span>
               </div>
 
@@ -4085,7 +4085,7 @@ function render() {
               return `<div class="atlas-card locked">
                 <div style="font-size:11px" class="mut">${CLASSES[m.cat].toUpperCase()}</div>
                 <b>[NO DESCUBIERTO]</b>
-                <div class="mut" style="font-size:11px">Verifica esta senal en Central para desbloquear su registro visual y sonoro.</div>
+                <div class="mut" style="font-size:11px">Verifica esta señal en Central para desbloquear su registro visual y sonoro.</div>
               </div>`;
             }
             const showSpec = specAvail && atlasSpecMode.has(m.id);
@@ -4183,10 +4183,10 @@ function render() {
           <div style="font-size:12px;color:#7f1d1d;font-weight:700;letter-spacing:1.5px">INTERVENCION GUBERNAMENTAL // DIVISION DEL ESPACIO DE NACIONES UNIDAS</div>
           <h2 style="margin:8px 0;color:#991b1b">ESTACION ERIAL-7 CLAUSURADA</h2>
           <p>
-            Al transmitir una senal anomala a traves de la red oficial, los filtros de seguridad de la <b>Division del Espacio de Naciones Unidas</b> rastrearon el origen hasta tu terminal.
+            Al transmitir una señal anomala a traves de la red oficial, los filtros de seguridad de la <b>Division del Espacio de Naciones Unidas</b> rastrearon el origen hasta tu terminal.
           </p>
           <p class="mut">
-            Fuerzas de contencion orbital han clausurado la estacion Erial-7 y has sido puesto bajo arresto preventivo para investigacion.
+            Fuerzas de contencion orbital han clausurado la estacion y has sido puesto bajo arresto preventivo para investigacion.
           </p>
           <div class="row" style="margin-top:16px">
             <button id="rsBtn">Iniciar nueva partida</button>
@@ -4198,7 +4198,7 @@ function render() {
           <div class="mut" style="font-size:12px;font-weight:700;letter-spacing:1.5px">CAMPANA COMPLETADA // 15 NOCHES</div>
           <h2 style="margin:8px 0">GUARDIA FINALIZADA · OP. ${S.playerName.toUpperCase()}</h2>
           <p>
-            Has completado las 15 noches de vigilancia en la Estacion Erial-7.
+            Has completado las 15 noches de vigilancia en la Estacion.
           </p>
           <div class="row">
             <span class="pill">Creditos finales: $${G.money} CR</span>
@@ -4447,7 +4447,7 @@ function bindEvents(w) {
           if (R) R.invalid++;
           beep(180, 0.15, "sawtooth");
           const maxCap = hasFloppyDisk ? (MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES) : MAX_MEMORY_SIGNALS;
-          return msg(`[ERR] Memoria llena (${getStoredMemoryCount()}/${maxCap}) // Envia, guarda en Floppy o descarta senales antes de capturar mas`, 0);
+          return msg(`[ERR] Memoria llena (${getStoredMemoryCount()}/${maxCap}) // Envia, guarda en Floppy o descarta señales antes de capturar mas`, 0);
         }
         if (en < ECHO_LOCK_COST) { if (R) R.invalid++; beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
         en -= ECHO_LOCK_COST;
@@ -4937,7 +4937,7 @@ const TUT_STEPS = [
   // ---------------------------------------------------------------- CORREO
   {
     id: "mail_intro", pose: "present", view: "mail", btn: "Siguiente",
-    text: () => `¡Bienvenido a la Estación Erial-7, ${S.playerName}! Soy Snøskred, tu asistente. Vamos a hacer juntos tu primera guardia. Empecemos por aquí: esta es la pestaña de Correo.`
+    text: () => `¡Bienvenido a tu nuevo trabajo en Radioastronomía, ${S.playerName}! Soy Snøskred, tu asistente oso polar. Vamos a hacer juntos tu primera guardia. Empecemos por aquí: esta es la pestaña de Correo.`
   },
   {
     id: "mail_1", pose: "read", view: "mail", btn: "Siguiente",
@@ -5347,8 +5347,8 @@ function startTutorial() {
 
   const introId = addMail(
     `Protocolo de Operaciones // ${cleanName}`,
-    "Estacion de Escucha Erial-7 · Guardia de entrenamiento (NOCHE 1).\n\n" +
-    "Obtencion de senales:\n" +
+    "Estacion de Escucha · Guardia de entrenamiento (NOCHE 1).\n\n" +
+    "Obtencion de señales:\n" +
     "1. Mapa Estelar: Selecciona un eco para alinear antenas y descargar la trama.\n" +
     "2. Procesador: Ajusta Frecuencia y Polaridad, fija la captura y cataloga el objeto.\n" +
     "3. Plataforma: Despacha el paquete resultante desde la Plataforma de Envio.",
