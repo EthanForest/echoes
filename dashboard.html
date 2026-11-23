@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard de Validación de Diseño · Estación Erial-7 (15 Noches)</title>
+<style>
+:root{
+  --bg:#060b09;--panel:#0c1511;--card:#101c16;--card-hi:#14241c;--border:#213a2b;
+  --fg:#d8f5df;--mut:#7fa38a;--accent:#4ade80;--blue:#38bdf8;--warn:#eab308;--bad:#f87171;--purple:#c084fc;--orange:#fb923c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font:14px/1.5 ui-monospace,"Cascadia Code","Fira Code",Consolas,monospace;
+  padding:16px 12px 44px;
+}
+main{max-width:1280px;margin:0 auto}
+header{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  padding:16px 20px;margin-bottom:14px;
+  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+}
+h1{margin:0;font-size:19px;color:var(--accent);letter-spacing:0.8px}
+.sub{color:var(--mut);font-size:12px;margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.live-dot{
+  display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;
+  background:#0d2618;border:1px solid #22c55e;color:#86efac;font-size:11px;font-weight:700;
+}
+.live-dot.warn{background:#261f0d;border-color:#eab308;color:#fde047}
+.live-dot.err{background:#290d0d;border-color:#ef4444;color:#fca5a5}
+.live-dot::before{
+  content:"";width:7px;height:7px;border-radius:50%;background:currentColor;
+  box-shadow:0 0 8px currentColor;animation:pulse 1.4s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button, .file-btn{
+  font:inherit;font-size:12px;background:#1b5433;color:#ecfdf5;
+  border:1px solid #328554;border-radius:6px;padding:7px 11px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;transition:.15s;text-decoration:none;
+}
+button:hover, .file-btn:hover{background:#236b41}
+button.alt{background:#111e18;color:var(--fg);border:1px solid var(--border)}
+button.alt:hover{background:#192c23}
+button.blue{background:#0f2e42;border-color:#0284c7;color:#e0f2fe}
+button.blue:hover{background:#15405c}
+button.bad{background:#451616;border-color:#991b1b;color:#fecaca}
+button.bad:hover{background:#5c1d1d}
+input[type=file]{display:none}
+
+.dropzone{
+  border:1px dashed #346346;background:#09110d;border-radius:8px;
+  padding:11px 16px;margin-bottom:14px;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.dropzone.drag{border-color:var(--accent);background:#102218}
+
+.filter-bars{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.session-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{
+  background:#0f1b15;border:1px solid var(--border);color:var(--mut);
+  padding:5px 11px;border-radius:999px;font-size:12px;cursor:pointer;transition:.12s;
+}
+.chip:hover{border-color:#3a684c;color:var(--fg)}
+.chip.on{background:#1b3828;border-color:var(--accent);color:var(--fg);font-weight:700}
+.chip.sandbox{border-color:#581c87;color:#d8b4fe}
+.chip.sandbox.on{background:#2e1065;border-color:#c084fc;color:#f3e8ff}
+.chip.arrest{border-color:#7f1d1d;color:#fca5a5}
+.chip.arrest.on{background:#450a0a;border-color:#ef4444;color:#fee2e2}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:18px}
+.kpi{
+  background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:14px 16px;
+  position:relative;overflow:hidden;
+}
+.kpi::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);
+}
+.kpi.blue::before{background:var(--blue)}
+.kpi.warn::before{background:var(--warn)}
+.kpi.purple::before{background:var(--purple)}
+.kpi-title{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px}
+.kpi-val{font-size:25px;font-weight:700;margin:4px 0;color:var(--fg)}
+.kpi-sub{font-size:12px;color:var(--mut);line-height:1.4}
+
+.milestone-strip{
+  background:var(--panel);border:1px solid var(--border);border-radius:8px;
+  padding:9px 14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:11.5px;
+}
+.m-tag{
+  background:#0a140f;border:1px solid #213a2b;border-radius:5px;padding:3px 8px;color:#b7e4c7;
+}
+.m-tag b{color:var(--accent)}
+.m-tag.warn b{color:var(--warn)}
+.m-tag.bad b{color:var(--bad)}
+.m-tag.purple b{color:var(--purple)}
+
+.q-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:20px}
+@media(min-width:960px){.q-grid{grid-template-columns:1fr 1fr}}
+
+.q-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:12px;
+}
+.q-head{border-bottom:1px solid var(--border);padding-bottom:10px}
+.q-tag{
+  display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;
+  background:#14281d;color:var(--accent);border:1px solid #28523a;margin-bottom:6px;
+}
+.q-title{margin:0;font-size:15px;color:#f0fdf4;line-height:1.35}
+.metrics-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mpill{
+  font-size:11px;background:#0a120e;border:1px solid var(--border);
+  padding:3px 7px;border-radius:4px;color:#b7e4c7;
+}
+.mpill b{color:var(--accent)}
+
+canvas.chart{
+  width:100%;height:230px;background:#070d0a;border:1px solid #1b3024;border-radius:7px;display:block;
+}
+
+.insight{
+  background:#0b1410;border-left:3px solid var(--accent);border-radius:5px;
+  padding:10px 12px;font-size:12px;line-height:1.5;
+}
+.insight.warn{border-left-color:var(--warn);background:#141209}
+.insight.bad{border-left-color:var(--bad);background:#170b0b}
+.insight b{display:block;margin-bottom:3px;color:#f0fdf4}
+
+.table-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto;
+}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+th,td{padding:8px 9px;border-bottom:1px solid #1a2e22;text-align:left;white-space:nowrap}
+th{color:var(--accent);background:#09110d;font-weight:700;position:sticky;top:0}
+tr:hover td{background:#122019}
+.badge{padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700}
+.b-ok{background:#123822;color:#86efac}
+.b-warn{background:#382c0e;color:#fde047}
+.b-fail{background:#3f1515;color:#fca5a5}
+.b-live{background:#173247;color:#7dd3fc}
+.b-sandbox{background:#2e1065;color:#e9d5ff;border:1px solid #6b21a8}
+
+select.filter-sel{
+  background:#09110d;color:var(--fg);border:1px solid var(--border);
+  border-radius:6px;padding:5px 10px;font:12px inherit;cursor:pointer;outline:none;
+}
+select.filter-sel:focus{border-color:var(--accent)}
+
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px;z-index:20;
+}
+.modal.open{display:flex}
+.modal-box{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;max-width:560px;width:100%;
+}
+textarea, input[type=text]{
+  width:100%;background:#070d0a;color:var(--fg);border:1px solid var(--border);
+  border-radius:6px;padding:10px;font:12px inherit;margin:8px 0;
+}
+textarea{height:150px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>ERIAL-7 // DASHBOARD DE VALIDACIÓN DE DISEÑO (15 NOCHES)</h1>
+      <div class="sub">
+        <span>Telemetría en vivo · Estación Cestovatel · Prototipo "Frecuencia de Fondo"</span>
+        <span class="live-dot" id="liveBadge">MODO LOCAL</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="blue" id="cloudModalBtn">☁ Conectar Nube</button>
+      <button class="alt" id="copyGameLinkBtn" style="display:none">🔗 Copiar Link Juego</button>
+      <label class="file-btn">
+        📂 Cargar JSON(s)
+        <input type="file" id="fileInput" accept=".json,application/json" multiple>
+      </label>
+      <button class="alt" id="pasteModalBtn">📋 Pegar JSON</button>
+      <button class="alt" id="exportCsvBtn">⬇ Exportar CSV</button>
+      <button class="bad" id="clearBtn">Limpiar</button>
+    </div>
+  </header>
+
+  <div class="dropzone" id="dropzone">
+    <span style="font-size:12px;color:var(--mut)" id="bannerHelp">
+      Conecta una URL de Firebase Realtime Database (<b style="color:var(--fg)">☁ Conectar Nube</b>) para recibir en vivo las partidas de cualquier jugador en internet, o arrastra archivos <b style="color:var(--fg)">.json</b>.
+    </span>
+    <span id="statusLabel" style="font-size:12px;color:var(--accent)"></span>
+  </div>
+
+  <div class="filter-bars">
+    <div class="session-bar" id="modeBar"></div>
+    <div class="session-bar" id="sessionBar"></div>
+  </div>
+
+  <section class="kpi-grid" id="kpiGrid"></section>
+
+  <div class="milestone-strip">
+    <span style="color:var(--mut);font-weight:700">HITOS DE CAMPAÑA:</span>
+    <span class="m-tag"><b>N1–N2:</b> 4 Clases Base</span>
+    <span class="m-tag"><b>N3+:</b> Púlsares + Espectrograma</span>
+    <span class="m-tag"><b>N5+:</b> Singularidades</span>
+    <span class="m-tag warn"><b>N6–N10:</b> Recarga PWR Lenta</span>
+    <span class="m-tag bad"><b>N9:</b> Fallo Óptico CRT</span>
+    <span class="m-tag purple"><b>N10+:</b> 30 Subcategorías + 13 Anomalías</span>
+    <span class="m-tag bad"><b>N11–N15:</b> Corte de Generador (0 Recarga)</span>
+  </div>
+
+  <section class="q-grid">
+    <!-- PREGUNTA 1 -->
+    <article class="q-card">
+      <div class="q-head">
+        <span class="q-tag">PREGUNTA 1 · CLARIDAD DE INTERFAZ Y CURVA DE APRENDIZAJE</span>
+        <h2 class="q-title">¿El tutorial de Snøskred y el flujo entre pestañas reducen la fricción inicial (N1 → N15)?</h2>
+        <div class="metrics-pills" id="pillsQ1"></div>
+      </div>
+      <canvas class="chart" id="chartQ1" width="540" height="230"></canvas>
+      <div class="insight" id="insightQ1"></div>
+    </article>
+
+    <!-- PREGUNTA 2 -->
+    <article class="q-card">
+      <div class="q-head">
+        <span class="q-tag">PREGUNTA 2 · DEDUCCIÓN ESPECTRAL, FALLO ÓPTICO (N9) Y SUBCATEGORÍAS (N10+)</span>
+        <h2 class="q-title">¿Cómo impactan los Púlsares (N3), el Fallo Óptico CRT (N9) y las 30 Subcategorías (N10) en los errores?</h2>
+        <div class="metrics-pills" id="pillsQ2"></div>
+      </div>
+      <canvas class="chart" id="chartQ2" width="540" height="230"></canvas>
+      <div class="insight" id="insightQ2"></div>
+    </article>
+
+    <!-- PREGUNTA 3 -->
+    <article class="q-card">
+      <div class="q-head">
+        <span class="q-tag">PREGUNTA 3 · ENERGÍA (PWR), ECONOMÍA ($CR) Y SERVIDOR</span>
+        <h2 class="q-title">¿El desgaste térmico (N6), el corte de generador (N11) y las caídas de servidor equilibran la economía?</h2>
+        <div class="metrics-pills" id="pillsQ3"></div>
+      </div>
+      <canvas class="chart" id="chartQ3" width="540" height="230"></canvas>
+      <div class="insight" id="insightQ3"></div>
+    </article>
+
+    <!-- PREGUNTA 4 -->
+    <article class="q-card">
+      <div class="q-head">
+        <span class="q-tag">PREGUNTA 4 · RETENCIÓN POR NOCHE, ANOMALÍAS (N10+) Y CLAUSURA ONU</span>
+        <h2 class="q-title">¿Hasta qué noche progresan los jugadores y cuántos provocan la intervención de la ONU?</h2>
+        <div class="metrics-pills" id="pillsQ4"></div>
+      </div>
+      <canvas class="chart" id="chartQ4" width="540" height="230"></canvas>
+      <div class="insight" id="insightQ4"></div>
+    </article>
+  </section>
+
+  <section class="table-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div>
+        <b style="color:var(--accent)">REGISTRO DE SESIONES Y DESGLOSE POR NOCHE (N1 – N15)</b>
+        <span style="font-size:12px;color:var(--mut);margin-left:10px" id="tableCount"></span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <label for="nightFilterSel" style="font-size:12px;color:var(--mut)">Filtrar Noche:</label>
+        <select id="nightFilterSel" class="filter-sel">
+          <option value="ALL">Todas las noches (N1–N15)</option>
+        </select>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Operador</th>
+          <th>Fecha Registro</th>
+          <th>Inicio</th>
+          <th>Tiempo Total</th>
+          <th>Jornada</th>
+          <th>Estado</th>
+          <th>Duración</th>
+          <th>1ª Acción</th>
+          <th>Alineación</th>
+          <th>Clics Inv.</th>
+          <th>Sintonías</th>
+          <th>Audio</th>
+          <th>Espectrog.</th>
+          <th>Corruptos</th>
+          <th>Err. Silenc.</th>
+          <th>Srv (Caída/Fix)</th>
+          <th>PWR / $CR</th>
+          <th>Anomalía ONU</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </section>
+</main>
+
+<!-- MODAL CONECTAR NUBE -->
+<div class="modal" id="cloudModal">
+  <div class="modal-box">
+    <b style="color:var(--blue)">☁ SINCRONIZACIÓN ONLINE MULTIDISPOSITIVO</b>
+    <p style="font-size:12px;color:var(--mut);margin:6px 0">
+      Para que las partidas que jueguen otras personas en sus computadoras o celulares aparezcan aquí automáticamente, pega la URL de tu <b>Firebase Realtime Database</b>:
+    </p>
+    <input type="text" id="cloudUrlInput" placeholder="https://tu-proyecto-default-rtdb.firebaseio.com">
+    <div style="font-size:11px;color:var(--mut);background:#08100c;border:1px solid var(--border);padding:8px;border-radius:6px;margin-bottom:10px">
+      <b>Tip:</b> Una vez guardada la URL aquí, pulsa <b>"🔗 Copiar Link Juego"</b> en la barra superior para compartir el enlace conectado con tus evaluadores, o verifica <code>CLOUD_DB_URL</code> en <code>index.html</code> y <code>dashboard.html</code>.
+    </div>
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <button class="bad" id="disconnectCloudBtn">Desconectar</button>
+      <div style="display:flex;gap:8px">
+        <button class="alt" id="closeCloudModalBtn">Cancelar</button>
+        <button class="blue" id="saveCloudBtn">Guardar y sincronizar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PEGAR JSON -->
+<div class="modal" id="pasteModal">
+  <div class="modal-box">
+    <b style="color:var(--accent)">PEGAR JSON DE SESIÓN</b>
+    <p style="font-size:12px;color:var(--mut);margin:4px 0 0">
+      Pega el objeto JSON exportado o copiado de una sesión de "Frecuencia de Fondo".
+    </p>
+    <textarea id="pasteArea" placeholder='{"id":"A1B2C3","playerName":"Operador","startNight":1,"freeMode":false,"totalPlayTime":950.2,"status":"FINALIZADA","shifts":[...]}'></textarea>
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button class="alt" id="closeModalBtn">Cancelar</button>
+      <button id="confirmPasteBtn">Agregar sesión</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// CONFIGURACIÓN DE BASE DE DATOS EN LA NUBE (Firebase Realtime Database)
+// ============================================================================
+const CLOUD_DB_URL = "https://signal-finder-5e191-default-rtdb.firebaseio.com";
+
+const $ = s => document.querySelector(s);
+const TOTAL_NIGHTS = 15;
+const NIGHT_LABELS_SHORT = Array.from({length: TOTAL_NIGHTS}, (_, i) => `N${i + 1}`);
+const LIVE_STORAGE_KEY = "erial7_live_sessions_v1";
+const DB_URL_STORAGE_KEY = "erial7_cloud_db_url_v1";
+const bc = ("BroadcastChannel" in window) ? new BroadcastChannel("erial7_telemetry") : null;
+
+// Poblar selector de filtro de noches
+const nightFilterSel = $("#nightFilterSel");
+for (let n = 1; n <= TOTAL_NIGHTS; n++) {
+  const opt = document.createElement("option");
+  opt.value = String(n);
+  opt.textContent = `Noche ${n} (N${n})`;
+  nightFilterSel.appendChild(opt);
+}
+
+function normalizeDbUrl(raw) {
+  const clean = String(raw || "").trim().replace(/\/+$/, "");
+  if (!clean) return "";
+  return /^https?:\/\//i.test(clean) ? clean : `https://${clean}`;
+}
+
+function getCloudDbUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = normalizeDbUrl(params.get("db"));
+    if (fromQuery) {
+      localStorage.setItem(DB_URL_STORAGE_KEY, fromQuery);
+      return fromQuery;
+    }
+  } catch (_) {}
+  const fromConst = normalizeDbUrl(CLOUD_DB_URL);
+  if (fromConst) return fromConst;
+  try {
+    return normalizeDbUrl(localStorage.getItem(DB_URL_STORAGE_KEY));
+  } catch (_) {
+    return "";
+  }
+}
+
+let activeDbUrl = getCloudDbUrl();
+let cloudConnState = activeDbUrl ? "CONNECTING" : "LOCAL";
+let sessions = [];
+let selectedSessionId = "ALL";
+let selectedModeFilter = "ALL"; // ALL | NORMAL | SANDBOX
+let selectedNightFilter = "ALL"; // ALL | 1..15
+
+function avg(arr) {
+  return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+}
+
+function fmtDuration(sec) {
+  const s = Math.max(0, Math.round(Number(sec) || 0));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const rem = s % 60;
+  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m`;
+  return `${m}m ${String(rem).padStart(2, "0")}s`;
+}
+
+// Extraer índice de noche (1..15) desde el nombre de jornada ("NOCHE 4", "MODO LIBRE · N10", o legado "DIA 1"/"NOCHE 3")
+function parseNightNumber(shiftName, fallbackIdx, startNight = 1) {
+  const txt = String(shiftName || "").toUpperCase();
+  const mNoche = txt.match(/(?:NOCHE|N)\s*(\d+)/);
+  if (mNoche) {
+    const n = parseInt(mNoche[1], 10);
+    if (n >= 1 && n <= TOTAL_NIGHTS) return n;
+  }
+  const mDia = txt.match(/DIA\s*(\d+)/);
+  if (mDia) {
+    const d = parseInt(mDia[1], 10);
+    if (d >= 1 && d <= TOTAL_NIGHTS) return d;
+  }
+  return Math.min(TOTAL_NIGHTS, Math.max(1, Number(startNight || 1) + fallbackIdx));
+}
+
+function addSessionObj(obj) {
+  if (!obj || !Array.isArray(obj.shifts)) return false;
+  if (obj.tutorial === true || String(obj.id || "").toUpperCase() === "TUTORIAL") return false;
+
+  const id = String(obj.id || Math.random().toString(36).slice(2, 8).toUpperCase());
+  const startNight = Math.max(1, Math.min(TOTAL_NIGHTS, Number(obj.startNight || 1)));
+  const freeMode = Boolean(obj.freeMode);
+  const totalSec = Number(obj.totalPlayTime ?? obj.shifts.reduce((acc, r) => acc + Number(r.time || 0), 0));
+
+  const normalizedShifts = obj.shifts.map((r, idx) => {
+    const nightNum = parseNightNumber(r.shift, idx, startNight);
+    const rawStatus = String(r.status || (r.ok ? "COMPLETADA" : "EN_CURSO")).toUpperCase();
+    return {
+      nightNum,
+      shift: r.shift || `NOCHE ${nightNum}`,
+      status: rawStatus,
+      ok: Number(r.ok ?? (rawStatus === "COMPLETADA" ? 1 : 0)),
+      tFirst: r.tFirst == null ? 0 : Number(r.tFirst),
+      slewTime: Number(r.slewTime ?? 0),
+      retunes: Number(r.retunes ?? 0),
+      invalid: Number(r.invalid ?? 0),
+      repeats: Number(r.repeats ?? 0),
+      corrupt: Number(r.corrupt ?? 0),
+      silentErrors: Number(r.silentErrors ?? 0),
+      specUses: Number(r.specUses ?? 0),
+      anomSent: Number(r.anomSent ?? 0),
+      crash: Number(r.crash ?? 0),
+      fix: Number(r.fix ?? 0),
+      time: Number(r.time ?? 0),
+      energy: Number(r.energy ?? (freeMode ? 200 : 100)),
+      money: Number(r.money ?? (freeMode ? 9999 : 75))
+    };
+  });
+
+  const hasArrest = normalizedShifts.some(r => r.anomSent > 0 || r.status === "CLAUSURADA_ONU") || obj.status === "CLAUSURADA_ONU";
+  const normalizedStatus = hasArrest
+    ? "CLAUSURADA_ONU"
+    : String(obj.status || "EN_CURSO").toUpperCase();
+
+  const normalized = {
+    id,
+    playerName: String(obj.playerName || `Operador #${id}`),
+    startNight,
+    freeMode,
+    date: String(obj.date || "Sin fecha"),
+    dateISO: String(obj.dateISO || ""),
+    totalPlayTime: totalSec,
+    status: normalizedStatus,
+    shifts: normalizedShifts
+  };
+
+  const existingIdx = sessions.findIndex(s => s.id === id);
+  if (existingIdx >= 0) sessions[existingIdx] = normalized;
+  else sessions.push(normalized);
+  return true;
+}
+
+function loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem(LIVE_STORAGE_KEY);
+    if (!raw) return;
+    const list = JSON.parse(raw);
+    if (Array.isArray(list)) {
+      list.forEach(item => addSessionObj(item));
+    }
+  } catch (_) {}
+}
+
+function updateCloudUi() {
+  const badge = $("#liveBadge");
+  const copyBtn = $("#copyGameLinkBtn");
+  const help = $("#bannerHelp");
+
+  if (!activeDbUrl) {
+    badge.className = "live-dot warn";
+    badge.textContent = "SINCRONIZACIÓN SOLO LOCAL";
+    copyBtn.style.display = "none";
+    help.innerHTML = `Conecta una URL de Firebase Realtime Database (<b style="color:var(--fg)">☁ Conectar Nube</b>) para recibir en vivo las partidas de cualquier jugador en internet, o arrastra archivos <b style="color:var(--fg)">.json</b>.`;
+    return;
+  }
+
+  copyBtn.style.display = "inline-flex";
+  if (cloudConnState === "ONLINE") {
+    badge.className = "live-dot";
+    badge.textContent = "NUBE ONLINE · TIEMPO REAL";
+    help.innerHTML = `Conectado a <b style="color:var(--accent)">${activeDbUrl}</b>. Usa <b style="color:var(--fg)">🔗 Copiar Link Juego</b> para compartir el enlace conectado con tus jugadores.`;
+  } else if (cloudConnState === "ERROR") {
+    badge.className = "live-dot err";
+    badge.textContent = "ERROR DE CONEXIÓN NUBE";
+    help.innerHTML = `No se pudo leer <b style="color:var(--bad)">${activeDbUrl}</b>. Verifica que la URL sea correcta y que las reglas de Firebase permitan lectura/escritura.`;
+  } else {
+    badge.className = "live-dot warn";
+    badge.textContent = "CONECTANDO A NUBE...";
+  }
+}
+
+async function fetchFromCloud() {
+  if (!activeDbUrl) return;
+  try {
+    const res = await fetch(`${activeDbUrl}/sessions.json`, {cache: "no-store"});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    cloudConnState = "ONLINE";
+    if (data && typeof data === "object") {
+      Object.values(data).forEach(item => {
+        if (item && typeof item === "object") addSessionObj(item);
+      });
+    }
+    updateCloudUi();
+    renderDashboard();
+  } catch (_) {
+    cloudConnState = "ERROR";
+    updateCloudUi();
+  }
+}
+
+function getFilteredByMode() {
+  if (selectedModeFilter === "NORMAL") return sessions.filter(s => !s.freeMode);
+  if (selectedModeFilter === "SANDBOX") return sessions.filter(s => s.freeMode);
+  return sessions;
+}
+
+function getActiveSessions() {
+  const byMode = getFilteredByMode();
+  if (selectedSessionId === "ALL") return byMode;
+  return byMode.filter(s => s.id === selectedSessionId);
+}
+
+// Gráfico de líneas / barras multi-serie optimizado para las 15 noches (N1..N15)
+function drawNightTrendChart(canvasId, labels, seriesList, options = {}) {
+  const cv = $(canvasId);
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const padL = 42, padR = 14, padT = 34, padB = 30;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const allVals = seriesList.flatMap(s => s.values.filter(v => v !== null && !Number.isNaN(v)));
+  const rawMax = Math.max(options.minMax || 5, ...allVals, 1);
+  const maxVal = Math.ceil(rawMax * 1.15);
+
+  // Rejilla horizontal
+  ctx.strokeStyle = "rgba(52, 95, 68, 0.28)";
+  ctx.lineWidth = 1;
+  ctx.font = "10px monospace";
+  ctx.fillStyle = "#7fa38a";
+  const steps = 4;
+  for (let i = 0; i <= steps; i++) {
+    const y = padT + plotH - (plotH * i / steps);
+    const val = (maxVal * i / steps).toFixed(options.decimals ?? 0);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    ctx.textAlign = "right";
+    ctx.fillText(val, padL - 6, y + 3);
+  }
+
+  // Marcadores verticales de hitos de campaña (ej. N3, N6, N9, N10, N11)
+  const stepX = plotW / Math.max(1, labels.length - 1);
+  if (Array.isArray(options.milestones)) {
+    options.milestones.forEach(m => {
+      const idx = m.night - 1;
+      if (idx < 0 || idx >= labels.length) return;
+      const mx = padL + idx * stepX;
+      ctx.save();
+      ctx.strokeStyle = m.color || "rgba(234, 179, 8, 0.45)";
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(mx, padT);
+      ctx.lineTo(mx, padT + plotH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = m.color || "#fde047";
+      ctx.font = "9px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(m.label, mx, padT - 3);
+      ctx.restore();
+    });
+  }
+
+  // Leyenda superior
+  let lx = padL;
+  ctx.font = "10.5px monospace";
+  seriesList.forEach(s => {
+    ctx.fillStyle = s.color;
+    ctx.fillRect(lx, 8, 9, 9);
+    ctx.fillStyle = "#d8f5df";
+    ctx.textAlign = "left";
+    ctx.fillText(s.name, lx + 13, 16);
+    lx += ctx.measureText(s.name).width + 24;
+  });
+
+  // Etiquetas eje X (N1..N15)
+  labels.forEach((lbl, i) => {
+    const x = padL + i * stepX;
+    ctx.fillStyle = "#b7e4c7";
+    ctx.font = "10px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(lbl, x, H - 9);
+  });
+
+  // Dibujar series (barras o líneas con nodos)
+  if (options.stackedBars) {
+    const barW = Math.min(22, (plotW / labels.length) * 0.68);
+    labels.forEach((_, gi) => {
+      const x = padL + gi * stepX - barW / 2;
+      let accY = padT + plotH;
+      seriesList.forEach(s => {
+        const val = Number(s.values[gi] || 0);
+        if (val <= 0) return;
+        const bh = (val / maxVal) * plotH;
+        accY -= bh;
+        ctx.fillStyle = s.color;
+        ctx.fillRect(x, accY, barW, bh);
+      });
+      const total = seriesList.reduce((a, s) => a + Number(s.values[gi] || 0), 0);
+      if (total > 0) {
+        ctx.fillStyle = "#ecfdf5";
+        ctx.font = "9.5px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(String(total), padL + gi * stepX, Math.max(padT + 9, accY - 3));
+      }
+    });
+    return;
+  }
+
+  seriesList.forEach(s => {
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    let started = false;
+    s.values.forEach((v, i) => {
+      if (v === null || Number.isNaN(v)) {
+        started = false;
+        return;
+      }
+      const x = padL + i * stepX;
+      const y = padT + plotH - (Math.min(maxVal, v) / maxVal) * plotH;
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Puntos sobre cada noche con datos
+    s.values.forEach((v, i) => {
+      if (v === null || Number.isNaN(v)) return;
+      const x = padL + i * stepX;
+      const y = padT + plotH - (Math.min(maxVal, v) / maxVal) * plotH;
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(x, y, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  });
+}
+
+function renderDashboard() {
+  const modeSessions = getFilteredByMode();
+  if (selectedSessionId !== "ALL" && !modeSessions.some(s => s.id === selectedSessionId)) {
+    selectedSessionId = "ALL";
+  }
+  const active = getActiveSessions();
+
+  const normalCount = sessions.filter(s => !s.freeMode).length;
+  const sandboxCount = sessions.filter(s => s.freeMode).length;
+
+  $("#statusLabel").textContent = sessions.length
+    ? `${sessions.length} sesión(es) registrada(s) (${normalCount} campaña · ${sandboxCount} libre)`
+    : "Esperando inicio de partida o carga de archivo .json...";
+
+  // Barra de filtro por Modo de Juego
+  $("#modeBar").innerHTML = !sessions.length ? "" : `
+    <span style="font-size:12px;color:var(--mut)">Modo:</span>
+    <span class="chip ${selectedModeFilter === "ALL" ? "on" : ""}" data-mode="ALL">Todos (${sessions.length})</span>
+    <span class="chip ${selectedModeFilter === "NORMAL" ? "on" : ""}" data-mode="NORMAL">Campaña Normal (${normalCount})</span>
+    <span class="chip sandbox ${selectedModeFilter === "SANDBOX" ? "on" : ""}" data-mode="SANDBOX">Modo Libre / Sandbox (${sandboxCount})</span>
+  `;
+  $("#modeBar").querySelectorAll("[data-mode]").forEach(el => el.onclick = () => {
+    selectedModeFilter = el.dataset.mode;
+    selectedSessionId = "ALL";
+    renderDashboard();
+  });
+
+  // Barra de selección de Sesión / Operador
+  const bar = $("#sessionBar");
+  if (!modeSessions.length) {
+    bar.innerHTML = "";
+  } else {
+    bar.innerHTML = `<span style="font-size:12px;color:var(--mut)">Operadores:</span>` +
+      `<span class="chip ${selectedSessionId === "ALL" ? "on" : ""}" data-sid="ALL">Todos (${modeSessions.length})</span>` +
+      modeSessions.map(s => {
+        const modeTag = s.freeMode ? " [LIBRE]" : "";
+        const startTag = s.startNight > 1 ? ` · Desde N${s.startNight}` : "";
+        const statusTag = s.status === "EN_CURSO"
+          ? " [EN VIVO]"
+          : s.status === "CLAUSURADA_ONU"
+            ? " [CLAUSURA ONU]"
+            : " [15/15 OK]";
+        const extraCls = s.status === "CLAUSURADA_ONU" ? "arrest" : (s.freeMode ? "sandbox" : "");
+        return `<span class="chip ${extraCls} ${selectedSessionId === s.id ? "on" : ""}" data-sid="${s.id}">${s.playerName}${modeTag}${startTag} · ${fmtDuration(s.totalPlayTime)}${statusTag}</span>`;
+      }).join("");
+    bar.querySelectorAll("[data-sid]").forEach(el => el.onclick = () => {
+      selectedSessionId = el.dataset.sid;
+      renderDashboard();
+    });
+  }
+
+  const allShifts = active.flatMap(s => s.shifts);
+  const closedShifts = allShifts.filter(r => r.status !== "EN_CURSO");
+  const completedShifts = closedShifts.filter(r => r.status === "COMPLETADA" || r.ok === 1).length;
+  const incompleteShifts = closedShifts.filter(r => r.status === "INCOMPLETA" || r.status === "FALLIDA_TIEMPO").length;
+  const completionRate = closedShifts.length ? (completedShifts / closedShifts.length) * 100 : 0;
+
+  const finishedCampaigns = active.filter(s => s.status === "FINALIZADA").length;
+  const arrestSessions = active.filter(s => s.status === "CLAUSURADA_ONU" || s.shifts.some(r => r.anomSent > 0)).length;
+  const arrestRate = active.length ? (arrestSessions / active.length) * 100 : 0;
+
+  const avgTotalPlay = avg(active.map(s => s.totalPlayTime));
+  const avgShiftDur = avg(allShifts.map(r => r.time));
+  const avgTFirst = avg(allShifts.filter(r => r.tFirst > 0).map(r => r.tFirst));
+  const avgSlew = avg(allShifts.map(r => r.slewTime));
+  const avgInvalid = avg(allShifts.map(r => r.invalid));
+  const avgSilentErr = avg(allShifts.map(r => r.silentErrors));
+  const avgCorrupt = avg(allShifts.map(r => r.corrupt));
+  const avgEnergy = avg(allShifts.map(r => r.energy));
+  const avgMoney = avg(allShifts.map(r => r.money));
+
+  const crashedShifts = allShifts.filter(r => r.crash > 0 && r.fix > 0);
+  const totalCrashes = allShifts.reduce((a, r) => a + r.crash, 0);
+  const avgFix = avg(crashedShifts.map(r => r.fix));
+
+  // KPIs
+  $("#kpiGrid").innerHTML = `
+    <div class="kpi">
+      <div class="kpi-title">Sesiones & Tiempo Promedio</div>
+      <div class="kpi-val">${active.length ? fmtDuration(avgTotalPlay) : "0m 00s"}</div>
+      <div class="kpi-sub">${active.length} sesión(es) · ${completedShifts}/${closedShifts.length} noches completadas (${completionRate.toFixed(0)}%) · ${finishedCampaigns} campaña(s) 15/15</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-title">Flujo Interfaz & Alineación</div>
+      <div class="kpi-val">${avgTFirst.toFixed(1)}s <span style="font-size:13px;color:var(--mut)">1ª acción</span></div>
+      <div class="kpi-sub">Alineación antenas: ${avgSlew.toFixed(1)}s/noche · Clics inválidos: ${avgInvalid.toFixed(1)}/noche</div>
+    </div>
+    <div class="kpi warn">
+      <div class="kpi-title">Errores Silenciosos & Economía</div>
+      <div class="kpi-val">${avgSilentErr.toFixed(2)} <span style="font-size:13px;color:var(--mut)">err/noche</span></div>
+      <div class="kpi-sub">Saldo medio: $${avgMoney.toFixed(0)} CR · Energía final media: ${avgEnergy.toFixed(0)} PWR</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-title">Anomalías ONU & Servidor</div>
+      <div class="kpi-val">${arrestRate.toFixed(0)}% <span style="font-size:13px;color:var(--mut)">clausura ONU</span></div>
+      <div class="kpi-sub">${arrestSessions} sesión(es) clausurada(s) · ${totalCrashes} caídas srv (${avgFix.toFixed(1)}s fix)</div>
+    </div>
+  `;
+
+  // Agrupar métricas por noche (N1..N15)
+  const byNight = Array.from({length: TOTAL_NIGHTS}, (_, idx) => {
+    const n = idx + 1;
+    return allShifts.filter(r => r.nightNum === n);
+  });
+
+  const nightAvgOrNull = (arr, fn) => arr.length ? avg(arr.map(fn)) : null;
+
+  // --- PREGUNTA 1: Claridad y Curva de Aprendizaje (N1 -> N15) ---
+  const tFirstByN = byNight.map(list => nightAvgOrNull(list.filter(r => r.tFirst > 0), r => r.tFirst));
+  const invalidByN = byNight.map(list => nightAvgOrNull(list, r => r.invalid));
+  const slewByN = byNight.map(list => nightAvgOrNull(list, r => r.slewTime));
+  const n1Shifts = byNight[0];
+  const n1TFirst = avg(n1Shifts.filter(r => r.tFirst > 0).map(r => r.tFirst));
+  const n1Invalid = avg(n1Shifts.map(r => r.invalid));
+
+  $("#pillsQ1").innerHTML = `
+    <span class="mpill">1ª Acción N1: <b>${n1TFirst.toFixed(1)}s</b></span>
+    <span class="mpill">Clics Inv. N1: <b>${n1Invalid.toFixed(1)}</b></span>
+    <span class="mpill">Alineación Prom.: <b>${avgSlew.toFixed(1)}s</b></span>
+    <span class="mpill">Corruptos/Noche: <b>${avgCorrupt.toFixed(2)}</b></span>
+  `;
+  drawNightTrendChart("#chartQ1", NIGHT_LABELS_SHORT, [
+    { name: "1ª Acción (s)", values: tFirstByN, color: "#38bdf8" },
+    { name: "Clics Inválidos", values: invalidByN, color: "#f87171" },
+    { name: "Alineación Antena (s)", values: slewByN, color: "#4ade80" }
+  ], { decimals: 1, minMax: 15 });
+
+  const q1El = $("#insightQ1");
+  if (!active.length) {
+    q1El.className = "insight";
+    q1El.innerHTML = "<b>Sin sesiones registradas:</b>Inicia una partida en <code>index.html</code> (el tutorial de Snøskred no contamina las métricas) o carga un archivo <code>.json</code>.";
+  } else if (n1TFirst > 22 || n1Invalid >= 5) {
+    q1El.className = "insight warn";
+    q1El.innerHTML = `<b>Fricción inicial detectada en Noche 1:</b>Los jugadores tardan <b>${n1TFirst.toFixed(1)}s</b> en realizar su primera acción y cometen <b>${n1Invalid.toFixed(1)}</b> clics inválidos en N1. Revisa si quienes omiten el tutorial de Snøskred necesitan un indicador más claro en <b>Mapa Estelar</b>.`;
+  } else {
+    q1El.className = "insight";
+    q1El.innerHTML = `<b>Curva de aprendizaje saludable:</b>La reacción inicial en Noche 1 es de <b>${n1TFirst.toFixed(1)}s</b> con <b>${n1Invalid.toFixed(1)}</b> clics inválidos, y el tiempo medio de alineación de antenas es de <b>${avgSlew.toFixed(1)}s</b> por noche.`;
+  }
+
+  // --- PREGUNTA 2: Deducción Espectral, Fallo Óptico (N9) y Subcategorías (N10+) ---
+  const retunesByN = byNight.map(list => nightAvgOrNull(list, r => r.retunes));
+  const repeatsByN = byNight.map(list => nightAvgOrNull(list, r => r.repeats));
+  const specByN = byNight.map(list => nightAvgOrNull(list, r => r.specUses));
+  const silentByN = byNight.map(list => nightAvgOrNull(list, r => r.silentErrors));
+
+  const n3PlusShifts = allShifts.filter(r => r.nightNum >= 3);
+  const preN10Shifts = allShifts.filter(r => r.nightNum < 10);
+  const n10PlusShifts = allShifts.filter(r => r.nightNum >= 10);
+  const n9Shifts = byNight[8];
+
+  $("#pillsQ2").innerHTML = `
+    <span class="mpill">Perilla/Noche: <b>${avg(allShifts.map(r => r.retunes)).toFixed(1)}</b></span>
+    <span class="mpill">Audio/Noche: <b>${avg(allShifts.map(r => r.repeats)).toFixed(1)}</b></span>
+    <span class="mpill">Espectrog. N3+: <b>${avg(n3PlusShifts.map(r => r.specUses)).toFixed(1)}</b></span>
+    <span class="mpill">Err. N1–9 vs N10+: <b>${avg(preN10Shifts.map(r => r.silentErrors)).toFixed(2)} / ${avg(n10PlusShifts.map(r => r.silentErrors)).toFixed(2)}</b></span>
+  `;
+  drawNightTrendChart("#chartQ2", NIGHT_LABELS_SHORT, [
+    { name: "Ajustes Perilla", values: retunesByN, color: "#eab308" },
+    { name: "Audio Escuchado", values: repeatsByN, color: "#38bdf8" },
+    { name: "Espectrograma", values: specByN, color: "#4ade80" },
+    { name: "Err. Silenciosos", values: silentByN, color: "#f87171" }
+  ], {
+    decimals: 1,
+    minMax: 10,
+    milestones: [
+      { night: 3, label: "N3:Spec", color: "#4ade80" },
+      { night: 9, label: "N9:Óptico", color: "#f87171" },
+      { night: 10, label: "N10:Subcat", color: "#c084fc" }
+    ]
+  });
+
+  const q2El = $("#insightQ2");
+  const errN10 = avg(n10PlusShifts.map(r => r.silentErrors));
+  if (!active.length) {
+    q2El.className = "insight";
+    q2El.innerHTML = "<b>Sin sesiones registradas:</b>Aquí se analizarán los ajustes de sintonía, el uso de audio/espectrograma en el Fallo Óptico (N9) y los errores con 30 subcategorías (N10+).";
+  } else if (n10PlusShifts.length > 0 && errN10 >= 1.5) {
+    q2El.className = "insight bad";
+    q2El.innerHTML = `<b>Pico de errores en Subcategorías (N10+):</b>A partir de Noche 10 se registran <b>${errN10.toFixed(2)}</b> errores silenciosos por noche al exigir el modelo exacto (30 modelos). Considera destacar más las pistas espectrales del <b>Atlas</b>.`;
+  } else if (n9Shifts.length > 0 && avg(n9Shifts.map(r => r.silentErrors)) >= 1.5) {
+    q2El.className = "insight warn";
+    q2El.innerHTML = `<b>Dificultad alta en Fallo Óptico (Noche 9):</b>Durante el apagón óptico del CRT se registran <b>${avg(n9Shifts.map(r => r.silentErrors)).toFixed(2)}</b> errores silenciosos. Verifica que los jugadores usen el audio y espectrograma para distinguir patrones.`;
+  } else {
+    q2El.className = "insight";
+    q2El.innerHTML = `<b>Deducción espectral equilibrada:</b>Promedio global de <b>${avgSilentErr.toFixed(2)}</b> errores silenciosos por noche, apoyado por <b>${avg(allShifts.map(r => r.repeats)).toFixed(1)}</b> escuchas de audio y <b>${avg(n3PlusShifts.map(r => r.specUses)).toFixed(1)}</b> usos del espectrograma desde N3.`;
+  }
+
+  // --- PREGUNTA 3: Gestión de Energía (PWR), Economía ($CR) y Servidor ---
+  const energyByN = byNight.map(list => nightAvgOrNull(list, r => r.energy));
+  const moneyScaledByN = byNight.map(list => nightAvgOrNull(list, r => r.money / 10));
+  const durScaledByN = byNight.map(list => nightAvgOrNull(list, r => r.time / 10));
+  const fixByN = byNight.map(list => {
+    const crashed = list.filter(r => r.crash > 0 && r.fix > 0);
+    return crashed.length ? avg(crashed.map(r => r.fix)) : null;
+  });
+
+  const n11PlusShifts = allShifts.filter(r => r.nightNum >= 11);
+  const avgEnergyN11Plus = avg(n11PlusShifts.map(r => r.energy));
+
+  $("#pillsQ3").innerHTML = `
+    <span class="mpill">Duración Noche: <b>${avgShiftDur.toFixed(0)}s</b></span>
+    <span class="mpill">PWR N11+: <b>${n11PlusShifts.length ? avgEnergyN11Plus.toFixed(0) : "N/A"}</b></span>
+    <span class="mpill">Reparación Srv: <b>${avgFix.toFixed(1)}s</b></span>
+    <span class="mpill">Noches Incompletas: <b>${incompleteShifts}</b></span>
+  `;
+  drawNightTrendChart("#chartQ3", NIGHT_LABELS_SHORT, [
+    { name: "PWR Final", values: energyByN, color: "#4ade80" },
+    { name: "Créditos ($/10)", values: moneyScaledByN, color: "#38bdf8" },
+    { name: "Duración (s/10)", values: durScaledByN, color: "#eab308" },
+    { name: "Fix Servidor (s)", values: fixByN, color: "#f87171" }
+  ], {
+    decimals: 0,
+    minMax: 120,
+    milestones: [
+      { night: 6, label: "N6:Lento", color: "#eab308" },
+      { night: 11, label: "N11:0-PWR", color: "#f87171" }
+    ]
+  });
+
+  const q3El = $("#insightQ3");
+  if (!active.length) {
+    q3El.className = "insight";
+    q3El.innerHTML = "<b>Sin sesiones registradas:</b>Se evaluará el impacto de la recarga lenta (N6), el corte de generador (N11–N15) y el tiempo de reparación de servidor.";
+  } else if (n11PlusShifts.length > 0 && avgEnergyN11Plus < 15) {
+    q3El.className = "insight warn";
+    q3El.innerHTML = `<b>Estrés energético crítico en N11–N15:</b>Con el corte de generador, los jugadores terminan con solo <b>${avgEnergyN11Plus.toFixed(0)} PWR</b> en promedio. Si se quedan bloqueados sin energía para descargar tramas, considera reducir el costo de recarga o añadir baterías de emergencia.`;
+  } else if (avgFix > 22) {
+    q3El.className = "insight warn";
+    q3El.innerHTML = `<b>Cuello de botella en Servidor:</b>La reparación de relés toma <b>${avgFix.toFixed(1)}s</b> en promedio. Evalúa si el minijuego de servidor interrumpe demasiado el ritmo de sintonía.`;
+  } else {
+    q3El.className = "insight";
+    q3El.innerHTML = `<b>Economía y energía bien calibradas:</b>Cada noche toma <b>${avgShiftDur.toFixed(0)}s</b> en promedio, los jugadores cierran con <b>${avgEnergy.toFixed(0)} PWR</b> y <b>$${avgMoney.toFixed(0)} CR</b>, y las caídas de servidor se reparan en <b>${avgFix.toFixed(1)}s</b>.`;
+  }
+
+  // --- PREGUNTA 4: Embudo de Progresión (N1 -> N15) y Clausura ONU ---
+  const compCountsByN = byNight.map(list => list.filter(r => r.status === "COMPLETADA" || r.ok === 1).length);
+  const incCountsByN = byNight.map(list => list.filter(r => r.status === "INCOMPLETA" || r.status === "FALLIDA_TIEMPO").length);
+  const onuCountsByN = byNight.map(list => list.filter(r => r.status === "CLAUSURADA_ONU" || r.anomSent > 0).length);
+  const liveCountsByN = byNight.map(list => list.filter(r => r.status === "EN_CURSO").length);
+
+  const maxNightReached = allShifts.length ? Math.max(...allShifts.map(r => r.nightNum)) : 0;
+
+  $("#pillsQ4").innerHTML = `
+    <span class="mpill">Noche Máx. Alcanzada: <b>N${maxNightReached}</b></span>
+    <span class="mpill">Completadas: <b>${completedShifts}</b></span>
+    <span class="mpill">Incompletas: <b>${incompleteShifts}</b></span>
+    <span class="mpill">Clausuras ONU: <b>${arrestSessions} (${arrestRate.toFixed(0)}%)</b></span>
+  `;
+  drawNightTrendChart("#chartQ4", NIGHT_LABELS_SHORT, [
+    { name: "Completadas", values: compCountsByN, color: "#4ade80" },
+    { name: "Incompletas", values: incCountsByN, color: "#eab308" },
+    { name: "Clausura ONU", values: onuCountsByN, color: "#f87171" },
+    { name: "En Curso", values: liveCountsByN, color: "#38bdf8" }
+  ], {
+    decimals: 0,
+    minMax: Math.max(4, active.length),
+    stackedBars: true,
+    milestones: [
+      { night: 10, label: "N10:Anomalías", color: "#c084fc" }
+    ]
+  });
+
+  const q4El = $("#insightQ4");
+  if (!active.length) {
+    q4El.className = "insight";
+    q4El.innerHTML = "<b>Sin sesiones registradas:</b>Se mostrará el embudo de avance de Noche 1 a Noche 15 y las clausuras por transmisión de anomalías a partir de Noche 10.";
+  } else if (arrestSessions > 0) {
+    q4El.className = "insight warn";
+    q4El.innerHTML = `<b>Intervenciones de la ONU registradas (${arrestRate.toFixed(0)}%):</b><b>${arrestSessions}</b> sesión(es) terminaron en <b>CLAUSURADA_ONU</b> tras transmitir una anomalía en lugar de respaldarla en el <b>Disco Floppy</b>. Confirma que los correos de advertencia de Noche 10 sean claros.`;
+  } else {
+    q4El.className = "insight";
+    q4El.innerHTML = `<b>Progresión de campaña:</b>Los jugadores han alcanzado hasta la <b>Noche ${maxNightReached}</b> con <b>${completedShifts}</b> noches completadas y <b>${finishedCampaigns}</b> campañas finalizadas (15/15) sin activar bloqueos de la ONU.`;
+  }
+
+  // --- TABLA DETALLADA DE REGISTROS ---
+  const filteredRows = active.flatMap(s =>
+    s.shifts
+      .filter(r => selectedNightFilter === "ALL" || String(r.nightNum) === selectedNightFilter)
+      .map(r => ({ session: s, shift: r }))
+  );
+
+  $("#tableCount").textContent = `${active.length} sesión(es) · ${filteredRows.length} registro(s) mostrados`;
+  if (!filteredRows.length) {
+    $("#tableBody").innerHTML = `<tr><td colspan="18" style="text-align:center;color:var(--mut);padding:18px">No hay registros para el filtro seleccionado. Conecta la nube o inicia una partida en <code>index.html</code>.</td></tr>`;
+  } else {
+    $("#tableBody").innerHTML = filteredRows.map(({session: s, shift: r}) => {
+      const badgeCls = r.status === "COMPLETADA"
+        ? "b-ok"
+        : (r.status === "CLAUSURADA_ONU"
+          ? "b-fail"
+          : (r.status === "INCOMPLETA" || r.status === "FALLIDA_TIEMPO" ? "b-warn" : "b-live"));
+      const modeBadge = s.freeMode ? ` <span class="badge b-sandbox">LIBRE</span>` : "";
+      const anomTxt = (r.anomSent > 0 || r.status === "CLAUSURADA_ONU")
+        ? `<span class="badge b-fail">CLAUSURA</span>`
+        : `<span style="color:var(--mut)">NO</span>`;
+      return `
+        <tr>
+          <td><b>${s.playerName}</b> <span style="color:var(--mut)">(#${s.id})</span>${modeBadge}</td>
+          <td>${s.date}</td>
+          <td>N${s.startNight}</td>
+          <td><b>${fmtDuration(s.totalPlayTime)}</b></td>
+          <td><b>${r.shift}</b></td>
+          <td><span class="badge ${badgeCls}">${r.status}</span></td>
+          <td>${r.time.toFixed(1)}s</td>
+          <td>${r.tFirst.toFixed(1)}s</td>
+          <td>${r.slewTime.toFixed(1)}s</td>
+          <td>${r.invalid}</td>
+          <td>${r.retunes}</td>
+          <td>${r.repeats}</td>
+          <td>${r.specUses}</td>
+          <td>${r.corrupt}</td>
+          <td>${r.silentErrors}</td>
+          <td>${r.crash} / ${r.fix.toFixed(1)}s</td>
+          <td>${r.energy} PWR · $${r.money}</td>
+          <td>${anomTxt}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+}
+
+nightFilterSel.onchange = e => {
+  selectedNightFilter = e.target.value;
+  renderDashboard();
+};
+
+if (bc) {
+  bc.onmessage = ev => {
+    if (ev.data?.type === "SESSION_UPDATE" && ev.data.session) {
+      addSessionObj(ev.data.session);
+      renderDashboard();
+    }
+  };
+}
+
+window.addEventListener("storage", ev => {
+  if (ev.key === LIVE_STORAGE_KEY) {
+    loadFromLocalStorage();
+    renderDashboard();
+  }
+});
+
+// Sondeo continuo (local cada 2s, nube cada 4s)
+setInterval(() => {
+  loadFromLocalStorage();
+  renderDashboard();
+}, 2000);
+
+setInterval(() => {
+  if (activeDbUrl) fetchFromCloud();
+}, 4000);
+
+// Modal configuración nube
+$("#cloudModalBtn").onclick = () => {
+  $("#cloudUrlInput").value = activeDbUrl;
+  $("#cloudModal").classList.add("open");
+};
+$("#closeCloudModalBtn").onclick = () => $("#cloudModal").classList.remove("open");
+
+$("#saveCloudBtn").onclick = () => {
+  const url = normalizeDbUrl($("#cloudUrlInput").value);
+  if (!url) return alert("Ingresa una URL válida de Firebase Realtime Database.");
+  activeDbUrl = url;
+  cloudConnState = "CONNECTING";
+  try { localStorage.setItem(DB_URL_STORAGE_KEY, url); } catch (_) {}
+  $("#cloudModal").classList.remove("open");
+  updateCloudUi();
+  fetchFromCloud();
+};
+
+$("#disconnectCloudBtn").onclick = () => {
+  activeDbUrl = "";
+  cloudConnState = "LOCAL";
+  try { localStorage.removeItem(DB_URL_STORAGE_KEY); } catch (_) {}
+  $("#cloudModal").classList.remove("open");
+  updateCloudUi();
+};
+
+$("#copyGameLinkBtn").onclick = () => {
+  if (!activeDbUrl) return;
+  const base = window.location.href.replace(/dashboard[^/]*\.html.*$/i, "").replace(/\/+$/, "");
+  const gameUrl = `${base}/?db=${encodeURIComponent(activeDbUrl)}`;
+  try { navigator.clipboard.writeText(gameUrl); } catch (_) {}
+  alert(`Enlace del juego conectado copiado:\n\n${gameUrl}\n\nCompártelo con cualquier jugador para recibir sus métricas aquí en vivo.`);
+};
+
+// Carga manual de archivos JSON
+async function handleFiles(fileList) {
+  let loaded = 0;
+  for (const file of fileList) {
+    try {
+      const txt = await file.text();
+      const parsed = JSON.parse(txt);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(item => { if (addSessionObj(item)) loaded++; });
+      } else if (addSessionObj(parsed)) {
+        loaded++;
+      }
+    } catch (_) {
+      alert(`Error leyendo ${file.name}: JSON inválido.`);
+    }
+  }
+  if (loaded > 0) {
+    selectedSessionId = "ALL";
+    renderDashboard();
+  }
+}
+
+$("#fileInput").onchange = e => { handleFiles(e.target.files); e.target.value = ""; };
+
+const dz = $("#dropzone");
+dz.ondragover = e => { e.preventDefault(); dz.classList.add("drag"); };
+dz.ondragleave = () => dz.classList.remove("drag");
+dz.ondrop = e => {
+  e.preventDefault();
+  dz.classList.remove("drag");
+  if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files);
+};
+
+$("#clearBtn").onclick = async () => {
+  if (!confirm("¿Limpiar todos los registros del dashboard?")) return;
+  sessions = [];
+  selectedSessionId = "ALL";
+  try { localStorage.removeItem(LIVE_STORAGE_KEY); } catch (_) {}
+  if (activeDbUrl) {
+    try { await fetch(`${activeDbUrl}/sessions.json`, {method: "DELETE"}); } catch (_) {}
+  }
+  renderDashboard();
+};
+
+$("#pasteModalBtn").onclick = () => { $("#pasteArea").value = ""; $("#pasteModal").classList.add("open"); };
+$("#closeModalBtn").onclick = () => $("#pasteModal").classList.remove("open");
+$("#confirmPasteBtn").onclick = () => {
+  try {
+    const parsed = JSON.parse($("#pasteArea").value);
+    if (Array.isArray(parsed)) parsed.forEach(addSessionObj);
+    else addSessionObj(parsed);
+    $("#pasteModal").classList.remove("open");
+    selectedSessionId = "ALL";
+    renderDashboard();
+  } catch (_) {
+    alert("El texto pegado no es un JSON válido.");
+  }
+};
+
+$("#exportCsvBtn").onclick = () => {
+  const active = getActiveSessions();
+  if (!active.length) return alert("No hay sesiones registradas para exportar.");
+  const headers = [
+    "session_id","player_name","start_night","free_mode","date","session_status","total_play_time_s",
+    "night_num","shift","shift_status","shift_time_s","t_first_s","slew_time_s","invalid_clicks",
+    "retunes","repeats","spec_uses","corrupt_packets","silent_errors","crashes","fix_time_s",
+    "anom_sent","energy_end","money_end"
+  ];
+  const rows = active.flatMap(s => s.shifts.map(r => [
+    s.id,
+    `"${s.playerName.replace(/"/g, '""')}"`,
+    s.startNight,
+    s.freeMode ? 1 : 0,
+    `"${s.date}"`,
+    s.status,
+    s.totalPlayTime,
+    r.nightNum,
+    `"${r.shift}"`,
+    r.status,
+    r.time,
+    r.tFirst,
+    r.slewTime,
+    r.invalid,
+    r.retunes,
+    r.repeats,
+    r.specUses,
+    r.corrupt,
+    r.silentErrors,
+    r.crash,
+    r.fix,
+    r.anomSent,
+    r.energy,
+    r.money
+  ].join(",")));
+  const csv = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "erial7_metricas_15noches.csv";
+  a.click();
+};
+
+updateCloudUi();
+loadFromLocalStorage();
+renderDashboard();
+if (activeDbUrl) fetchFromCloud();
+</script>
+</body>
+</html>
