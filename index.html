@@ -2757,12 +2757,9 @@ function updTop() {
   const pwrTag = isFreeMode ? " [LIBRE]" : regenMode === "none" ? " [SIN RECARGA]" : regenMode === "slow" ? " [RECARGA LENTA]" : "";
 
   st.innerHTML = `
-    <span class="pill">OP: ${S.playerName}</span>
     <span class="pill ${shift >= 8 ? "night" : ""}">${shiftLabel(shift)}/${TOTAL_NIGHTS}</span>
     <span class="pill ${pwrClass}">PWR ${Math.round(en)}/${cap}${pwrTag}</span>
     <span class="pill">CR $${G.money}</span>
-    <span class="pill ${isBufferFullForLock() ? "slowrech" : ""}">MEM ${hasFloppyDisk ? `${getNormalStoredCount()}/${MAX_MEMORY_SIGNALS} · FLOPPY +${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES}` : `${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}`}</span>
-    <span class="pill">ENCARGOS: ${totalAssigns - remAssigns}/${totalAssigns}</span>
     <button class="alt" id="helpTutBtn" title="Iniciar tutorial interactivo con Snøskred" ${TUT || isTransitioningNight ? "disabled" : ""} style="padding:3px 8px;font-size:11px;font-weight:700">Tutorial</button>
     <button class="alt" id="muteBtn" style="padding:3px 8px;font-size:11px">${muted ? "SONIDO: OFF" : "SONIDO: ON"}</button>
     <span class="topbar-actions">
