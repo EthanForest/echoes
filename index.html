@@ -159,6 +159,26 @@ button:disabled{opacity:.35;cursor:not-allowed}
   flex:1;padding:14px 16px;white-space:pre-line;overflow-wrap:anywhere;word-break:break-word;font-size:14px;line-height:1.62;
   color:#ffffff;overflow-y:auto;background:#000000;
 }
+.mail-reader-foot{
+  padding:10px 14px;border-top:1px solid #14532d;background:#030906;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+.mail-help-btn{
+  display:inline-flex;align-items:center;gap:8px;padding:7px 13px;
+  font-family:inherit;font-size:12.5px;font-weight:700;letter-spacing:.3px;
+  color:#fde047;background:#071a10;border:1px solid #22c55e;border-radius:4px;
+  cursor:pointer;transition:background .15s,border-color .15s,transform .08s,box-shadow .15s;
+}
+.mail-help-btn:hover:not(:disabled){
+  background:#14532d;border-color:#4ade80;color:#ffffff;
+  box-shadow:0 0 10px rgba(34,197,94,.28);
+}
+.mail-help-btn:active:not(:disabled){transform:translateY(1px)}
+.mail-help-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;background:#fde047;color:#052e16;
+  font-size:12px;font-weight:900;line-height:1;flex:none;
+}
 
 /* Mapa Estelar: área ampliada a pantalla completa con barra HUD compacta */
 .map-shell{
@@ -737,6 +757,25 @@ body.paper-theme .mail-reader-subj{
   border-bottom:1px dashed #8c734b;
   color:#3d2814;
 }
+body.paper-theme .mail-reader-foot{
+  background:#ece1c6;
+  border-top:1px dashed #8c734b;
+}
+body.paper-theme .mail-help-btn{
+  background:#fbf6ea;
+  color:#3d2814;
+  border:1px solid #8c734b;
+}
+body.paper-theme .mail-help-btn:hover:not(:disabled){
+  background:#e6d7b8;
+  border-color:#5c4424;
+  color:#1e1912;
+  box-shadow:none;
+}
+body.paper-theme .mail-help-badge{
+  background:#5c4424;
+  color:#fbf6ea;
+}
 body.paper-theme .map-viewport{
   border:2px solid #6e5634;
   background:#1e1912;
@@ -1044,6 +1083,14 @@ button.xp-opt-btn.tut-skip{
   background:transparent;
   border-style:dashed;
   color:#5c4424;
+}
+.asst-help-row{
+  display:flex;
+  gap:5px;
+}
+.asst-help-row button.xp-opt-btn{
+  flex:1;
+  justify-content:center;
 }
 .tut-bear{
   height:188px;
@@ -2328,7 +2375,7 @@ function initShift() {
       "AVISO DE ACTUALIZACION DE FIRMWARE:\n\n" +
       "Se ha habilitado la categoria Pulsar en la consola del Procesador (incluyendo Pulsares y FRB) junto con el Espectrograma FFT en tiempo real.\n\n" +
       "USO DEL ESPECTROGRAMA: Reproduce el audio de la señal capturada para observar su cadencia de pulsos y bandas de frecuencia en el espectrograma. Esta herramienta te permitira distinguir los Pulsares y otras emisiones energeticas con precision.",
-      {sender: "SISTEMA", tag: `N${shift + 1} · UPD`}
+      {sender: "SISTEMA", tag: `N${shift + 1} · UPD`, helpTopic: "spectrogram"}
     );
   } else if (shift === 4) {
     addMail(
@@ -2453,6 +2500,7 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
 
   gameOverReason = "";
   pendingEvals = [];
+  closeAssistantHelp();
 
   const introId = addMail(
     `Protocolo de Operaciones // ${cleanName}`,
@@ -3642,6 +3690,7 @@ function loop(now) {
   last = now;
   tick(dt);
   tutUpdate(dt);
+  asstHelpUpdate(dt);
   const t = now / 1000;
   if (V === "boot") drawBoot();
   if (V === "map") drawMap(t);
@@ -3833,6 +3882,14 @@ function render() {
               </div>
               <div class="mail-reader-subj">${sm.subj}</div>
               <div class="mail-body">${sm.body}</div>
+              ${(sm.helpTopic === "spectrogram" || /espectrograma/i.test(sm.subj || "")) ? `
+                <div class="mail-reader-foot">
+                  <button type="button" class="mail-help-btn" id="mailSpecHelpBtn">
+                    <span class="mail-help-badge">?</span>
+                    <span>Ayuda de Snøskred: Uso y casos del Espectrograma</span>
+                  </button>
+                </div>
+              ` : ""}
             ` : `
               <div class="mail-reader-head">
                 <span class="mut">SIN MENSAJE SELECCIONADO</span>
@@ -4393,6 +4450,10 @@ function bindEvents(w) {
     beep(340, 0.06);
     updBadges();
     render();
+  });
+
+  on("#mailSpecHelpBtn", () => {
+    openAssistantHelp("spectrogram");
   });
 
   on("#goSrvBtn", () => {
@@ -5320,6 +5381,7 @@ function tutUpdate(dt) {
 
 function startTutorial() {
   if (TUT) return;
+  closeAssistantHelp();
   const cleanName = (playerNameInput || "").trim() || "Operador";
   preloadAllSprites();
   Object.values(TUT_IMG).forEach(src => { const im = new Image(); im.src = src; });
@@ -5470,6 +5532,229 @@ function tutLogoutFade() {
 }
 
 
+// ============================================================================
+// ASISTENTE CONTEXTUAL SNØSKRED · AYUDA DE HERRAMIENTAS (ESPECTROGRAMA)
+// ============================================================================
+const ASST_HELP_TOPICS = {
+  spectrogram: [
+    {
+      pose: "present",
+      text: "¡Hola! Soy Snøskred, tu asistente oso polar. Veo que activaste la ayuda del Espectrograma FFT. Esta herramienta convierte el sonido real de cada señal espacial en un gráfico visual en tiempo real dentro del Procesador."
+    },
+    {
+      pose: "read",
+      text: "¿Cómo funciona? Cuando sintonizas una señal y pulsas «Audio» (-2 PWR), el Espectrograma analiza sus frecuencias en vivo: abajo ves los tonos graves, arriba los agudos, el desplazamiento lateral muestra el tiempo en cascada y el medidor lateral marca la potencia en decibelios (dB)."
+    },
+    {
+      pose: "read",
+      text: "Caso 1 · Púlsares y FRB: Permite distinguir cuerpos de la categoría Púlsar. Un Púlsar muestra pulsos rítmicos y periódicos muy marcados en el espectrograma, mientras que una Ráfaga Rápida de Radio (FRB) genera destellos breves e intensos de banda ancha."
+    },
+    {
+      pose: "read",
+      text: "Caso 2 · Señuelos ópticos: Algunos objetos engañan al Monitor CRT. Los Cuásares (Singularidad) proyectan la silueta falsa de una Enana Amarilla o Roja, y las Enanas Marrones (Estrella) parecen Enanas Rojas. El espectrograma y el audio revelan su firma real."
+    },
+    {
+      pose: "read",
+      text: "Caso 3 · Fallos visuales y tormentas: Cuando una tormenta magnética daña la capa de imagen de un archivo o el Monitor CRT sufre una avería crítica, no verás imagen óptica. En esos casos, el Espectrograma junto con el Audio son indispensables para catalogar."
+    },
+    {
+      pose: "read",
+      text: "Caso 4 · Anomalías y consulta en el Atlas: Las Anomalías presentan patrones espectrales irregulares en tonos rojizos/ámbar. Además, en la pestaña Atlas puedes alternar entre «Imagen» y «Espectrograma» en cualquier objeto descubierto para comparar patrones."
+    }
+  ]
+};
+
+let ASST_HELP = null;
+
+function ensureAsstHelpDock() {
+  let dock = document.querySelector("#asstHelpDock");
+  if (dock) return dock;
+  dock = document.createElement("div");
+  dock.id = "asstHelpDock";
+  dock.className = "tut-dock";
+  dock.style.display = "none";
+  dock.setAttribute("aria-label", "Asistente de ayuda Snøskred");
+  dock.innerHTML = `
+    <div class="xp-balloon" role="dialog" aria-label="Explicación de Snøskred">
+      <div class="xp-balloon-head">
+        <span>Snøskred el Oso</span>
+        <span id="asstHelpStepLbl">[AYUDA 1/1]</span>
+      </div>
+      <div class="xp-balloon-msg" id="asstHelpMsg"></div>
+      <div class="xp-balloon-opts">
+        <div class="asst-help-row">
+          <button type="button" class="xp-opt-btn" id="asstHelpPrevBtn">
+            <span class="xp-opt-bullet">&#9666;</span><span>Anterior</span>
+          </button>
+          <button type="button" class="xp-opt-btn" id="asstHelpNextBtn">
+            <span class="xp-opt-bullet">&#9656;</span><span id="asstHelpNextLbl">Siguiente</span>
+          </button>
+        </div>
+        <button type="button" class="xp-opt-btn tut-skip" id="asstHelpCloseBtn">
+          <span class="xp-opt-bullet">&times;</span><span>Cerrar asistente</span>
+        </button>
+      </div>
+    </div>
+    <img id="asstHelpBear" class="tut-bear" alt="Snøskred, asistente de radioastronomía" src="${TUT_IMG.presentando_1}">
+  `;
+  document.body.appendChild(dock);
+
+  dock.querySelector("#asstHelpPrevBtn").onclick = () => {
+    if (!ASST_HELP || ASST_HELP.i <= 0) return;
+    asstHelpGo(ASST_HELP.i - 1);
+  };
+  dock.querySelector("#asstHelpNextBtn").onclick = () => {
+    if (!ASST_HELP) return;
+    if (ASST_HELP.typed < ASST_HELP.text.length) {
+      ASST_HELP.typed = ASST_HELP.text.length;
+      asstHelpRenderDock();
+      return;
+    }
+    if (ASST_HELP.i + 1 < ASST_HELP.steps.length) {
+      asstHelpGo(ASST_HELP.i + 1);
+    } else {
+      closeAssistantHelp();
+    }
+  };
+  dock.querySelector("#asstHelpCloseBtn").onclick = () => {
+    beep(360, 0.05, "triangle", 0.04);
+    closeAssistantHelp();
+  };
+
+  const head = dock.querySelector(".xp-balloon-head");
+  let drag = null;
+  head.addEventListener("pointerdown", e => {
+    const r = dock.getBoundingClientRect();
+    drag = {dx: e.clientX - r.left, dy: e.clientY - r.top};
+    dock.style.left = r.left + "px";
+    dock.style.top = r.top + "px";
+    dock.style.right = "auto";
+    dock.style.bottom = "auto";
+    dock.classList.add("dragging");
+    document.body.classList.remove("tut-side");
+    try { head.setPointerCapture(e.pointerId); } catch (_) {}
+    e.preventDefault();
+  });
+  head.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const r = dock.getBoundingClientRect();
+    dock.style.left = Math.max(0, Math.min(window.innerWidth - r.width, e.clientX - drag.dx)) + "px";
+    dock.style.top = Math.max(0, Math.min(window.innerHeight - r.height, e.clientY - drag.dy)) + "px";
+  });
+  const endDrag = () => { drag = null; dock.classList.remove("dragging"); };
+  head.addEventListener("pointerup", endDrag);
+  head.addEventListener("pointercancel", endDrag);
+  return dock;
+}
+
+function asstHelpRenderDock() {
+  if (!ASST_HELP) return;
+  const total = ASST_HELP.steps.length;
+  const lbl = document.querySelector("#asstHelpStepLbl");
+  const msgEl = document.querySelector("#asstHelpMsg");
+  const prevBtn = document.querySelector("#asstHelpPrevBtn");
+  const nextLbl = document.querySelector("#asstHelpNextLbl");
+  if (lbl) lbl.textContent = `[AYUDA ${ASST_HELP.i + 1}/${total}]`;
+  if (msgEl) msgEl.textContent = ASST_HELP.text.slice(0, Math.floor(ASST_HELP.typed));
+  if (prevBtn) prevBtn.disabled = ASST_HELP.i === 0;
+  if (nextLbl) nextLbl.textContent = ASST_HELP.i + 1 < total ? "Siguiente" : "Entendido";
+}
+
+function asstHelpHop() {
+  const img = document.querySelector("#asstHelpBear");
+  if (!img) return;
+  img.classList.remove("hop");
+  void img.offsetWidth;
+  img.classList.add("hop");
+}
+
+function asstHelpGo(i) {
+  if (!ASST_HELP || i < 0 || i >= ASST_HELP.steps.length) return;
+  const st = ASST_HELP.steps[i];
+  ASST_HELP.i = i;
+  ASST_HELP.pose = st.pose || "read";
+  ASST_HELP.text = st.text;
+  ASST_HELP.typed = 0;
+  ASST_HELP.talkStep = 0;
+  ASST_HELP.frame = "";
+  asstHelpRenderDock();
+  asstHelpHop();
+  beep(523.25, 0.06, "triangle", 0.04);
+}
+
+function openAssistantHelp(topic = "spectrogram") {
+  if (TUT) return;
+  const steps = ASST_HELP_TOPICS[topic];
+  if (!steps || !steps.length) return;
+  Object.values(TUT_IMG).forEach(src => { const im = new Image(); im.src = src; });
+
+  ASST_HELP = {
+    topic,
+    steps,
+    i: 0,
+    text: "",
+    typed: 0,
+    pose: "present",
+    frame: "",
+    clock: 0,
+    talkStep: 0,
+    nextBlink: 2.6,
+    blinkEnd: 0
+  };
+
+  const dock = ensureAsstHelpDock();
+  dock.style.left = "";
+  dock.style.top = "";
+  dock.style.right = "";
+  dock.style.bottom = "";
+  document.body.classList.add("tut-side");
+  dock.style.display = "flex";
+  asstHelpGo(0);
+}
+
+function closeAssistantHelp() {
+  ASST_HELP = null;
+  const dock = document.querySelector("#asstHelpDock");
+  if (dock) dock.style.display = "none";
+  if (!TUT) document.body.classList.remove("tut-side");
+}
+
+function asstHelpUpdate(dt) {
+  if (!ASST_HELP) return;
+  if (V === "boot" || V === "intro" || V === "end") {
+    closeAssistantHelp();
+    return;
+  }
+
+  if (ASST_HELP.typed < ASST_HELP.text.length) {
+    ASST_HELP.typed = Math.min(ASST_HELP.text.length, ASST_HELP.typed + dt * 64);
+    const el = document.querySelector("#asstHelpMsg");
+    if (el) el.textContent = ASST_HELP.text.slice(0, Math.floor(ASST_HELP.typed));
+  }
+
+  const pose = TUT_POSES[ASST_HELP.pose] || TUT_POSES.read;
+  const talking = ASST_HELP.typed < ASST_HELP.text.length;
+  ASST_HELP.clock += dt;
+  let key;
+  if (talking) {
+    ASST_HELP.talkStep += dt;
+    const ph = Math.floor(ASST_HELP.talkStep / 0.12);
+    const n = Math.floor(ph / 2);
+    key = ph % 2 === 0 ? pose.open[n % pose.open.length] : pose.closed[n % pose.closed.length];
+  } else {
+    if (ASST_HELP.clock >= ASST_HELP.nextBlink) {
+      ASST_HELP.blinkEnd = ASST_HELP.clock + 0.16;
+      ASST_HELP.nextBlink = ASST_HELP.clock + 3.0 + Math.random() * 2.4;
+    }
+    key = ASST_HELP.clock < ASST_HELP.blinkEnd ? pose.blink : pose.closed[0];
+  }
+  if (key !== ASST_HELP.frame) {
+    ASST_HELP.frame = key;
+    const img = document.querySelector("#asstHelpBear");
+    if (img && TUT_IMG[key]) img.src = TUT_IMG[key];
+  }
+}
+
 function unlockBootAudioOnGesture() {
   if (V === "boot" && !bootSoundPlayed) {
     if (playStartupSound(false)) {
@@ -5502,4 +5787,3 @@ if (document.readyState === "loading") {
 </script>
 </body>
 </html>
-version 0.52
