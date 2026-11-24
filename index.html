@@ -1133,6 +1133,71 @@ button.xp-opt-btn.tut-skip{
   .tut-dock .xp-balloon-msg{min-height:84px;max-height:150px}
 }
 
+
+/* ============================================================================
+   SISTEMA DE GUARDADO Y CARGA DE PARTIDAS
+   ============================================================================ */
+.save-modal-win{
+  max-width:560px;
+  width:100%;
+  max-height:88vh;
+  display:flex;
+  flex-direction:column;
+}
+.save-modal-body{
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.save-slot-card{
+  margin:0;
+  padding:10px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.save-slot-card.auto-slot{
+  border-style:dashed;
+}
+.save-slot-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.save-slot-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  font-size:11px;
+}
+.save-slot-actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  margin-top:2px;
+}
+.save-slot-actions button{
+  padding:4px 10px;
+  font-size:11.5px;
+}
+.save-modal-foot{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  padding-top:8px;
+  margin-top:2px;
+  border-top:1px dashed #166534;
+}
+body.paper-theme .save-modal-foot{
+  border-top-color:#8c734b;
+}
+
 </style>
 </head>
 <body>
@@ -2427,6 +2492,7 @@ function initShift() {
 
   ensureSectorDiversity();
   syncLiveTelemetry(false, true);
+  autoSaveGame();
 }
 
 function start(operatorName, startNightIdx = 0, sandboxMode = false) {
@@ -2597,9 +2663,19 @@ function updTop() {
     <span class="pill">CR $${G.money}</span>
     <span class="pill ${isBufferFullForLock() ? "slowrech" : ""}">MEM ${hasFloppyDisk ? `${getNormalStoredCount()}/${MAX_MEMORY_SIGNALS} · FLOPPY +${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES}` : `${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}`}</span>
     <span class="pill">ENCARGOS: ${totalAssigns - remAssigns}/${totalAssigns}</span>
+    <button class="alt" id="helpTutBtn" title="Iniciar tutorial interactivo con Snøskred" ${TUT || isTransitioningNight ? "disabled" : ""} style="padding:3px 8px;font-size:11px;font-weight:700">[?]</button>
+    <button class="alt" id="saveGameBtn" title="Guardar o cargar partida" ${TUT || isTransitioningNight ? "disabled" : ""} style="padding:3px 8px;font-size:11px;font-weight:700">Guardar</button>
     <button class="alt" id="muteBtn" style="padding:3px 8px;font-size:11px">${muted ? "SONIDO: OFF" : "SONIDO: ON"}</button>
     <button class="logout-btn" id="logoutShiftBtn" ${canLogout ? "" : "disabled"}>Cerrar sesión</button>
   `;
+  const htb = $("#helpTutBtn");
+  if (htb) htb.onclick = () => { startTutorialFromGame(); };
+  const sgb = $("#saveGameBtn");
+  if (sgb) sgb.onclick = () => {
+    if (TUT || isTransitioningNight) return;
+    beep(460, 0.07);
+    openSaveModal();
+  };
   const mb = $("#muteBtn");
   if (mb) mb.onclick = () => { muted = !muted; if (muted) stopVoice(); updTop(); };
   const lb = $("#logoutShiftBtn");
@@ -2755,6 +2831,7 @@ function evaluatePlatformDispatch(ev) {
     );
     msg(`[OK] Encargo validado (+$${asg.reward} CR)`, 1);
     syncLiveTelemetry(false, true);
+    autoSaveGame();
     updTop();
     if (V === "mail" || V === "shop" || V === "atlas") render();
     return;
@@ -2790,6 +2867,7 @@ function evaluatePlatformDispatch(ev) {
     );
     msg(`[OK] Registro extra acreditado (+$${pay} CR)`, 1);
     syncLiveTelemetry(false, true);
+    autoSaveGame();
     updTop();
     if (V === "mail" || V === "shop" || V === "atlas") render();
   }
@@ -3030,6 +3108,12 @@ function tick(dt) {
     if (activeDbUrl) {
       pushSnapshotToCloud(buildSessionSnapshot(false));
     }
+  }
+
+  autoSaveTimer += dt;
+  if (autoSaveTimer >= 20.0) {
+    autoSaveTimer = 0;
+    autoSaveGame();
   }
 }
 
@@ -3770,6 +3854,7 @@ function render() {
           </div>
           <div class="row" style="justify-content:center;gap:10px;margin-top:8px">
             <button id="go" class="primary-os">Iniciar sistema</button>
+            <button id="openSaveLoginBtn" class="alt">Cargar partida${getSavedSlotsCount() ? ` (${getSavedSlotsCount()})` : ""}</button>
             <button id="openAdminBtn" class="alt">Iniciar Modo Admin</button>
           </div>
         </div>
@@ -4397,6 +4482,17 @@ function bindEvents(w) {
     startTutorial();
   });
 
+  on("#openSaveLoginBtn", () => {
+    const val = w.querySelector("#playerName")?.value;
+    if (typeof val === "string") playerNameInput = val;
+    if (bootLoginChimePending && !bootSoundPlayed) {
+      playStartupSound(false);
+    } else {
+      beep(460, 0.08);
+    }
+    openSaveModal();
+  });
+
   on("#openAdminBtn", () => {
     const val = w.querySelector("#playerName")?.value;
     if (typeof val === "string") playerNameInput = val;
@@ -4791,6 +4887,7 @@ function bindEvents(w) {
     beep(620, 0.12);
     msg(`[OK] Anomalia guardada en Disco Floppy (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})`, 1);
     syncLiveTelemetry(false, true);
+    autoSaveGame();
     updTop();
     render();
   });
@@ -4824,6 +4921,7 @@ function bindEvents(w) {
     beep(620, 0.12);
     msg(`[OK] Anomalia guardada en Disco Floppy (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})`, 1);
     syncLiveTelemetry(false, true);
+    autoSaveGame();
     updTop();
     render();
   });
@@ -4933,6 +5031,7 @@ function bindEvents(w) {
     beep(660, 0.1);
     msg(`[OK] Mejora instalada (NV ${G[k]}/${maxLv})`, 1);
     syncLiveTelemetry(false, true);
+    autoSaveGame();
     updTop();
     render();
   });
@@ -4944,6 +5043,7 @@ function bindEvents(w) {
     en = Math.min(cap, en + 45);
     beep(680, 0.1);
     msg("[OK] Celda auxiliar conectada (+45 PWR)", 1);
+    autoSaveGame();
     updTop();
     render();
   });
@@ -4955,6 +5055,7 @@ function bindEvents(w) {
     beep(680, 0.12);
     msg("[OK] Disco Floppy instalado (+5 espacios para anomalias en buffer)", 1);
     syncLiveTelemetry(false, true);
+    autoSaveGame();
     updTop();
     render();
   });
@@ -5170,7 +5271,9 @@ const TUT_STEPS = [
   },
   {
     id: "logout", pose: "read", view: "atlas", hl: "logout",
-    text: "Como ya completaste todas las asignaciones del día (hoy, la única), puedes cerrar sesión para pasar a la noche siguiente. Pulsa «Cerrar sesión», arriba a la derecha.",
+    text: () => TUT_RETURN_SNAPSHOT
+      ? "Como ya completaste todas las asignaciones del tutorial, pulsa «Cerrar sesión» arriba a la derecha para finalizar el entrenamiento y volver a tu guardia."
+      : "Como ya completaste todas las asignaciones del día (hoy, la única), puedes cerrar sesión para pasar a la noche siguiente. Pulsa «Cerrar sesión», arriba a la derecha.",
     done: () => false
   }
 ];
@@ -5471,7 +5574,7 @@ function startTutorial() {
   tutGo(0);
 }
 
-// Cierra el tutorial y vuelve a la pantalla de inicio de sesión con el asistente
+// Cierra el tutorial y vuelve a la sesión activa (si se inició dentro del juego) o al login
 function tutEnd(completed) {
   stopVoice();
   const dock = document.querySelector("#tutDock");
@@ -5479,6 +5582,19 @@ function tutEnd(completed) {
   document.querySelectorAll(".tut-hl").forEach(el => el.classList.remove("tut-hl"));
   document.body.classList.remove("tut-side");
   TUT = null;
+
+  if (TUT_RETURN_SNAPSHOT) {
+    const snap = TUT_RETURN_SNAPSHOT;
+    TUT_RETURN_SNAPSHOT = null;
+    restoreGameState(snap);
+    msg(
+      completed
+        ? "[TUTORIAL] Entrenamiento completado · Guardia restaurada"
+        : "[TUTORIAL] Tutorial cerrado · Guardia restaurada",
+      1
+    );
+    return;
+  }
 
   G = null; S = null; R = null;
   sigs = []; mail = []; selMail = null; nightAssignments = []; nightAssignPool = [];
@@ -5753,6 +5869,531 @@ function asstHelpUpdate(dt) {
     const img = document.querySelector("#asstHelpBear");
     if (img && TUT_IMG[key]) img.src = TUT_IMG[key];
   }
+}
+
+
+// ============================================================================
+// SISTEMA DE GUARDADO LOCAL Y EXPORTACIÓN / IMPORTACIÓN DE PARTIDAS
+// ============================================================================
+const SAVE_STORAGE_KEY = "erial7_save_slots_v1";
+const SAVE_SLOT_DEFS = [
+  { id: "auto", label: "Autoguardado", isAuto: true },
+  { id: "slot_1", label: "Ranura 1", isAuto: false },
+  { id: "slot_2", label: "Ranura 2", isAuto: false },
+  { id: "slot_3", label: "Ranura 3", isAuto: false }
+];
+
+let memorySaveStore = {};
+let saveModalOpen = false;
+let saveDeleteConfirmId = null;
+let autoSaveTimer = 0;
+let TUT_RETURN_SNAPSHOT = null;
+
+function readSaveStore() {
+  try {
+    const raw = localStorage.getItem(SAVE_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        memorySaveStore = parsed;
+        return parsed;
+      }
+    }
+  } catch (_) {}
+  return memorySaveStore || {};
+}
+
+function writeSaveStore(store) {
+  memorySaveStore = store;
+  try {
+    localStorage.setItem(SAVE_STORAGE_KEY, JSON.stringify(store));
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function getSavedSlotsCount() {
+  const store = readSaveStore();
+  return SAVE_SLOT_DEFS.filter(def => store[def.id] && store[def.id].state).length;
+}
+
+function captureGameState() {
+  if (!G || !S || S.tutorial) return null;
+  const elapsedTotal = sessionStartPerf
+    ? +((performance.now() - sessionStartPerf) / 1000).toFixed(1)
+    : (S.totalPlayTime || 0);
+  S.totalPlayTime = elapsedTotal;
+
+  const rElapsed = R && typeof R.t0 === "number"
+    ? Math.max(0, (performance.now() - R.t0) / 1000)
+    : 0;
+
+  const safeView = (V && V !== "boot" && V !== "intro" && V !== "end") ? V : "mail";
+
+  return {
+    view: safeView,
+    playerNameInput,
+    selectedStartNight,
+    isFreeMode,
+    S: { ...JSON.parse(JSON.stringify(S)), totalPlayTime: elapsedTotal },
+    R: R ? { ...JSON.parse(JSON.stringify(R)), rElapsed } : null,
+    G: { ...G },
+    en,
+    cap,
+    rd,
+    shift,
+    sid,
+    crashes,
+    cam: { ...cam },
+    sigs: JSON.parse(JSON.stringify(sigs)),
+    curId: cur ? cur.id : null,
+    knobF,
+    knobP,
+    choiceCat,
+    choiceMod,
+    mail: JSON.parse(JSON.stringify(mail)),
+    selMail,
+    nightAssignments: JSON.parse(JSON.stringify(nightAssignments)),
+    nightAssignPool: JSON.parse(JSON.stringify(nightAssignPool)),
+    nightExtraSpawned,
+    nightTotalSpawned,
+    usedPlanetModelsThisNight: Array.from(usedPlanetModelsThisNight),
+    srv: srv ? JSON.parse(JSON.stringify(srv)) : null,
+    outbox: JSON.parse(JSON.stringify(outbox)),
+    selPkgId,
+    pendingEvals: pendingEvals.map(ev => ({
+      remainingMs: Math.max(250, ev.at - performance.now()),
+      pkg: JSON.parse(JSON.stringify(ev.pkg)),
+      targetType: ev.targetType,
+      assignId: ev.assignId || null
+    })),
+    discoveredModels: Array.from(discoveredModels),
+    discoveredAnomalies: JSON.parse(JSON.stringify(discoveredAnomalies)),
+    atlasSpecMode: Array.from(atlasSpecMode),
+    firstAnomalyFound,
+    flockMailSent,
+    hasFloppyDisk,
+    floppyStoredAnomalies: JSON.parse(JSON.stringify(floppyStoredAnomalies))
+  };
+}
+
+function restoreGameState(snapshot) {
+  if (!snapshot || !snapshot.S || !snapshot.G) return false;
+
+  if (TUT) {
+    const dock = document.querySelector("#tutDock");
+    if (dock) dock.style.display = "none";
+    document.querySelectorAll(".tut-hl").forEach(el => el.classList.remove("tut-hl"));
+    document.body.classList.remove("tut-side");
+    TUT = null;
+  }
+
+  stopVoice();
+  closeAssistantHelp();
+  preloadAllSprites();
+
+  playerNameInput = snapshot.playerNameInput || snapshot.S.playerName || "";
+  selectedStartNight = Math.max(0, Math.min(TOTAL_NIGHTS - 1, Number(snapshot.selectedStartNight) || 0));
+  isFreeMode = Boolean(snapshot.isFreeMode);
+
+  S = JSON.parse(JSON.stringify(snapshot.S));
+  S.tutorial = false;
+  sessionStartPerf = performance.now() - ((Number(S.totalPlayTime) || 0) * 1000);
+
+  if (snapshot.R) {
+    R = JSON.parse(JSON.stringify(snapshot.R));
+    R.t0 = performance.now() - ((Number(R.rElapsed) || 0) * 1000);
+  } else {
+    R = {
+      shift: shiftLabel(Number(snapshot.shift) || 0),
+      status: "EN_CURSO",
+      ok: 0,
+      t0: performance.now(),
+      tFirst: null,
+      slewTime: 0,
+      retunes: 0,
+      invalid: 0,
+      repeats: 0,
+      corrupt: 0,
+      silentErrors: 0,
+      specUses: 0,
+      anomSent: 0,
+      crash: 0,
+      fix: 0
+    };
+  }
+
+  G = {
+    money: Number(snapshot.G.money) || 0,
+    a: Number(snapshot.G.a) || 0,
+    f: Number(snapshot.G.f) || 0,
+    b: Number(snapshot.G.b) || 0
+  };
+  cap = Number(snapshot.cap) || (100 + 20 * G.b);
+  en = Math.max(0, Math.min(cap, Number(snapshot.en) || 0));
+  rd = Math.max(0, Number(snapshot.rd) || 0);
+  shift = Math.max(0, Math.min(TOTAL_NIGHTS - 1, Number(snapshot.shift) || 0));
+  crashes = Number(snapshot.crashes) || 0;
+  cam = snapshot.cam ? { x: Number(snapshot.cam.x) || 1900, y: Number(snapshot.cam.y) || 1250 } : { x: 1900, y: 1250 };
+
+  sigs = Array.isArray(snapshot.sigs) ? JSON.parse(JSON.stringify(snapshot.sigs)) : [];
+  const maxSigId = sigs.reduce((acc, s) => Math.max(acc, Number(s.id) || 0), 0);
+  sid = Math.max(Number(snapshot.sid) || 0, maxSigId);
+
+  cur = snapshot.curId
+    ? (sigs.find(s => s.id === snapshot.curId && s.st === "raw") || null)
+    : null;
+  knobF = typeof snapshot.knobF === "number" ? snapshot.knobF : 50;
+  knobP = typeof snapshot.knobP === "number" ? snapshot.knobP : 50;
+  choiceCat = snapshot.choiceCat !== undefined ? snapshot.choiceCat : null;
+  choiceMod = snapshot.choiceMod !== undefined ? snapshot.choiceMod : null;
+
+  mail = Array.isArray(snapshot.mail) ? JSON.parse(JSON.stringify(snapshot.mail)) : [];
+  selMail = snapshot.selMail || (mail[0] ? mail[0].id : null);
+  nightAssignments = Array.isArray(snapshot.nightAssignments) ? JSON.parse(JSON.stringify(snapshot.nightAssignments)) : [];
+  nightAssignPool = Array.isArray(snapshot.nightAssignPool) ? JSON.parse(JSON.stringify(snapshot.nightAssignPool)) : [];
+  nightExtraSpawned = Number(snapshot.nightExtraSpawned) || 0;
+  nightTotalSpawned = Number(snapshot.nightTotalSpawned) || 0;
+  usedPlanetModelsThisNight = new Set(Array.isArray(snapshot.usedPlanetModelsThisNight) ? snapshot.usedPlanetModelsThisNight : []);
+
+  srv = snapshot.srv ? { ...JSON.parse(JSON.stringify(snapshot.srv)), t: performance.now() } : null;
+  outbox = Array.isArray(snapshot.outbox) ? JSON.parse(JSON.stringify(snapshot.outbox)) : [];
+  selPkgId = snapshot.selPkgId || (outbox[0] ? outbox[0].id : null);
+
+  pendingEvals = Array.isArray(snapshot.pendingEvals)
+    ? snapshot.pendingEvals.map(ev => ({
+        at: performance.now() + Math.max(250, Number(ev.remainingMs) || 1200),
+        pkg: ev.pkg,
+        targetType: ev.targetType,
+        assignId: ev.assignId || null
+      }))
+    : [];
+
+  discoveredModels = new Set(Array.isArray(snapshot.discoveredModels) ? snapshot.discoveredModels : []);
+  discoveredAnomalies = Array.isArray(snapshot.discoveredAnomalies) ? JSON.parse(JSON.stringify(snapshot.discoveredAnomalies)) : [];
+  atlasSpecMode = new Set(Array.isArray(snapshot.atlasSpecMode) ? snapshot.atlasSpecMode : []);
+  firstAnomalyFound = Boolean(snapshot.firstAnomalyFound);
+  flockMailSent = Boolean(snapshot.flockMailSent);
+  hasFloppyDisk = Boolean(snapshot.hasFloppyDisk);
+  floppyStoredAnomalies = Array.isArray(snapshot.floppyStoredAnomalies) ? JSON.parse(JSON.stringify(snapshot.floppyStoredAnomalies)) : [];
+
+  pendingOverrideSig = null;
+  isTransitioningNight = false;
+  adminModalOpen = false;
+  bearDialogOpen = false;
+  gameOverReason = "";
+  lastProcSpecSigId = null;
+  Object.keys(SPEC_BUFFERS).forEach(k => delete SPEC_BUFFERS[k]);
+
+  ensureSectorDiversity();
+  V = snapshot.view || "mail";
+  updTop();
+  render();
+  return true;
+}
+
+function buildSaveRecord(slotId, state) {
+  const def = SAVE_SLOT_DEFS.find(d => d.id === slotId) || { id: slotId, label: slotId };
+  const now = new Date();
+  return {
+    version: 1,
+    slotId: def.id,
+    slotLabel: def.label,
+    savedAt: formatLocalDateTime(now),
+    savedAtISO: now.toISOString(),
+    summary: {
+      playerName: state.S.playerName || "Operador",
+      night: (Number(state.shift) || 0) + 1,
+      totalNights: TOTAL_NIGHTS,
+      freeMode: Boolean(state.isFreeMode),
+      money: Number(state.G.money) || 0,
+      upgrades: `ANT ${state.G.a || 0} · CRT ${state.G.f || 0} · BAT ${state.G.b || 0}`,
+      atlasCount: Array.isArray(state.discoveredModels) ? state.discoveredModels.length : 0,
+      atlasTotal: MODELS.length,
+      anomCount: Array.isArray(state.discoveredAnomalies) ? state.discoveredAnomalies.length : 0,
+      hasFloppyDisk: Boolean(state.hasFloppyDisk)
+    },
+    state
+  };
+}
+
+function saveToSlot(slotId, silent = false) {
+  const state = captureGameState();
+  if (!state) return false;
+  const store = readSaveStore();
+  const record = buildSaveRecord(slotId, state);
+  store[slotId] = record;
+  const persisted = writeSaveStore(store);
+
+  if (!silent) {
+    beep(640, 0.1);
+    msg(
+      persisted
+        ? `[OK] Partida guardada en ${record.slotLabel}`
+        : `[AVISO] Guardado en memoria temporal (${record.slotLabel})`,
+      1
+    );
+    if (saveModalOpen) renderSaveModal();
+  }
+  return true;
+}
+
+function autoSaveGame() {
+  if (TUT || isTransitioningNight) return false;
+  if (!G || !S || S.tutorial) return false;
+  if (V === "boot" || V === "intro" || V === "end") return false;
+  return saveToSlot("auto", true);
+}
+
+function loadFromSlot(slotId) {
+  const store = readSaveStore();
+  const record = store[slotId];
+  if (!record || !record.state) {
+    beep(180, 0.12, "sawtooth");
+    return msg("[ERR] La ranura seleccionada está vacía", 0);
+  }
+  closeSaveModal();
+  if (restoreGameState(record.state)) {
+    beep(580, 0.11);
+    msg(`[OK] Partida cargada · ${record.summary.playerName} (${shiftLabel(shift)})`, 1);
+  }
+}
+
+function deleteSaveSlot(slotId) {
+  const store = readSaveStore();
+  delete store[slotId];
+  writeSaveStore(store);
+  saveDeleteConfirmId = null;
+  beep(320, 0.08);
+  if (saveModalOpen) renderSaveModal();
+  if (V === "intro") render();
+}
+
+function exportSaveRecordToFile(record) {
+  if (!record || !record.state) return;
+  try {
+    const safeName = String(record.summary?.playerName || "operador")
+      .replace(/[^a-zA-Z0-9_-]+/g, "_")
+      .slice(0, 24);
+    const nightNum = record.summary?.night || 1;
+    const filename = `erial7_${safeName}_N${nightNum}.json`;
+    const blob = new Blob([JSON.stringify(record, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    beep(620, 0.09);
+    msg(`[OK] Archivo exportado: ${filename}`, 1);
+  } catch (_) {
+    msg("[ERR] No se pudo exportar el archivo de guardado", 0);
+  }
+}
+
+function importSaveFromFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(String(reader.result || ""));
+      const state = parsed && parsed.state ? parsed.state : parsed;
+      if (!state || !state.S || !state.G) {
+        beep(180, 0.14, "sawtooth");
+        return msg("[ERR] El archivo JSON no corresponde a una partida válida", 0);
+      }
+      const store = readSaveStore();
+      store.auto = buildSaveRecord("auto", state);
+      writeSaveStore(store);
+      closeSaveModal();
+      if (restoreGameState(state)) {
+        beep(640, 0.12);
+        msg(`[OK] Guardado importado · ${S.playerName} (${shiftLabel(shift)})`, 1);
+      }
+    } catch (_) {
+      beep(180, 0.14, "sawtooth");
+      msg("[ERR] Error al leer el archivo de guardado", 0);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function ensureSaveModalRoot() {
+  let root = document.querySelector("#saveModalRoot");
+  if (root) return root;
+  root = document.createElement("div");
+  root.id = "saveModalRoot";
+  document.body.appendChild(root);
+  return root;
+}
+
+function openSaveModal() {
+  saveModalOpen = true;
+  saveDeleteConfirmId = null;
+  renderSaveModal();
+}
+
+function closeSaveModal() {
+  saveModalOpen = false;
+  saveDeleteConfirmId = null;
+  const root = document.querySelector("#saveModalRoot");
+  if (root) root.innerHTML = "";
+}
+
+function renderSaveModal() {
+  const root = ensureSaveModalRoot();
+  if (!saveModalOpen) {
+    root.innerHTML = "";
+    return;
+  }
+
+  const inActiveSession = Boolean(G && S && !S.tutorial && V !== "boot" && V !== "intro" && V !== "end");
+  const store = readSaveStore();
+
+  const slotsHtml = SAVE_SLOT_DEFS.map(def => {
+    const rec = store[def.id] && store[def.id].state ? store[def.id] : null;
+    const sum = rec ? rec.summary : null;
+    const isConfirmDel = saveDeleteConfirmId === def.id;
+
+    return `
+      <div class="card save-slot-card ${def.isAuto ? "auto-slot" : ""}">
+        <div class="save-slot-head">
+          <div>
+            <b>${def.label.toUpperCase()}</b>
+            ${rec ? `<span class="mut" style="font-size:11px;margin-left:6px">${rec.savedAt}</span>` : `<span class="mut" style="font-size:11px;margin-left:6px">[VACÍA]</span>`}
+          </div>
+          ${sum ? `<span class="pill ${sum.night >= 9 ? "night" : ""}">${sum.freeMode ? `MODO LIBRE · N${sum.night}` : `NOCHE ${sum.night}/${sum.totalNights || TOTAL_NIGHTS}`}</span>` : ""}
+        </div>
+
+        ${sum ? `
+          <div class="save-slot-meta">
+            <span><b>OP:</b> ${sum.playerName}</span>
+            <span>· <b>CR:</b> $${sum.money}</span>
+            <span>· <b>MEJORAS:</b> ${sum.upgrades}</span>
+            <span>· <b>ATLAS:</b> ${sum.atlasCount}/${sum.atlasTotal}</span>
+            ${sum.anomCount > 0 ? `<span>· <b>ANOM:</b> ${sum.anomCount}</span>` : ""}
+            ${sum.hasFloppyDisk ? `<span>· <b>FLOPPY</b></span>` : ""}
+          </div>
+        ` : `
+          <div class="mut" style="font-size:11.5px">
+            ${def.isAuto ? "Se actualiza automáticamente durante tu guardia." : "Sin datos guardados en esta ranura."}
+          </div>
+        `}
+
+        <div class="save-slot-actions">
+          ${inActiveSession && !def.isAuto ? `<button type="button" data-save-slot="${def.id}">Guardar aquí</button>` : ""}
+          ${inActiveSession && def.isAuto ? `<button type="button" class="alt" data-save-slot="auto">Actualizar autoguardado</button>` : ""}
+          ${rec ? `<button type="button" class="primary-os" data-load-slot="${def.id}">Cargar</button>` : ""}
+          ${rec ? `<button type="button" class="alt" data-export-slot="${def.id}">Exportar</button>` : ""}
+          ${rec ? (
+            isConfirmDel
+              ? `<button type="button" class="bad" data-del-confirm="${def.id}">Confirmar borrado</button>
+                 <button type="button" class="alt" data-del-cancel="${def.id}">Cancelar</button>`
+              : `<button type="button" class="bad" data-del-ask="${def.id}">Borrar</button>`
+          ) : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  root.innerHTML = `
+    <div class="os-modal-backdrop" id="saveModalBackdrop">
+      <div class="os-modal-win save-modal-win" role="dialog" aria-modal="true" aria-label="Sistema de Guardado">
+        <div class="os-win-bar">
+          <span>SISTEMA DE GUARDADO // ARCHIVO DE ESTACIÓN</span>
+          <button type="button" class="alt" id="closeSaveModalBtn" style="padding:2px 8px;font-size:11px">X</button>
+        </div>
+        <div class="os-modal-body save-modal-body">
+          <div class="mut" style="font-size:11.5px">
+            ${inActiveSession
+              ? `Sesión actual: <b>${S.playerName}</b> (${shiftLabel(shift)} · $${G.money} CR). Guarda en una ranura manual o carga un registro previo.`
+              : "Selecciona una partida guardada para continuar tu guardia o importa un archivo .JSON."}
+          </div>
+          ${slotsHtml}
+          <div class="save-modal-foot">
+            <div class="row" style="margin:0;gap:6px">
+              ${inActiveSession ? `<button type="button" class="alt" id="exportCurrentBtn">Exportar actual (.JSON)</button>` : ""}
+              <button type="button" class="alt" id="importSaveBtn">Importar (.JSON)</button>
+              <input type="file" id="importSaveInput" accept=".json,application/json" style="display:none">
+            </div>
+            <button type="button" class="alt" id="doneSaveModalBtn">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const backdrop = root.querySelector("#saveModalBackdrop");
+  if (backdrop) {
+    backdrop.onclick = e => {
+      if (e.target === backdrop) closeSaveModal();
+    };
+  }
+  const closeBtn = root.querySelector("#closeSaveModalBtn");
+  if (closeBtn) closeBtn.onclick = () => { beep(380, 0.06); closeSaveModal(); };
+  const doneBtn = root.querySelector("#doneSaveModalBtn");
+  if (doneBtn) doneBtn.onclick = () => { beep(380, 0.06); closeSaveModal(); };
+
+  root.querySelectorAll("[data-save-slot]").forEach(btn => {
+    btn.onclick = () => saveToSlot(btn.dataset.saveSlot, false);
+  });
+  root.querySelectorAll("[data-load-slot]").forEach(btn => {
+    btn.onclick = () => loadFromSlot(btn.dataset.loadSlot);
+  });
+  root.querySelectorAll("[data-export-slot]").forEach(btn => {
+    btn.onclick = () => {
+      const st = readSaveStore();
+      exportSaveRecordToFile(st[btn.dataset.exportSlot]);
+    };
+  });
+  root.querySelectorAll("[data-del-ask]").forEach(btn => {
+    btn.onclick = () => {
+      saveDeleteConfirmId = btn.dataset.delAsk;
+      renderSaveModal();
+    };
+  });
+  root.querySelectorAll("[data-del-cancel]").forEach(btn => {
+    btn.onclick = () => {
+      saveDeleteConfirmId = null;
+      renderSaveModal();
+    };
+  });
+  root.querySelectorAll("[data-del-confirm]").forEach(btn => {
+    btn.onclick = () => deleteSaveSlot(btn.dataset.delConfirm);
+  });
+
+  const expCur = root.querySelector("#exportCurrentBtn");
+  if (expCur) {
+    expCur.onclick = () => {
+      const st = captureGameState();
+      if (st) exportSaveRecordToFile(buildSaveRecord("export", st));
+    };
+  }
+  const impBtn = root.querySelector("#importSaveBtn");
+  const impInput = root.querySelector("#importSaveInput");
+  if (impBtn && impInput) {
+    impBtn.onclick = () => impInput.click();
+    impInput.onchange = e => {
+      const file = e.target.files && e.target.files[0];
+      if (file) importSaveFromFile(file);
+      impInput.value = "";
+    };
+  }
+}
+
+function startTutorialFromGame() {
+  if (TUT || isTransitioningNight) return;
+  if (G && S && !S.tutorial) {
+    const snap = captureGameState();
+    if (snap) {
+      TUT_RETURN_SNAPSHOT = snap;
+    }
+  }
+  beep(659.25, 0.1, "triangle", 0.06);
+  startTutorial();
 }
 
 function unlockBootAudioOnGesture() {
