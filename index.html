@@ -1226,12 +1226,16 @@ const CLOUD_DB_URL = "https://echoes-2ed86-default-rtdb.firebaseio.com/";
 
 const $ = s => document.querySelector(s);
 const CLASSES = ["Estrella", "Planeta", "Asteroide", "Satelite", "Pulsar", "Singularidad"];
-const TOTAL_NIGHTS = 15;
+const TOTAL_NIGHTS = 30;
 const EXTRA_SIGNALS_PER_NIGHT = 10;
 const MAX_NIGHT_SIGNALS_AFTER_CATALOG = 13;
 const MAX_MEMORY_SIGNALS = 5;
 const MAX_FLOPPY_ANOMALIES = 5;
 const ECHO_LOCK_COST = 4;
+const MAX_UPGRADE_LEVEL = 16;
+const getMemoryCapacity = () => MAX_MEMORY_SIGNALS + Math.min(5, G?.mem || 0);
+const getNightSignalLimit = () => MAX_NIGHT_SIGNALS_AFTER_CATALOG + Math.floor(shift / 5) * 2;
+const getAntennaSlots = () => 1 + ((G?.ant2 || 0) > 0 ? 1 : 0);
 const W = 4800, H = 3200;
 const stars = Array.from({length: 2400}, () => [Math.random()*W, Math.random()*H, Math.random()*1.6 + 0.5]);
 
@@ -1781,7 +1785,7 @@ function ensureAudioContext() {
 // Recuperación de energía escalonada:
 // Noches 1-5 (shift 0..4): rápida
 // Noches 6-10 (shift 5..9): lenta
-// Noches 11-15 (shift 10..14): nula (en Modo Libre se mantiene recarga rápida)
+// Noches 11 en adelante (shift 10+): nula (en Modo Libre se mantiene recarga rápida)
 function getEnergyRegenMode() {
   if (isFreeMode) return "fast";
   if (shift <= 4) return "fast";
@@ -2236,7 +2240,7 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId
     y = 240 + Math.random() * (H - 480);
   } while (tries++ < 160 && sigs.some(s => s.st !== "gone" && Math.hypot(s.x - x, s.y - y) < 760));
 
-  // Las anomalías SOLO aparecen a partir de Noche 10 (isAnomEnabled()), con ratio considerablemente menor (6%)
+  // Las anomalías SOLO aparecen a partir de Noche 10 (isAnomEnabled()), con ratio reducido (4.5%)
   // y cada anomalía es estrictamente única (si ya fue encontrada o está activa, nunca vuelve a aparecer)
   const availableAnoms = getAvailableUniqueAnomalies();
   const allowAnom = isAnomEnabled() && !assignRefId && availableAnoms.length > 0;
@@ -2328,24 +2332,24 @@ function getStoredMemoryCount() {
 function canAcceptSignalInBuffer(isAnomSignal = false) {
   if (!hasFloppyDisk) {
     const reservedTotal = getStoredMemoryCount() + sigs.filter(s => s.st === "align" || s.st === "dl").length;
-    return reservedTotal < MAX_MEMORY_SIGNALS;
+    return reservedTotal < getMemoryCapacity();
   }
   const activeNormal = sigs.filter(s => (s.st === "align" || s.st === "dl") && !s.anom).length;
   const activeAnom = sigs.filter(s => (s.st === "align" || s.st === "dl") && s.anom).length;
   if (isAnomSignal) {
     return (getAnomalyBufferCount() + activeAnom) < MAX_FLOPPY_ANOMALIES;
   }
-  return (getNormalStoredCount() + activeNormal) < MAX_MEMORY_SIGNALS;
+  return (getNormalStoredCount() + activeNormal) < getMemoryCapacity();
 }
 
 function isBufferFullForLock() {
   if (!hasFloppyDisk) {
     const reservedTotal = getStoredMemoryCount() + sigs.filter(s => s.st === "align" || s.st === "dl").length;
-    return reservedTotal >= MAX_MEMORY_SIGNALS;
+    return reservedTotal >= getMemoryCapacity();
   }
   const activeNormal = sigs.filter(s => (s.st === "align" || s.st === "dl") && !s.anom).length;
   const activeAnom = sigs.filter(s => (s.st === "align" || s.st === "dl") && s.anom).length;
-  return (getNormalStoredCount() + activeNormal) >= MAX_MEMORY_SIGNALS &&
+  return (getNormalStoredCount() + activeNormal) >= getMemoryCapacity() &&
          (getAnomalyBufferCount() + activeAnom) >= MAX_FLOPPY_ANOMALIES;
 }
 
@@ -2414,6 +2418,18 @@ function ensureSectorDiversity() {
     }
   }
 
+  // Primera anomalía garantizada: Voyager 1 aparece en la Noche 10.
+  if (shift === 9 && !discoveredAnomalies.some(a => a.anomType === "voyager") &&
+      !sigs.some(s => s.anomType === "voyager" && s.st !== "gone")) {
+    if (inSector().length >= 5) {
+      const idleExtra = sigs.find(s => s.st === "echo" && !s.assignRefId);
+      if (idleExtra) idleExtra.st = "gone";
+    }
+    sigs.push(makeSignal(3, true, "voyager", null, null));
+    nightExtraSpawned++;
+    nightTotalSpawned++;
+  }
+
   // En Noche 9 (shift === 8), asegurar al menos una aparición del Agujero Negro en el sector
   if (shift === 8 && !discoveredModels.has("sin_agujero_negro") && !sigs.some(s => s.modelId === "sin_agujero_negro" && s.st !== "gone")) {
     if (inSector().length >= 5) {
@@ -2427,16 +2443,16 @@ function ensureSectorDiversity() {
 
   // 2. Completar ecos en sector
   const allowedCats = getAvailableCategories();
-  while (inSector().length < 5 && (!areNightAssignmentsCataloged() || nightTotalSpawned < MAX_NIGHT_SIGNALS_AFTER_CATALOG)) {
+  while (inSector().length < 5 && (!areNightAssignmentsCataloged() || nightTotalSpawned < getNightSignalLimit())) {
     const curSector = inSector();
     const missingCats = allowedCats.filter(c => !curSector.some(s => s.cat === c && !s.anom));
     let chosenCat;
     if (missingCats.length > 0) {
       chosenCat = missingCats[Math.floor(Math.random() * missingCats.length)];
     } else {
-      const activeCats = getUncatalogedNightAssignments().map(a => a.cat);
-      const weightedPool = [...allowedCats, ...activeCats];
-      chosenCat = weightedPool[Math.floor(Math.random() * weightedPool.length)];
+      // Las categorías solicitadas siguen garantizadas por sus ecos asignados,
+      // pero ya no reciben peso adicional en las señales extra del sector.
+      chosenCat = allowedCats[Math.floor(Math.random() * allowedCats.length)];
     }
 
     sigs.push(makeSignal(chosenCat, null, null, null, null));
@@ -2461,11 +2477,12 @@ function initShift() {
     specUses: 0, anomSent: 0, crash: 0, fix: 0
   };
 
-  // Generar exactamente 3 encargos científicos diarios (pagos: $45-$65 CR)
+  // Generar 3 encargos hasta Noche 14 y 5 desde Noche 15.
+  const assignmentCount = shift >= 14 ? 5 : 3;
   const allowedCats = getAvailableCategories();
   const usedSci = new Set();
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < assignmentCount; i++) {
     let sci;
     do {
       sci = SCIENTISTS[Math.floor(Math.random() * SCIENTISTS.length)];
@@ -2484,7 +2501,7 @@ function initShift() {
       mod = catModels[Math.floor(Math.random() * catModels.length)];
     }
 
-    const reward = 45 + Math.floor(Math.random() * 21); // $45 a $65 CR
+    const reward = 55 + Math.floor(Math.random() * 21) + (shift >= 14 ? 5 : 0); // $55-$75, +5 desde Noche 15
     const requireModel = isSubcatEnabled();
 
     const targetDesc = requireModel
@@ -2512,7 +2529,7 @@ function initShift() {
     });
 
     addMail(
-      `Encargo ${i + 1}/3 · ${targetDesc}`,
+      `Encargo ${i + 1}/${assignmentCount} · ${targetDesc}`,
       `Remitente: ${sci.name} (${sci.inst})\n` +
       `Solicitud para ${shiftLabel(shift)}: Registro espectral verificado de ${targetDesc}.\n` +
       `Honorarios autorizados: $${reward} CR.\n\n` +
@@ -2622,11 +2639,11 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
   };
 
   if (isFreeMode) {
-    G = {money: 9999, a: 5, f: 5, b: 5};
+    G = {money: 9999, a: 0, align: 16, download: 16, st: 16, mem: 5, ant2: 1, f: 5, b: 5};
     cap = 200;
     en = 200;
   } else {
-    G = {money: 75, a: 0, f: 0, b: 0};
+    G = {money: 75, a: 0, align: 0, download: 0, st: 0, mem: 0, ant2: 0, f: 0, b: 0};
     cap = 100;
     en = 100;
   }
@@ -2750,7 +2767,7 @@ function updTop() {
   if (topTitle) topTitle.textContent = "AVALANCHE(r) COSMOS 95";
   document.title = "Frecuencia de Fondo · Estación Erial-7";
   const remAssigns = activeAssigns().length;
-  const totalAssigns = nightAssignments.filter(a => a.night === shift).length || 3;
+  const totalAssigns = nightAssignments.filter(a => a.night === shift).length || (shift >= 14 ? 5 : 3);
   const canLogout = allNightAssignsClosed();
   const regenMode = getEnergyRegenMode();
   const pwrClass = regenMode === "none" ? "norech" : regenMode === "slow" ? "slowrech" : "";
@@ -2796,7 +2813,7 @@ function updTop() {
 }
 
 function makeServerChallenge() {
-  const count = Math.min(7, 3 + Math.floor(shift / 3));
+  const count = Math.min(8, 3 + Math.floor(shift / 3));
   const seq = Array.from({length: count}, (_, i) => i);
   if (shift >= 2) {
     for (let i = seq.length - 1; i > 0; i--) {
@@ -2955,7 +2972,7 @@ function evaluatePlatformDispatch(ev) {
 
     const isNewDiscovery = !discoveredModels.has(pkg.trueMod);
     discoveredModels.add(pkg.trueMod);
-    const pay = isNewDiscovery ? 20 : 10;
+    const pay = isNewDiscovery ? 25 : 15;
     G.money += pay;
 
     addMail(
@@ -3085,9 +3102,10 @@ function tick(dt) {
   }
 
   if (rd > 0) rd = Math.max(0, rd - dt);
+  if (!isFreeMode && !TUT) en = Math.max(0, en - dt * (0.025 + (shift / (TOTAL_NIGHTS - 1)) * 0.055));
 
-  const alignDur = TUT ? 2.0 : Math.max(1.1, 4.4 - G.a * 0.65);
-  const dlDur = TUT ? 5.5 : Math.max(3.8, 12.0 - G.a * 1.6);
+  const alignDur = TUT ? 2.0 : Math.max(0.65, 4.4 - (G.align || 0) * 0.22);
+  const dlDur = TUT ? 5.5 : Math.max(2.2, 12.0 - (G.download || 0) * 0.48);
   const noiseProb = Math.max(0.02, 0.24 - G.f * 0.04);
   let activeDl = false;
 
@@ -3152,7 +3170,7 @@ function tick(dt) {
     }
   });
 
-  if (activeDl && !srv && !TUT && Math.random() < dt / 46) triggerCrash();
+  if (activeDl && !srv && !TUT && Math.random() < dt / (46 + (G.st || 0) * 5)) triggerCrash();
 
   if (activeVoice) {
     activeVoice.t += dt;
@@ -4086,7 +4104,8 @@ function render() {
         </div>
       </div>`;
   } else if (V === "map") {
-    const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
+    const activeAntennaSignals = sigs.filter(s => s.st === "align" || s.st === "dl");
+    const busySig = activeAntennaSignals.length >= getAntennaSlots() ? activeAntennaSignals[0] : null;
     h = `
       <div class="map-shell">
         ${srv ? `
@@ -4116,14 +4135,14 @@ function render() {
         <div class="map-hud-bar">
           <span class="mut">${
             isBufferFullForLock() && !busySig
-              ? `Memoria llena (${getStoredMemoryCount()}/${hasFloppyDisk ? MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES : MAX_MEMORY_SIGNALS}): envia en Plataforma o descarta en Procesador.`
+              ? `Memoria llena (${getStoredMemoryCount()}/${hasFloppyDisk ? getMemoryCapacity() + MAX_FLOPPY_ANOMALIES : getMemoryCapacity()}): envia en Plataforma o descarta en Procesador.`
               : busySig
-                ? `Antenas ocupadas rastreando señal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${hasFloppyDisk ? MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES : MAX_MEMORY_SIGNALS}]`
-                : sigs.filter(s => s.st === "echo").length === 0 && areNightAssignmentsCataloged() && nightTotalSpawned >= MAX_NIGHT_SIGNALS_AFTER_CATALOG
+                ? `Antenas ocupadas rastreando señal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${hasFloppyDisk ? getMemoryCapacity() + MAX_FLOPPY_ANOMALIES : getMemoryCapacity()}]`
+                : sigs.filter(s => s.st === "echo").length === 0 && areNightAssignmentsCataloged() && nightTotalSpawned >= getNightSignalLimit()
                   ? "No quedan mas señales en el sector durante esta noche."
-                  : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco) · Memoria: ${hasFloppyDisk ? `${getNormalStoredCount()}/${MAX_MEMORY_SIGNALS} + ${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES} ANOM` : `${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}`}.`
+                  : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco) · Memoria: ${hasFloppyDisk ? `${getNormalStoredCount()}/${getMemoryCapacity()} + ${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES} ANOM` : `${getStoredMemoryCount()}/${getMemoryCapacity()}`}.`
           }</span>
-          <button class="alt" id="rd">Pulso Radar (-6 PWR)</button>
+          <button class="alt" id="rd">Pulso Radar (-6 PWR · CD 5s)</button>
         </div>
       </div>`;
   } else if (V === "proc") {
@@ -4133,7 +4152,7 @@ function render() {
 
     h = `<div class="proc-shell">
       <div class="proc-buffer-bar">
-        <span class="mut" style="font-size:12px">MEMORIA (${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}) · BUFFER:</span>
+        <span class="mut" style="font-size:12px">MEMORIA (${getStoredMemoryCount()}/${getMemoryCapacity()}) · BUFFER:</span>
         ${ready.length ? ready.map(s => `<button class="${s === cur ? "" : "alt"}" data-s="${s.id}">TRAMA #${s.id}</button>`).join("") : `<span class="mut">Sin tramas descargadas</span>`}
       </div>`;
 
@@ -4274,7 +4293,7 @@ function render() {
       <div class="card">
         <div class="between">
           <b>PLATAFORMA DE ENVIO</b>
-          <span class="mut" style="font-size:12px">MEMORIA: ${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS} (Cola: ${outbox.length} · Procesador: ${sigs.filter(s => s.st === "raw").length})</span>
+          <span class="mut" style="font-size:12px">MEMORIA: ${getStoredMemoryCount()}/${getMemoryCapacity()} (Cola: ${outbox.length} · Procesador: ${sigs.filter(s => s.st === "raw").length})</span>
         </div>
         <div class="mut" style="font-size:12px">Selecciona un paquete preparado y elige manualmente su destinatario.</div>
         <div class="row" style="margin-top:8px">
@@ -4404,31 +4423,35 @@ function render() {
       </div>` : `<div class="card"><b>SERVIDOR EN LINEA</b><p class="mut">Sin incidencias.</p></div>`;
   } else if (V === "shop") {
     const upgrades = [
-      ["a", "Servomotores de Antena", "Acelera el giro de antenas y la descarga.", 5, 85 + 55 * G.a],
-      ["f", "Filtro CRT Optico", "Aumenta la resolucion del CRT y reduce la estatica.", 5, 80 + 50 * G.f],
-      ["b", "Banco de Baterias", "Aumenta la capacidad maxima de PWR (+20 por nivel).", 5, 75 + 45 * G.b]
+      ["ant2", "Segunda Antena", "Permite mantener dos señales en alineación/descarga simultáneamente. Disponible desde Noche 15.", 1, 180 + 0, shift >= 14],
+      ["mem", "Aumento de Memoria", "Añade un espacio de señal al buffer por nivel (hasta 10 señales).", 5, 45 + 25 * G.mem, true],
+      ["st", "Estabilizador de Servidor", "Reduce la frecuencia de fallos del servidor. Disponible desde Noche 1.", 16, 10 + 2 * G.st, true],
+      ["align", "Velocidad de Alineación", "Reduce el tiempo necesario para orientar las antenas.", 16, 20 + 4 * G.align, true],
+      ["download", "Velocidad de Descarga", "Reduce el tiempo necesario para descargar cada señal.", 16, 20 + 4 * G.download, true],
+      ["f", "Filtro CRT Óptico", "Aumenta la resolución del CRT y reduce la estática.", 5, 60 + 40 * G.f, true],
+      ["b", "Banco de Baterías", "Aumenta la capacidad máxima de PWR (+20 por nivel).", 5, 75 + 45 * G.b, true]
     ];
-    h = upgrades.map(([k, name, desc, maxLv, cost]) => {
-      const lv = G[k];
+    h = upgrades.map(([k, name, desc, maxLv, cost, unlocked]) => {
+      const lv = G[k] || 0;
       return `<div class="card between">
         <div>
           <b>${name}</b> <span class="mut">[NV ${lv}/${maxLv}]</span>
           <div class="mut" style="font-size:12px">${desc}</div>
         </div>
-        <button data-u="${k}" ${lv >= maxLv || G.money < cost ? "disabled" : ""}>${lv >= maxLv ? "MAXIMO" : `$${cost} CR`}</button>
+        <button data-u="${k}" ${!unlocked || lv >= maxLv || G.money < cost ? "disabled" : ""}>${!unlocked ? "DISPONIBLE NOCHE 15" : lv >= maxLv ? "MAXIMO" : `$${cost} CR`}</button>
       </div>`;
     }).join("") + `
     <div class="card between">
       <div>
-        <b>Celda de Energia Auxiliar (+45 PWR)</b>
-        <div class="mut" style="font-size:12px">Suministro de emergencia indispensable cuando la recarga es lenta o nula.</div>
+        <b>Celda de Energía Auxiliar (+45 PWR)</b>
+        <div class="mut" style="font-size:12px">Suministro de emergencia para compensar el desgaste del generador.</div>
       </div>
       <button id="buyCellBtn" ${G.money < 30 || en >= cap ? "disabled" : ""}>$30 CR</button>
     </div>` + (firstAnomalyFound ? `
     <div class="card shadowbox between">
       <div>
-        <b>Disco Floppy (Almacenamiento Anomalo +5)</b> <span class="mut">[VENDEDOR: OCULTO]</span>
-        <div class="mut" style="font-size:12px">Permite guardar lecturas anomalas en disco fuera de la red oficial y habilita +5 espacios extra para anomalias en el buffer.</div>
+        <b>Disco Floppy (Almacenamiento Anómalo +5)</b> <span class="mut">[VENDEDOR: OCULTO]</span>
+        <div class="mut" style="font-size:12px">Permite guardar lecturas anómalas fuera de la red oficial.</div>
       </div>
       <button class="shadow" id="buyFloppyBtn" ${hasFloppyDisk || G.money < 50 ? "disabled" : ""}>${hasFloppyDisk ? "INSTALADO" : "$50 CR"}</button>
     </div>` : "");
@@ -4451,10 +4474,10 @@ function render() {
     } else {
       h = `
         <div class="card" style="padding:22px">
-          <div class="mut" style="font-size:12px;font-weight:700;letter-spacing:1.5px">CAMPANA COMPLETADA // 15 NOCHES</div>
+          <div class="mut" style="font-size:12px;font-weight:700;letter-spacing:1.5px">CAMPANA COMPLETADA // 30 NOCHES</div>
           <h2 style="margin:8px 0">GUARDIA FINALIZADA · OP. ${S.playerName.toUpperCase()}</h2>
           <p>
-            Has completado las 15 noches de vigilancia en la Estacion.
+            Has completado las 30 noches de vigilancia en la Estación.
           </p>
           <div class="row">
             <span class="pill">Creditos finales: $${G.money} CR</span>
@@ -4692,8 +4715,9 @@ function bindEvents(w) {
       if (!hit) { if (R) R.invalid++; syncLiveTelemetry(false, false); return; }
 
       if (hit.st === "echo") {
-        const busySig = sigs.find(s => s.st === "align" || s.st === "dl");
-        if (busySig) {
+        const activeAntennaSignals = sigs.filter(s => s.st === "align" || s.st === "dl");
+        const busySig = activeAntennaSignals[0];
+        if (activeAntennaSignals.length >= getAntennaSlots()) {
           if (pendingOverrideSig && pendingOverrideSig.id === hit.id) {
             if (en < ECHO_LOCK_COST) { beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
             busySig.st = "gone";
@@ -4717,7 +4741,7 @@ function bindEvents(w) {
         if (!canAcceptSignalInBuffer(hit.anom)) {
           if (R) R.invalid++;
           beep(180, 0.15, "sawtooth");
-          const maxCap = hasFloppyDisk ? (MAX_MEMORY_SIGNALS + MAX_FLOPPY_ANOMALIES) : MAX_MEMORY_SIGNALS;
+          const maxCap = hasFloppyDisk ? (getMemoryCapacity() + MAX_FLOPPY_ANOMALIES) : getMemoryCapacity();
           return msg(`[ERR] Memoria llena (${getStoredMemoryCount()}/${maxCap}) // Envia, guarda en Floppy o descarta señales antes de capturar mas`, 0);
         }
         if (en < ECHO_LOCK_COST) { if (R) R.invalid++; beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
@@ -4757,7 +4781,7 @@ function bindEvents(w) {
     markFirst();
     if (rd > 0) return;
     if (en < 6) { if (R) R.invalid++; return msg("[ERR] Energia insuficiente (6 PWR)", 0); }
-    en -= 6; rd = 7;
+    en -= 6; rd = 5;
     beep(580, 0.12);
     updTop();
   });
@@ -5116,17 +5140,19 @@ function bindEvents(w) {
       if (k !== "f") return tutNudge("Hoy solo necesitamos el Filtro CRT Óptico.");
       if (!tutGate("shop_buy", "Primero escucha mi explicación.")) return;
     }
-    const maxLv = 5;
-    if (G[k] >= maxLv) return;
+    const maxLevels = {ant2:1, mem:5, st:16, align:16, download:16, f:5, b:5};
     const costs = {
-      a: 85 + 55 * G.a,
-      f: 80 + 50 * G.f,
-      b: 75 + 45 * G.b
+      ant2: 180, mem: 45 + 25 * (G.mem || 0),
+      st: 10 + 2 * (G.st || 0),
+      align: 20 + 4 * (G.align || 0),
+      download: 20 + 4 * (G.download || 0),
+      f: 60 + 40 * G.f, b: 75 + 45 * G.b
     };
-    const cost = costs[k];
-    if (G.money < cost) return;
+    if (k === "ant2" && shift < 14) return;
+    const level = G[k] || 0, maxLv = maxLevels[k], cost = costs[k];
+    if (level >= maxLv || G.money < cost) return;
     G.money -= cost;
-    G[k]++;
+    G[k] = level + 1;
     if (k === "b") { cap = 100 + 20 * G.b; en = Math.min(cap, en + 20); }
     beep(660, 0.1);
     msg(`[OK] Mejora instalada (NV ${G[k]}/${maxLv})`, 1);
@@ -5248,7 +5274,7 @@ const TUT_STEPS = [
   },
   {
     id: "map_1", pose: "read", view: "map", btn: "Siguiente", hl: "rd",
-    text: "El cielo es más grande que la pantalla: arrastra el mapa con el mouse o el dedo para recorrerlo. El botón Pulso Radar (-6 PWR) marca con flechas hacia dónde hay ecos fuera de tu vista."
+    text: "El cielo es más grande que la pantalla: arrastra el mapa con el mouse o el dedo para recorrerlo. El botón Pulso Radar (-6 PWR · CD 5s) marca con flechas hacia dónde hay ecos fuera de tu vista y tiene 5 segundos de enfriamiento."
   },
   {
     id: "map_2", pose: "read", view: "map", btn: "Siguiente",
@@ -5598,7 +5624,7 @@ function startTutorial() {
     date: formatLocalDateTime(nowDate), dateISO: nowDate.toISOString(),
     totalPlayTime: 0, status: "EN_CURSO", shifts: [], survey: null
   };
-  G = {money: 75, a: 0, f: 0, b: 0};
+  G = {money: 75, a: 0, align: 0, download: 0, st: 0, mem: 0, ant2: 0, f: 0, b: 0};
   cap = 100; en = 100;
 
   sigs = []; cam = {x: 1900, y: 1250}; mail = []; selMail = null;
@@ -6127,6 +6153,8 @@ function restoreGameState(snapshot) {
   G = {
     money: Number(snapshot.G.money) || 0,
     a: Number(snapshot.G.a) || 0,
+    align: Number(snapshot.G.align) || 0, download: Number(snapshot.G.download) || 0,
+    st: Number(snapshot.G.st) || 0, mem: Number(snapshot.G.mem) || 0, ant2: Number(snapshot.G.ant2) || 0,
     f: Number(snapshot.G.f) || 0,
     b: Number(snapshot.G.b) || 0
   };
