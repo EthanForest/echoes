@@ -71,12 +71,15 @@ button:hover:not(:disabled){background:#072412;border-color:#4ade80;color:#fffff
 button.primary-os{
   border-width:2px;font-weight:700;
 }
-button.logout-btn{
+button.logout-btn,
+button.save-btn{
   padding:3px 10px;font-size:12px;font-weight:700;border-width:1px;
 }
-button.logout-btn:not(:disabled){
+button.logout-btn:not(:disabled),
+button.save-btn:not(:disabled){
   border-color:#4ade80;background:#062110;color:#ffffff;
 }
+.topbar-actions{display:inline-flex;gap:6px;flex-wrap:nowrap;align-items:center}
 button.alt{background:#000000;color:#ffffff;border:1px solid #22c55e}
 button.alt:hover:not(:disabled){background:#072412;border-color:#4ade80}
 button.bad{background:#000000;border:1px solid #ef4444;color:#ffffff}
@@ -614,7 +617,8 @@ body.paper-theme button.alt:hover:not(:disabled){
   border-color:#5c4424;
   color:#1e1912;
 }
-body.paper-theme button.logout-btn:not(:disabled){
+body.paper-theme button.logout-btn:not(:disabled),
+body.paper-theme button.save-btn:not(:disabled){
   background:#5c4424;
   border-color:#3d2b14;
   color:#fbf6ea;
@@ -1626,6 +1630,43 @@ let flash = "", flashOk = 1, flashT = 0;
 let drag = null, moved = 0, uiTick = 0;
 let au = null, analyser = null, specFreqData = null, specTimeData = null;
 let muted = false, activeVoice = null;
+
+// ===== Voz del oso asistente: pista en bucle mientras su texto se va escribiendo =====
+const BEAR_VOICE_SRC = "assets/audio/bear_voice.m4a";
+let bearVoiceAudio = null;
+let bearVoicePlaying = false;
+
+function bearIsTalking() {
+  // Login (globo del oso), tutorial de Snøskred y ayuda contextual
+  if (V === "intro" && bearDialogOpen && bearTypedChars < bearMsg.length) return true;
+  if (TUT && TUT.typed < TUT.text.length) return true;
+  if (ASST_HELP && ASST_HELP.typed < ASST_HELP.text.length) return true;
+  return false;
+}
+
+function setBearVoice(on) {
+  if (on === bearVoicePlaying) return;
+  bearVoicePlaying = on;
+  try {
+    if (on) {
+      if (!bearVoiceAudio) {
+        bearVoiceAudio = new Audio(BEAR_VOICE_SRC);
+        bearVoiceAudio.loop = true;
+        bearVoiceAudio.volume = 0.5;
+      }
+      bearVoiceAudio.currentTime = 0;
+      const p = bearVoiceAudio.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    } else if (bearVoiceAudio) {
+      bearVoiceAudio.pause();
+      bearVoiceAudio.currentTime = 0;
+    }
+  } catch (_) {}
+}
+
+function updateBearVoice() {
+  setBearVoice(!muted && bearIsTalking());
+}
 let pendingEvals = [];
 
 // Búferes persistentes para el espectrograma waterfall en tiempo real
@@ -2664,9 +2705,11 @@ function updTop() {
     <span class="pill ${isBufferFullForLock() ? "slowrech" : ""}">MEM ${hasFloppyDisk ? `${getNormalStoredCount()}/${MAX_MEMORY_SIGNALS} · FLOPPY +${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES}` : `${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}`}</span>
     <span class="pill">ENCARGOS: ${totalAssigns - remAssigns}/${totalAssigns}</span>
     <button class="alt" id="helpTutBtn" title="Iniciar tutorial interactivo con Snøskred" ${TUT || isTransitioningNight ? "disabled" : ""} style="padding:3px 8px;font-size:11px;font-weight:700">Tutorial</button>
-    <button class="alt" id="saveGameBtn" title="Guardar o cargar partida" ${TUT || isTransitioningNight ? "disabled" : ""} style="padding:3px 8px;font-size:11px;font-weight:700;border-color:#4ade80;background:#062110;color:#ffffff;">Guardar</button>
     <button class="alt" id="muteBtn" style="padding:3px 8px;font-size:11px">${muted ? "SONIDO: OFF" : "SONIDO: ON"}</button>
-    <button class="logout-btn" id="logoutShiftBtn" ${canLogout ? "" : "disabled"}>Cerrar sesión</button>
+    <span class="topbar-actions">
+      <button class="save-btn" id="saveGameBtn" title="Guardar o cargar partida" ${TUT || isTransitioningNight ? "disabled" : ""}>Guardar</button>
+      <button class="logout-btn" id="logoutShiftBtn" ${canLogout ? "" : "disabled"}>Cerrar sesión</button>
+    </span>
   `;
   const htb = $("#helpTutBtn");
   if (htb) htb.onclick = () => { startTutorialFromGame(); };
@@ -3775,6 +3818,7 @@ function loop(now) {
   tick(dt);
   tutUpdate(dt);
   asstHelpUpdate(dt);
+  updateBearVoice();
   const t = now / 1000;
   if (V === "boot") drawBoot();
   if (V === "map") drawMap(t);
