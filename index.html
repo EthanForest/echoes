@@ -2663,7 +2663,7 @@ function updTop() {
     <span class="pill">CR $${G.money}</span>
     <span class="pill ${isBufferFullForLock() ? "slowrech" : ""}">MEM ${hasFloppyDisk ? `${getNormalStoredCount()}/${MAX_MEMORY_SIGNALS} · FLOPPY +${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES}` : `${getStoredMemoryCount()}/${MAX_MEMORY_SIGNALS}`}</span>
     <span class="pill">ENCARGOS: ${totalAssigns - remAssigns}/${totalAssigns}</span>
-    <button class="alt" id="helpTutBtn" title="Iniciar tutorial interactivo con Snøskred" ${TUT || isTransitioningNight ? "disabled" : ""} style="padding:3px 8px;font-size:11px;font-weight:700">[?]</button>
+    <button class="alt" id="helpTutBtn" title="Iniciar tutorial interactivo con Snøskred" ${TUT || isTransitioningNight ? "disabled" : ""} style="padding:3px 8px;font-size:11px;font-weight:700">Tutorial</button>
     <button class="alt" id="saveGameBtn" title="Guardar o cargar partida" ${TUT || isTransitioningNight ? "disabled" : ""} style="padding:3px 8px;font-size:11px;font-weight:700">Guardar</button>
     <button class="alt" id="muteBtn" style="padding:3px 8px;font-size:11px">${muted ? "SONIDO: OFF" : "SONIDO: ON"}</button>
     <button class="logout-btn" id="logoutShiftBtn" ${canLogout ? "" : "disabled"}>Cerrar sesión</button>
