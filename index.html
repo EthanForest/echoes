@@ -1607,7 +1607,7 @@ let cloudSyncTimer = 0;
 let sigs = [], cam = {x: 1900, y: 1250};
 let en = 100, cap = 100, rd = 0;
 let mail = [], selMail = null;
-let shift = 0; // 0 = Noche 1 ... 14 = Noche 15
+let shift = 0; 
 let nightAssignments = [];
 let nightAssignPool = [];
 let nightExtraSpawned = 0;
@@ -2770,7 +2770,7 @@ function updTop() {
   const pwrTag = isFreeMode ? " [LIBRE]" : regenMode === "none" ? " [SIN RECARGA]" : regenMode === "slow" ? " [RECARGA LENTA]" : "";
 
   st.innerHTML = `
-    <span class="pill ${shift >= 8 ? "night" : ""}">${shiftLabel(shift)}/${TOTAL_NIGHTS}</span>
+    <span class="pill ${shift >= 8 ? "night" : ""}">${shiftLabel(shift)}</span>
     <span class="pill ${pwrClass}">PWR ${Math.round(en)}/${cap}${pwrTag}</span>
     <span class="pill">CR $${G.money}</span>
     <button class="alt" id="helpTutBtn" title="Iniciar tutorial interactivo con Snøskred" ${TUT || isTransitioningNight ? "disabled" : ""} style="padding:3px 8px;font-size:11px;font-weight:700">Tutorial</button>
