@@ -1231,7 +1231,8 @@ const CLASSES = ["Estrella", "Planeta", "Asteroide", "Satelite", "Pulsar", "Sing
 const TOTAL_NIGHTS = 30;
 const MAX_NIGHT_SIGNALS_AFTER_CATALOG = 13;
 const MAX_MEMORY_SIGNALS = 5;
-const MAX_FLOPPY_ANOMALIES = 5;
+let floppyCount = 0;
+const floppyCap = () => floppyCount * 5;
 const ECHO_LOCK_COST = 4;
 const getMemoryCapacity = () => MAX_MEMORY_SIGNALS + Math.min(5, G?.mem || 0);
 const getNightSignalLimit = () => MAX_NIGHT_SIGNALS_AFTER_CATALOG + Math.floor(shift / 5) * 2;
@@ -1278,7 +1279,28 @@ const MODELS = [
   {id:"pul_frb", cat:4, name:"FRB", img:"Signals/frb.png", audioSrc:"assets/audio/FRB.mp3", audioVol:0.48, minShift:2, freq:585, wave:"square", pattern:"pulses", desc:"Rafaga rapida de radio transitoria de altisima dispersion energetica."},
   // 5: Singularidad (2 modelos: Cuasar desde Noche 5 -> shift >= 4; Agujero Negro desde Noche 9 -> shift >= 8)
   {id:"sin_cuasar", cat:5, name:"Cuasar", img:"Signals/noimage_anomaly.png", audioSrc:"assets/audio/quasar.mp3", audioVol:0.48, minShift:4, freq:690, wave:"sawtooth", pattern:"singularity", desc:"Nucleo galactico activo extremadamente luminoso alimentado por acrecion relativista."},
-  {id:"sin_agujero_negro", cat:5, name:"Agujero Negro", img:"Signals/noimage_anomaly.png", audioSrc:"assets/audio/blackhole.mp3", audioVol:0.48, minShift:8, freq:64, wave:"sawtooth", pattern:"singularity", desc:"Region del espacio-tiempo con curvatura gravitacional extrema y horizonte de sucesos."}
+  {id:"sin_agujero_negro", cat:5, name:"Agujero Negro", img:"Signals/noimage_anomaly.png", audioSrc:"assets/audio/blackhole.mp3", audioVol:0.48, minShift:8, freq:64, wave:"sawtooth", pattern:"singularity", desc:"Region del espacio-tiempo con curvatura gravitacional extrema y horizonte de sucesos."},
+  {id:"est_enana_blanca", cat:0, name:"Enana Blanca", img:"Signals/white_dwarf.png", audioSrc:"assets/audio/white_dwarf.mp3", audioVol:0.48, freq:235, wave:"triangle", pattern:"band3", desc:"Remanente estelar compacto con emision tenue y aguda."},
+  {id:"est_cefeida", cat:0, name:"Cefeida Variable", img:"Signals/cepheid.png", audioSrc:"assets/audio/cepheid.mp3", audioVol:0.48, freq:198, wave:"sine", pattern:"band3", desc:"Estrella pulsante cuya intensidad sube y baja con periodo regular."},
+  {id:"est_supergigante_azul", cat:0, name:"Supergigante Azul", img:"Signals/blue_supergiant.png", audioSrc:"assets/audio/blue_supergiant.mp3", audioVol:0.48, freq:275, wave:"sine", pattern:"band3", desc:"Estrella masiva y muy caliente con emision intensa."},
+  {id:"pla_mercurio", cat:1, name:"Mercurio", img:"Signals/mercury.png", audioSrc:"assets/audio/mercury.mp3", audioVol:0.48, freq:120, wave:"sine", pattern:"band4", desc:"Planeta rocoso mas cercano al Sol, con extremos termicos."},
+  {id:"pla_titan", cat:1, name:"Titan", img:"Signals/titan.png", audioSrc:"assets/audio/titan.mp3", audioVol:0.48, freq:91, wave:"sine", pattern:"band4", desc:"Luna de Saturno con atmosfera densa de nitrogeno."},
+  {id:"pla_eris", cat:1, name:"Eris", img:"Signals/eris.png", audioSrc:"assets/audio/eris.mp3", audioVol:0.48, minShift:8, freq:82, wave:"sine", pattern:"band4", desc:"Planeta enano transneptuniano de superficie helada."},
+  {id:"pla_caronte", cat:1, name:"Caronte", img:"Signals/charon.png", audioSrc:"assets/audio/charon.mp3", audioVol:0.48, freq:85, wave:"sine", pattern:"band4", desc:"Luna helada de Pluton en rotacion sincronica."},
+  {id:"pla_encelado", cat:1, name:"Encelado", img:"Signals/enceladus.png", audioSrc:"assets/audio/enceladus.mp3", audioVol:0.48, freq:104, wave:"sine", pattern:"band4", desc:"Luna de Saturno con geiseres de agua en su polo sur."},
+  {id:"pla_ganimedes", cat:1, name:"Ganimedes", img:"Signals/ganymede.png", audioSrc:"assets/audio/ganymede.mp3", audioVol:0.48, freq:96, wave:"sine", pattern:"band4", desc:"Luna mayor del sistema solar, con campo magnetico propio."},
+  {id:"ast_troyano", cat:2, name:"Troyano Joviano", img:"Signals/trojan.png", audioSrc:"assets/audio/trojan.mp3", audioVol:0.48, freq:300, wave:"triangle", pattern:"diag", desc:"Cuerpo atrapado en un punto de Lagrange de Jupiter."},
+  {id:"ast_binario", cat:2, name:"Asteroide Binario", img:"Signals/binary_asteroid.png", audioSrc:"assets/audio/binary_asteroid.mp3", audioVol:0.48, freq:310, wave:"triangle", pattern:"diag", desc:"Dos cuerpos que orbitan un centro comun, con doble traza."},
+  {id:"ast_centauro", cat:2, name:"Centauro", img:"Signals/centaur.png", audioSrc:"assets/audio/centaur.mp3", audioVol:0.48, freq:345, wave:"sawtooth", pattern:"diag", desc:"Cuerpo helado de orbita inestable entre Jupiter y Neptuno."},
+  {id:"sat_nav", cat:3, name:"Satelite de Navegacion", img:"Signals/nav_satellite.png", audioSrc:"assets/audio/nav_satellite.mp3", audioVol:0.48, freq:780, wave:"sawtooth", pattern:"blocks", desc:"Bloques de tiempo extremadamente regulares."},
+  {id:"sat_cohete", cat:3, name:"Etapa de Cohete", img:"Signals/rocket_stage.png", audioSrc:"assets/audio/rocket_stage.mp3", audioVol:0.48, freq:745, wave:"square", pattern:"blocks", desc:"Chatarra orbital con bloques irregulares."},
+  {id:"pul_rayosx", cat:4, name:"Pulsar de Rayos X", img:"Signals/xray_pulsar.png", audioSrc:"assets/audio/xray_pulsar.mp3", audioVol:0.48, minShift:2, freq:545, wave:"square", pattern:"pulses", desc:"Estrella de neutrones que acreta materia de una companera."},
+  {id:"pul_neutrones", cat:4, name:"Estrella de Neutrones Aislada", img:"Signals/isolated_neutron.png", audioSrc:"assets/audio/isolated_neutron.mp3", audioVol:0.48, minShift:2, freq:455, wave:"square", pattern:"pulses", desc:"Pulsos debiles y lentos sin companera visible."},
+  {id:"sin_galaxia", cat:5, name:"Galaxia", img:"Signals/galaxy.png", audioSrc:"assets/audio/galaxy.mp3", audioVol:0.48, minShift:4, freq:610, wave:"sawtooth", pattern:"singularity", desc:"Conjunto inmenso de estrellas, gas y materia oscura."},
+  {id:"sin_nebulosa_pl", cat:5, name:"Nebulosa Planetaria", img:"Signals/planetary_nebula.png", audioSrc:"assets/audio/planetary_nebula.mp3", audioVol:0.48, minShift:4, freq:560, wave:"sawtooth", pattern:"singularity", desc:"Envoltura de gas expulsada por una estrella moribunda."},
+  {id:"sin_nebulosa_em", cat:5, name:"Nebulosa de Emision", img:"Signals/emission_nebula.png", audioSrc:"assets/audio/emission_nebula.mp3", audioVol:0.48, minShift:4, freq:530, wave:"sawtooth", pattern:"singularity", desc:"Nube de gas ionizado que brilla por radiacion estelar."},
+  {id:"sin_supernova", cat:5, name:"Supernova", img:"Signals/supernova.png", audioSrc:"assets/audio/supernova.mp3", audioVol:0.48, minShift:6, freq:640, wave:"sawtooth", pattern:"singularity", desc:"Explosion de una estrella masiva al final de su vida."},
+  {id:"sin_jet_gamma", cat:5, name:"Jet Gamma", img:"Signals/gamma_jet.png", audioSrc:"assets/audio/gamma_jet.mp3", audioVol:0.48, minShift:8, freq:700, wave:"sawtooth", pattern:"singularity", desc:"Chorro colimado de radiacion de altisima energia."}
 ];
 
 // Saludos en diferentes idiomas codificados únicamente en binario ASCII de 8 bits
@@ -1419,6 +1441,89 @@ const ANOMALY_DEFS = [
     textData: "..."
   }
 ];
+// ===== Huevos de pascua, rutas y anomalias menores =====
+["spaceship","astronaut"].forEach(t => ANOMALY_DEFS.splice(ANOMALY_DEFS.findIndex(a => a.type === t), 1));
+["voyager","dark_eyes","vitreous","macula","cyst","dyson","flock"].forEach(t => { ANOMALY_DEFS.find(a => a.type === t).egg = true; });
+const _ad = t => ANOMALY_DEFS.find(a => a.type === t);
+const NAVE_TXT = ["Eco metalico regular que no figura en ningun catalogo. Se acerca desde el borde del sector.","La señal imita los saludos de la sonda Voyager, con errores.","Pulsos ordenados: alguien o algo esta contando.","El eco repite fragmentos de transmisiones de la estacion.","Rumbo confirmado: el origen ya esta dentro del sistema solar.","Tono continuo. Ya no se esconde."];
+NAVE_TXT.forEach((d, i) => ANOMALY_DEFS.push({type:`nave_${i+1}`, title:"Nave Espacial", img:"Signals/spaceship_anomaly.png", audioSrc:`assets/audio/nave_${i+1}.mp3`, audioVol:0.48, cat:3, freq:194, wave:"sawtooth", textData:d, route:"nave"}));
+["EEI // BITACORA 001 // TRIPULANTES A BORDO: 6 // SIN NOVEDAD // REPITIENDO","EEI // BITACORA 002 // TRIPULANTES A BORDO: 3 // CONTACTO PERDIDO CON MODULO 2 // REPITIENDO","EEI // BITACORA 003 // TRIPULANTES A BORDO: 1 // NO ESTOY SOLO // REPITIENDO"].forEach((d, i) => ANOMALY_DEFS.push({type:`estacion_${i+1}`, title:"Estación", img:"Signals/station.png", audioSrc:`assets/audio/estacion_${i+1}.mp3`, audioVol:0.48, cat:3, freq:176, wave:"square", textData:d, route:"tierra"}));
+["Уровень кислорода критический. Не могу связаться с базой.","La base sovietica no responde. Me quedan dos minutos de oxigeno... Quien escuche esto, digale a mi esposa y a mi hija que las amo y que pronto volvere con ellas."].forEach((d, i) => ANOMALY_DEFS.push({type:`astro_${i+1}`, title:"Astronauta", img:"Signals/astronaut_anomaly.png", audioSrc:`assets/audio/astronaut_${i+1}.mp3`, audioVol:0.48, cat:3, freq:158, wave:"triangle", textData:d, route:"tierra"}));
+ANOMALY_DEFS.push({type:"the_end", title:"The End", img:"Signals/the_end_anomaly.png", audioSrc:"assets/audio/the_end.mp3", audioVol:0.48, cat:1, freq:60, wave:"sine", textData:" ", route:"tierra"});
+["Alfa Centauri: estrella de la constelacion del Centauro.","Alfa Centauri: su brillo es menor que en el registro anterior. Se atenua.","Alfa Centauri: se atenua cada vez mas.","Alfa Centauri: apenas es perceptible."].forEach((d, i) => ANOMALY_DEFS.push({type:`alfa_${i+1}`, title:"Alfa Centauri", img:"Signals/alpha_centauri_anomaly.png", audioSrc:`assets/audio/alfa_${i+1}.mp3`, audioVol:0.48, cat:0, freq:150 - i * 6, wave:"sine", textData:d, route:"dragon"}));
+_ad("earth_echo").route = "tierra"; _ad("earth_echo").textData = " ";
+_ad("virgo_dragon").route = "dragon"; _ad("virgo_dragon").textData = SIN_IMAGEN_BINARY;
+_ad("failed_planet").route = "dragon"; _ad("failed_planet").textData = " ";
+const TRIG = {nave_1:"nave", estacion_1:"tierra", alfa_1:"dragon"};
+const ROUTE_SCHEDULE = {
+  nave:{12:"nave_1",15:"nave_2",18:"nave_3",21:"nave_4",24:"nave_5",27:"nave_6"},
+  tierra:{12:"estacion_1",15:"estacion_2",18:"estacion_3",21:"astro_1",24:"astro_2",27:"earth_echo",29:"the_end"},
+  dragon:{12:"alfa_1",15:"alfa_2",18:"alfa_3",21:"alfa_4",24:"virgo_dragon",27:"failed_planet"}
+};
+let route = null;
+const quirkSeen = new Set();
+// Anomalias menores (NO son anom: se envian sin penalizacion y no van al Atlas). [cuerpo base, asunto, correo]
+const QUIRKS = {
+  venus_a:["pla_venus","Venus: nubes con ritmo","Revise el registro: la capa nubosa parece rotar al reves por momentos. Seguro es ruido del instrumento."],
+  marte_a:["pla_marte","Marte: casquete polar","El casquete norte aparece unos kilometros mas grande que en mis tablas. ¿Pudo ser la hora de captura?"],
+  jupiter_a:["pla_jupiter","Jupiter: banda geometrica","Una banda tormentosa se repite con un patron casi geometrico. Curioso. Si ve otra igual, avíseme."],
+  saturno_a:["pla_saturno","Saturno: anillos","Mi colega jura que falta una division en los anillos. Debe ser un error de calibracion."],
+  urano_a:["pla_urano","Urano: inclinacion","Su eje parece inclinado un par de grados mas de lo debido. Lo anote como curiosidad."],
+  neptuno_a:["pla_neptuno","Neptuno: pulso regular","Hay un pulso demasiado regular en la emision, como un metronomo. ¿Seria la antena?"],
+  luna_a:["pla_luna","Luna: un crater nuevo","Juraria que ese crater no estaba en mis fotos de archivo. Lo compare tres veces."],
+  enana_amarilla_a:["est_enana","Enana amarilla: mas tenue","Su brillo es un 0,4 % menor al esperado. Poca cosa, pero esta estrella es muy estable."],
+  mercurio_a:["pla_mercurio","Mercurio: cara nocturna","La cara nocturna se ve mas fria de lo que predice cualquier modelo. Quiza el sensor."]
+};
+const CHATTER = [
+  ["Planes para el mes que viene","Hola, soy {n}. Estamos armando una comida informal el mes que viene. Ojala puedas conectarte un rato."],
+  ["¿Todo bien por alla?","Soy {n}. Cuidate mucho en esa estacion tan solitaria. Aqui pensamos en ti."],
+  ["Gracias por los datos","Soy {n}. Tus registros me estan ahorrando semanas de trabajo. Gracias de verdad."],
+  ["Cafe virtual","Soy {n}. Un par de colegas queremos hacer un cafe por videollamada el mes entrante. Estas invitado."],
+  ["Animo","Soy {n}. Se que las noches son largas. Tu trabajo importa mas de lo que crees."],
+  ["Felicitaciones","Soy {n}. Mi equipo cito tus datos en un borrador. Buen trabajo."],
+  ["Excursion a la sierra","Soy {n}. Estamos planeando una salida a observar el cielo el mes que viene. Ojala puedas venir."],
+  ["Un saludo","Soy {n}. Solo queria desearte que estes bien. Esa soledad no es facil."],
+  ["Tus señales","Soy {n}. Gracias a tus capturas pude cerrar una investigacion pendiente. Te debo una."],
+  ["Cena de fin de año","Soy {n}. Planeamos una cena informal el mes proximo. Si terminas pronto tu guardia, te esperamos."]
+];
+const ENDS = {
+  EVAC:{t:"EVACUACION",p:"Tu reporte llego a la ONU. Fuiste evacuado de las instalaciones y trasladado a un bunker cientifico."},
+  NAVE_END:{t:"FIN",p:""},
+  TIERRA_END:{t:"INTERNAMIENTO",p:"La soledad de la estacion te hizo enloquecer. Fuiste recluido en un hospital psiquiatrico."},
+  DRAGON_END:{t:"FIN",p:""}
+};
+const blackNight = () => shift === 29 && (route === "nave" || route === "dragon");
+function routeOf(type) { const d = ANOMALY_DEFS.find(a => a.type === type); return d && d.route; }
+function endGame(reason) {
+  if (V === "end") return;
+  gameOverReason = reason; stopVoice();
+  if (R) { R.status = "FINALIZADA"; R.time = +((performance.now() - R.t0) / 1000).toFixed(1); R.energy = Math.round(en); R.money = G.money; S.shifts.push({...R}); }
+  V = "end"; syncLiveTelemetry(true, true); updTop(); render();
+}
+function routeTick() {
+  if (!route) {
+    const f = floppyStoredAnomalies.find(x => TRIG[x.anomType]);
+    if (f) {
+      route = TRIG[f.anomType];
+      const bad = a => { const r = routeOf(a.anomType); return r && r !== route; };
+      const had = floppyStoredAnomalies.some(bad) || sigs.some(x => x.anom && x.st === "raw" && bad(x)) || outbox.some(p => p.anom && bad(p));
+      floppyStoredAnomalies = floppyStoredAnomalies.filter(a => !bad(a));
+      sigs.forEach(x => { if (x.anom && bad(x)) x.st = "gone"; });
+      outbox = outbox.filter(p => !(p.anom && bad(p)));
+      discoveredAnomalies = discoveredAnomalies.filter(a => !bad(a));
+      if (had) addMail("Error de servidor", "Un error del servidor reinicio parte del sistema y se borraron algunas señales del buffer.", {sender:"SISTEMA", tag:`N${shift + 1} · SYS`});
+    }
+  }
+  if (route === "tierra" && floppyStoredAnomalies.some(f => f.anomType === "the_end")) endGame("TIERRA_END");
+}
+function onRouteAnomalyDiscovered(type) {
+  const E = "\u00a0";
+  if (/^nave_/.test(type)) addMail(E, E, {sender:E, tag:`N${shift + 1}`});
+  else if (/^estacion_/.test(type)) addMail("Baliza // Bitacora", _ad(type).textData, {sender:"Estación Espacial Internacional", tag:`N${shift + 1} · EEI`});
+  else if (type === "earth_echo" && route === "tierra") for (let i = 0; i < 6; i++) addMail(E, "NOMEAYUDASTE ".repeat(8 + i * 5), {sender:E, tag:`N${shift + 1}`});
+  updBadges();
+}
+
 
 // Caché de sprites PNG en Signals/
 const IMG_CACHE = {};
@@ -1625,7 +1730,7 @@ let discoveredAnomalies = []; // Lista privada de anomalías encontradas (aparec
 let atlasSpecMode = new Set(); // Entradas del Atlas mostradas como espectrograma en lugar de imagen
 let firstAnomalyFound = false;
 let flockMailSent = false;
-let hasFloppyDisk = false;
+let hasFloppyDisk = false; floppyCount = 0; route = null;
 let floppyStoredAnomalies = []; // Anomalías respaldadas en Disco Floppy (máx. 5)
 let gameOverReason = ""; // "ARREST" | "COMPLETED"
 let R = null, sid = 0, last = performance.now();
@@ -2072,7 +2177,7 @@ function startOscillatorFallback(sigObj, mod, anomDef, staticNodes) {
     ensureAudioContext();
     const o = au.createOscillator(), g = au.createGain();
     o.type = anomDef ? anomDef.wave : mod.wave;
-    o.frequency.value = anomDef ? anomDef.freq : mod.freq;
+    o.frequency.value = (anomDef ? anomDef.freq : mod.freq) + (sigObj.quirk ? 4 : 0);
     g.gain.value = 0.08;
     // Conectar directamente el mismo oscilador al AnalyserNode de Web Audio
     o.connect(g);
@@ -2247,7 +2352,7 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId
     if (forcedAnomType) {
       anomDef = availableAnoms.find(a => a.type === forcedAnomType) || null;
     } else {
-      anomDef = availableAnoms[Math.floor(Math.random() * availableAnoms.length)] || null;
+      { const pool = availableAnoms.filter(a => !a.route); anomDef = pool[Math.floor(Math.random() * pool.length)] || null; }
     }
     if (!anomDef) anom = false;
   }
@@ -2283,6 +2388,8 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId
     : 0;
   const isCorruptSignal = Math.random() < corruptProb;
 
+  let quirkId = null;
+  if (!anomDef && !assignRefId && !forcedModelId && shift >= 2 && Math.random() < 0.08) quirkId = Object.keys(QUIRKS).find(k => QUIRKS[k][0] === chosenModel.id && !quirkSeen.has(k)) || null;
   const moving = (actualCat === 2 || actualCat === 3);
   const ang = Math.random() * Math.PI * 2;
   const spd = moving ? (2.1 + Math.random() * 1.4) : 0;
@@ -2309,7 +2416,7 @@ function makeSignal(cat, forcedAnom = null, forcedAnomType = null, forcedModelId
     tot: 0, bad: 0, acc: 0, seed: Math.random() * 100,
     tgF: 14 + Math.floor(Math.random() * 72),
     tgP: 14 + Math.floor(Math.random() * 72),
-    fixed: false, textData
+    fixed: false, textData, quirk: quirkId
   };
 }
 
@@ -2333,7 +2440,7 @@ function canAcceptSignalInBuffer(isAnomSignal = false) {
   const activeNormal = sigs.filter(s => (s.st === "align" || s.st === "dl") && !s.anom).length;
   const activeAnom = sigs.filter(s => (s.st === "align" || s.st === "dl") && s.anom).length;
   if (isAnomSignal) {
-    return (getAnomalyBufferCount() + activeAnom) < MAX_FLOPPY_ANOMALIES;
+    return (getAnomalyBufferCount() + activeAnom) < floppyCap();
   }
   return (getNormalStoredCount() + activeNormal) < getMemoryCapacity();
 }
@@ -2346,7 +2453,7 @@ function isBufferFullForLock() {
   const activeNormal = sigs.filter(s => (s.st === "align" || s.st === "dl") && !s.anom).length;
   const activeAnom = sigs.filter(s => (s.st === "align" || s.st === "dl") && s.anom).length;
   return (getNormalStoredCount() + activeNormal) >= getMemoryCapacity() &&
-         (getAnomalyBufferCount() + activeAnom) >= MAX_FLOPPY_ANOMALIES;
+         (getAnomalyBufferCount() + activeAnom) >= floppyCap();
 }
 
 function getUncatalogedNightAssignments() {
@@ -2375,6 +2482,7 @@ function areNightAssignmentsCataloged() {
 }
 
 function ensureSectorDiversity() {
+  if (blackNight()) return;
   if (S && S.tutorial) return; // En el tutorial el sector está controlado por el asistente
   if (!isPulsarEnabled()) {
     sigs.forEach(s => { if (s.cat === 4 && s.st === "echo") s.st = "gone"; });
@@ -2426,6 +2534,19 @@ function ensureSectorDiversity() {
     nightTotalSpawned++;
   }
 
+  // Rutas: noche 13-15 aparecen los tres desencadenantes con igual probabilidad; despues, el calendario de la ruta elegida
+  {
+    const types = route === null ? (shift >= 12 && shift <= 14 ? ["nave_1", "estacion_1", "alfa_1"] : []) : [ROUTE_SCHEDULE[route][shift]].filter(Boolean);
+    types.forEach(type => {
+      const d = _ad(type);
+      if (d && getAvailableUniqueAnomalies().some(a => a.type === type)) {
+        if (inSector().length >= 5) { const ix = sigs.find(x => x.st === "echo" && !x.assignRefId); if (ix) ix.st = "gone"; }
+        sigs.push(makeSignal(d.cat, true, type, null, null));
+        nightExtraSpawned++; nightTotalSpawned++;
+      }
+    });
+  }
+
   // En Noche 9 (shift === 8), asegurar al menos una aparición del Agujero Negro en el sector
   if (shift === 8 && !discoveredModels.has("sin_agujero_negro") && !sigs.some(s => s.modelId === "sin_agujero_negro" && s.st !== "gone")) {
     if (inSector().length >= 5) {
@@ -2474,7 +2595,7 @@ function initShift() {
   };
 
   // Generar 3 encargos hasta Noche 14 y 5 desde Noche 15.
-  const assignmentCount = shift >= 14 ? 5 : 3;
+  const assignmentCount = blackNight() ? 0 : (shift >= 14 ? 5 : 3);
   const allowedCats = getAvailableCategories();
   const usedSci = new Set();
 
@@ -2603,6 +2724,25 @@ function initShift() {
     );
   }
 
+  if (shift === 9) {
+    addMail(
+      "Protocolo de Incidencias Orbitales",
+      "Comunicado oficial de la Oficina de Asuntos Internos de la Division del Espacio de Naciones Unidas:\n\n" +
+      "Nuestros monitores orbitales han registrado una fluctuacion no catalogada en el cuadrante de la Estacion.\n\n" +
+      "Le invitamos a reportar de inmediato cualquier incidencia, señal anomala o lectura fuera de parametro a traves de los canales oficiales de Central para su analisis institucional.",
+      {kind: "un_notice", sender: "ONU ESPACIO", tag: `N${shift + 1} · ONU`}
+    );
+  }
+  if (shift >= 4 && shift <= 14 && Math.random() < 0.4) {
+    const c = CHATTER[Math.floor(Math.random() * CHATTER.length)], sc = SCIENTISTS[Math.floor(Math.random() * SCIENTISTS.length)];
+    addMail(c[0], c[1].replace("{n}", sc.name), {sender: sc.name, tag:`N${shift + 1}`});
+  }
+  if (shift === 27 && route === "nave") {
+    addMail("Recordatorio // Reporte de incidentes espaciales", "La Division del Espacio de Naciones Unidas recuerda reportar cualquier incidente relacionado con el espacio.", {kind:"un_notice", sender:"ONU ESPACIO", tag:`N${shift + 1} · ONU`, reportBtn:true});
+  }
+  if (blackNight()) mail.length = 0, selMail = null;
+  if (shift === 29 && route === "nave") addMail("Han llegado", "Han llegado, Dios se apiade de nuestras almas", {sender: SCIENTISTS[0].name, tag:"N30"});
+
   ensureSectorDiversity();
   syncLiveTelemetry(false, true);
   autoSaveGame();
@@ -2666,14 +2806,14 @@ function start(operatorName, startNightIdx = 0, sandboxMode = false) {
       textData: a.textData
     }));
     firstAnomalyFound = true;
-    hasFloppyDisk = true;
+    hasFloppyDisk = true; floppyCount = 4;
     floppyStoredAnomalies = [];
   } else {
     discoveredModels = new Set();
     discoveredAnomalies = [];
     firstAnomalyFound = false;
     flockMailSent = false;
-    hasFloppyDisk = false;
+    hasFloppyDisk = false; floppyCount = 0; route = null;
     floppyStoredAnomalies = [];
   }
 
@@ -2842,14 +2982,6 @@ function onFirstAnomalyDiscovered() {
   firstAnomalyFound = true;
 
   addMail(
-    "Protocolo de Incidencias Orbitales",
-    "Comunicado oficial de la Oficina de Asuntos Internos de la Division del Espacio de Naciones Unidas:\n\n" +
-    "Nuestros monitores orbitales han registrado una fluctuacion no catalogada en el cuadrante de la Estacion.\n\n" +
-    "Le invitamos a reportar de inmediato cualquier incidencia, señal anomala o lectura fuera de parametro a traves de los canales oficiales de Central para su analisis institucional.",
-    {kind: "un_notice", sender: "ONU ESPACIO", tag: `N${shift + 1} · ONU`}
-  );
-
-  addMail(
     "NO LA ENVIES POR LA RED // DISCO FLOPPY",
     "Detectamos que acabas de fijar una lectura anomala en tu terminal.\n\n" +
     "ADVERTENCIA: No transmitas esa señal a los cientificos ni al Archivo Central. Si la subes a la red oficial, activaras los protocolos de seguridad de la Division del Espacio de Naciones Unidas: clausuraran la estacion y te arrestaran para interrogatorio.\n\n" +
@@ -2893,9 +3025,20 @@ function evaluatePlatformDispatch(ev) {
   const {pkg, targetType, assignId} = ev;
 
   if (pkg.anom) {
+    const rd = ANOMALY_DEFS.find(a => a.type === pkg.anomType);
+    if (rd && rd.route) {
+      if (pkg.anomType === "nave_6" && assignId === "onu_report") { endGame("EVAC"); return; }
+      addMail("Envio rechazado", "La trama anomala se corrompio durante la transmision y no pudo ser entregada.", {sender:"CENTRAL", tag:`N${shift + 1} · ERR`});
+      return;
+    }
     if (R) R.anomSent++;
     triggerGovernmentArrestEnding();
     return;
+  }
+  if (pkg.quirk && QUIRKS[pkg.quirk]) {
+    quirkSeen.add(pkg.quirk);
+    const qa = targetType === "assign" ? nightAssignments.find(a => a.id === assignId) : null;
+    addMail(QUIRKS[pkg.quirk][1], QUIRKS[pkg.quirk][2], {sender: qa ? qa.sciName : "CENTRAL", tag:`N${shift + 1}`});
   }
 
   const modObj = MODELS.find(m => m.id === pkg.modelId);
@@ -3006,7 +3149,7 @@ function advanceNight() {
     updTop();
     render();
   } else {
-    gameOverReason = "COMPLETED";
+    gameOverReason = route === "nave" ? "NAVE_END" : route === "dragon" ? "DRAGON_END" : "COMPLETED";
     V = "end";
     syncLiveTelemetry(true, true);
     updTop();
@@ -3952,6 +4095,7 @@ function render() {
               </div>
               <div class="mail-reader-subj">${sm.subj}</div>
               <div class="mail-body">${sm.body}</div>
+              ${sm.reportBtn && !sm.reported ? `<div class="mail-reader-foot"><button type="button" class="shadow" id="reportOnuBtn">Reportar</button></div>` : ""}
               ${(sm.helpTopic === "spectrogram" || /espectrograma/i.test(sm.subj || "")) ? `
                 <div class="mail-reader-foot">
                   <button type="button" class="mail-help-btn" id="mailSpecHelpBtn">
@@ -4002,12 +4146,12 @@ function render() {
         <div class="map-hud-bar">
           <span class="mut">${
             isBufferFullForLock() && !busySig
-              ? `Memoria llena (${getStoredMemoryCount()}/${hasFloppyDisk ? getMemoryCapacity() + MAX_FLOPPY_ANOMALIES : getMemoryCapacity()}): envia en Plataforma o descarta en Procesador.`
+              ? `Memoria llena (${getStoredMemoryCount()}/${hasFloppyDisk ? getMemoryCapacity() + floppyCap() : getMemoryCapacity()}): envia en Plataforma o descarta en Procesador.`
               : busySig
-                ? `Antenas ocupadas rastreando señal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${hasFloppyDisk ? getMemoryCapacity() + MAX_FLOPPY_ANOMALIES : getMemoryCapacity()}]`
+                ? `Antenas ocupadas rastreando señal #${busySig.id} (${busySig.st === "align" ? "alineando" : "descargando"})... [MEM ${getStoredMemoryCount()}/${hasFloppyDisk ? getMemoryCapacity() + floppyCap() : getMemoryCapacity()}]`
                 : sigs.filter(s => s.st === "echo").length === 0 && areNightAssignmentsCataloged() && nightTotalSpawned >= getNightSignalLimit()
                   ? "No quedan mas señales en el sector durante esta noche."
-                  : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco) · Memoria: ${hasFloppyDisk ? `${getNormalStoredCount()}/${getMemoryCapacity()} + ${getAnomalyBufferCount()}/${MAX_FLOPPY_ANOMALIES} ANOM` : `${getStoredMemoryCount()}/${getMemoryCapacity()}`}.`
+                  : `Antenas libres (-${ECHO_LOCK_COST} PWR por fijacion de eco) · Memoria: ${hasFloppyDisk ? `${getNormalStoredCount()}/${getMemoryCapacity()} + ${getAnomalyBufferCount()}/${floppyCap()} ANOM` : `${getStoredMemoryCount()}/${getMemoryCapacity()}`}.`
           }</span>
           <button class="alt" id="rd">Pulso Radar (-6 PWR · CD 5s)</button>
         </div>
@@ -4126,7 +4270,7 @@ function render() {
                   <div style="padding:6px 8px;border:1px solid #a855f7;border-radius:3px;font-size:11px;margin-bottom:4px">
                     <b>[LECTURA ANOMALA]</b> No la transmitas por la red oficial.
                     ${hasFloppyDisk
-                      ? `<button class="shadow" id="saveFloppyProcBtn" style="width:100%;margin-top:6px" ${floppyStoredAnomalies.length >= MAX_FLOPPY_ANOMALIES ? "disabled" : ""}>Guardar en Disco Floppy (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})</button>`
+                      ? `<button class="shadow" id="saveFloppyProcBtn" style="width:100%;margin-top:6px" ${floppyStoredAnomalies.length >= floppyCap() ? "disabled" : ""}>Guardar en Disco Floppy (${floppyStoredAnomalies.length}/${floppyCap()})</button>`
                       : `<div class="mut" style="margin-top:4px">Compra el <b>Disco Floppy</b> en el Taller para respaldarla.</div>`}
                   </div>
                 ` : ""}
@@ -4207,10 +4351,10 @@ function render() {
         ${hasFloppyDisk ? `
           <div class="between" style="padding:9px 0">
             <div>
-              <b style="color:#581c87">Disco Floppy // Respaldo Local (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})</b>
+              <b style="color:#581c87">Disco Floppy // Respaldo Local (${floppyStoredAnomalies.length}/${floppyCap()})</b>
               <div class="mut" style="font-size:12px">Guarda lecturas anomalas en el Disco Floppy sin transmitirlas por la red oficial.</div>
             </div>
-            <button class="shadow" id="saveFloppyPlatBtn" ${!selPkg || !selPkg.anom || floppyStoredAnomalies.length >= MAX_FLOPPY_ANOMALIES ? "disabled" : ""}>Guardar en Disco Floppy</button>
+            <button class="shadow" id="saveFloppyPlatBtn" ${!selPkg || !selPkg.anom || floppyStoredAnomalies.length >= floppyCap() ? "disabled" : ""}>Guardar en Disco Floppy</button>
           </div>
         ` : ""}
       </div>`;
@@ -4320,10 +4464,25 @@ function render() {
         <b>Disco Floppy (Almacenamiento Anómalo +5)</b> <span class="mut">[VENDEDOR: OCULTO]</span>
         <div class="mut" style="font-size:12px">Permite guardar lecturas anómalas fuera de la red oficial.</div>
       </div>
-      <button class="shadow" id="buyFloppyBtn" ${hasFloppyDisk || G.money < 50 ? "disabled" : ""}>${hasFloppyDisk ? "INSTALADO" : "$50 CR"}</button>
+      <button class="shadow" id="buyFloppyBtn" ${G.money < 50 ? "disabled" : ""}>$50 CR${floppyCount ? ` (x${floppyCount})` : ""}</button>
     </div>` : "");
   } else if (V === "end") {
-    if (gameOverReason === "ARREST") {
+    if (ENDS[gameOverReason]) {
+      const E = ENDS[gameOverReason], sh = S.shifts || [];
+      h = `
+        <div class="card" style="padding:22px">
+          <h2 style="margin:8px 0">${E.t}</h2>
+          ${E.p ? `<p>${E.p}</p>` : ""}
+          <div class="row">
+            <span class="pill">Señales en Atlas: ${discoveredModels.size}</span>
+            <span class="pill">Señales erroneas: ${sh.reduce((n, x) => n + (x.silentErrors || 0), 0)}</span>
+            <span class="pill">Anomalias: ${discoveredAnomalies.length}</span>
+            <span class="pill">Noches completadas: ${sh.filter(x => x.ok).length}/${TOTAL_NIGHTS}</span>
+            <span class="pill">Creditos: $${G.money} CR</span>
+          </div>
+          <div class="row" style="margin-top:16px"><button id="rsBtn">Iniciar nueva partida</button></div>
+        </div>`;
+    } else if (gameOverReason === "ARREST") {
       h = `
         <div class="card dangerbox" style="padding:22px">
           <div style="font-size:12px;color:#7f1d1d;font-weight:700;letter-spacing:1.5px">INTERVENCION GUBERNAMENTAL // DIVISION DEL ESPACIO DE NACIONES UNIDAS</div>
@@ -4365,6 +4524,14 @@ function render() {
 
 function bindEvents(w) {
   const on = (sel, fn) => { const el = w.querySelector(sel); if (el) el.onclick = fn; };
+  on("#reportOnuBtn", () => {
+    const m = mail.find(x => x.id === selMail);
+    if (!m || m.reported) return;
+    m.reported = true;
+    nightAssignments.push({id:"onu_report", night:shift, idx:9, sciName:"ONU ESPACIO", inst:"Division del Espacio de Naciones Unidas", cat:3, modelId:null, spawnModelId:null, reward:0, done:false, failed:false});
+    addMail("Reporte ONU", "Remite aqui el incidente espacial a la Division del Espacio.", {kind:"as", assignId:"onu_report", night:shift, sender:"ONU ESPACIO", tag:`N${shift + 1} · ONU`, sciName:"ONU ESPACIO", cat:3, modelId:null, reward:0, done:false, failed:false});
+    render();
+  });
 
   const bootEl = w.querySelector("#bootScreen");
   if (bootEl) {
@@ -4608,7 +4775,7 @@ function bindEvents(w) {
         if (!canAcceptSignalInBuffer(hit.anom)) {
           if (R) R.invalid++;
           beep(180, 0.15, "sawtooth");
-          const maxCap = hasFloppyDisk ? (getMemoryCapacity() + MAX_FLOPPY_ANOMALIES) : getMemoryCapacity();
+          const maxCap = hasFloppyDisk ? (getMemoryCapacity() + floppyCap()) : getMemoryCapacity();
           return msg(`[ERR] Memoria llena (${getStoredMemoryCount()}/${maxCap}) // Envia, guarda en Floppy o descarta señales antes de capturar mas`, 0);
         }
         if (en < ECHO_LOCK_COST) { if (R) R.invalid++; beep(180, 0.15, "sawtooth"); return msg(`[ERR] Energia insuficiente (${ECHO_LOCK_COST} PWR)`, 0); }
@@ -4732,6 +4899,7 @@ function bindEvents(w) {
         });
       }
       onFirstAnomalyDiscovered();
+      onRouteAnomalyDiscovered(cur.anomType);
       if (isNewAnom && cur.anomType === "flock") {
         onFlockAnomalyDiscovered();
       }
@@ -4789,7 +4957,7 @@ function bindEvents(w) {
       anomTitle: cur.anomTitle,
       img: cur.img,
       seed: cur.seed,
-      textData: cur.textData,
+      textData: cur.textData, quirk: cur.quirk,
       chosenCat: choiceCat,
       chosenMod: choiceMod
     });
@@ -4851,8 +5019,8 @@ function bindEvents(w) {
 
   on("#saveFloppyProcBtn", () => {
     if (!cur || !cur.anom || !cur.fixed || !hasFloppyDisk) return;
-    if (floppyStoredAnomalies.length >= MAX_FLOPPY_ANOMALIES) {
-      return msg(`[ERR] Disco Floppy lleno (${MAX_FLOPPY_ANOMALIES}/${MAX_FLOPPY_ANOMALIES})`, 0);
+    if (floppyStoredAnomalies.length >= floppyCap()) {
+      return msg(`[ERR] Disco Floppy lleno (${floppyCap()}/${floppyCap()})`, 0);
     }
     stopVoice();
     if (!floppyStoredAnomalies.some(f => f.anomType === cur.anomType)) {
@@ -4876,7 +5044,7 @@ function bindEvents(w) {
     delete SPEC_BUFFERS["proc"];
     ensureSectorDiversity();
     beep(620, 0.12);
-    msg(`[OK] Anomalia guardada en Disco Floppy (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})`, 1);
+    msg(`[OK] Anomalia guardada en Disco Floppy (${floppyStoredAnomalies.length}/${floppyCap()})`, 1);
     syncLiveTelemetry(false, true);
     autoSaveGame();
     updTop();
@@ -4891,8 +5059,8 @@ function bindEvents(w) {
     if (!pkg.anom) {
       return msg("[ERR] El Disco Floppy solo almacena lecturas anomalas", 0);
     }
-    if (floppyStoredAnomalies.length >= MAX_FLOPPY_ANOMALIES) {
-      return msg(`[ERR] Disco Floppy lleno (${MAX_FLOPPY_ANOMALIES}/${MAX_FLOPPY_ANOMALIES})`, 0);
+    if (floppyStoredAnomalies.length >= floppyCap()) {
+      return msg(`[ERR] Disco Floppy lleno (${floppyCap()}/${floppyCap()})`, 0);
     }
     outbox.splice(pkgIdx, 1);
     selPkgId = outbox[0]?.id || null;
@@ -4910,7 +5078,7 @@ function bindEvents(w) {
     }
     ensureSectorDiversity();
     beep(620, 0.12);
-    msg(`[OK] Anomalia guardada en Disco Floppy (${floppyStoredAnomalies.length}/${MAX_FLOPPY_ANOMALIES})`, 1);
+    msg(`[OK] Anomalia guardada en Disco Floppy (${floppyStoredAnomalies.length}/${floppyCap()})`, 1);
     syncLiveTelemetry(false, true);
     autoSaveGame();
     updTop();
@@ -5042,9 +5210,9 @@ function bindEvents(w) {
   });
 
   on("#buyFloppyBtn", () => {
-    if (hasFloppyDisk || G.money < 50) return;
+    if (G.money < 50) return;
     G.money -= 50;
-    hasFloppyDisk = true;
+    hasFloppyDisk = true; floppyCount++;
     beep(680, 0.12);
     msg("[OK] Disco Floppy instalado (+5 espacios para anomalias en buffer)", 1);
     syncLiveTelemetry(false, true);
@@ -5518,7 +5686,7 @@ function startTutorial() {
   atlasSpecMode = new Set(); lastProcSpecSigId = null;
   Object.keys(SPEC_BUFFERS).forEach(k => delete SPEC_BUFFERS[k]);
   discoveredModels = new Set(); discoveredAnomalies = [];
-  firstAnomalyFound = false; flockMailSent = false; hasFloppyDisk = false; floppyStoredAnomalies = [];
+  firstAnomalyFound = false; flockMailSent = false; hasFloppyDisk = false; floppyCount = 0; route = null; floppyStoredAnomalies = [];
   gameOverReason = ""; pendingEvals = [];
   stopVoice();
   R = {
@@ -5979,7 +6147,7 @@ function captureGameState() {
     discoveredModels: Array.from(discoveredModels),
     discoveredAnomalies: JSON.parse(JSON.stringify(discoveredAnomalies)),
     atlasSpecMode: Array.from(atlasSpecMode),
-    firstAnomalyFound,
+    firstAnomalyFound, route,
     flockMailSent,
     hasFloppyDisk,
     floppyStoredAnomalies: JSON.parse(JSON.stringify(floppyStoredAnomalies))
@@ -6084,6 +6252,7 @@ function restoreGameState(snapshot) {
   discoveredAnomalies = Array.isArray(snapshot.discoveredAnomalies) ? JSON.parse(JSON.stringify(snapshot.discoveredAnomalies)) : [];
   atlasSpecMode = new Set(Array.isArray(snapshot.atlasSpecMode) ? snapshot.atlasSpecMode : []);
   firstAnomalyFound = Boolean(snapshot.firstAnomalyFound);
+  route = snapshot.route || null;
   flockMailSent = Boolean(snapshot.flockMailSent);
   hasFloppyDisk = Boolean(snapshot.hasFloppyDisk);
   floppyStoredAnomalies = Array.isArray(snapshot.floppyStoredAnomalies) ? JSON.parse(JSON.stringify(snapshot.floppyStoredAnomalies)) : [];
@@ -6150,6 +6319,7 @@ function saveToSlot(slotId, silent = false) {
 }
 
 function autoSaveGame() {
+  routeTick();
   if (TUT || isTransitioningNight) return false;
   if (!G || !S || S.tutorial) return false;
   if (V === "boot" || V === "intro" || V === "end") return false;
